@@ -73,3 +73,55 @@ router.post('/signup', (req, res) => {
     }
 })
 
+router.post('/signin', (req, res) => {
+    let {email, password} = req.body;
+    console.log(req.body)
+
+    if (email == "" || password == "") {
+        res.json({
+            status: "FAILED",
+            message: "Empty credentials entered"
+        })
+    } else {
+        User.find({email}).then(data => {
+            console.log(data)
+            if (data.length) {
+                const hashedPassword = data[0].password
+                bcrypt.compare(password, hashedPassword).then(result => {
+                    if (result) {
+                        // Password matched
+                        res.json({
+                            status: "SUCCESS",
+                            message: "Sign-in successful",
+                            data: data
+                        })
+                    } else {
+                        // Incorrect password
+                        res.json({
+                            status: "FAILED",
+                            message: "Incorrect password or mail"
+                        })
+                    }
+                }).catch(err => {
+                    res.json({
+                        status: "FAILED",
+                        message: "An error occurred while checking the password"
+                    })
+                })
+            } else {    // email not found
+                res.json({
+                    status: "FAILED",
+                    message: "Incorrect password or mail"
+                })
+            }
+        }).catch(err => {
+            console.log(req.body)
+            res.json({
+                status: "FAILED",
+                message: "An error occured while checking for existance of user"
+            })
+        })
+    }
+})
+
+module.exports = router
