@@ -1,0 +1,26 @@
+{
+  "name": "ams-backend",
+  "version": "1.0.0",
+  "description": "Admission Management System for MITS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ramv33/AMS-Backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.12.15",
+    "nodemon": "^2.0.7"
+  },
+  "bugs": {
+    "url": "https://github.com/ramv33/AMS-Backend/issues"
+  },
+  "homepage": "https://github.com/ramv33/AMS-Backend#readme"
+}
