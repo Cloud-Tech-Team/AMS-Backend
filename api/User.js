@@ -10,10 +10,9 @@ const bcrypt = require('bcrypt')
 router.post('/signup', (req, res) => {
     let {name, email, password, dateOfBirth} = req.body
     console.log(req.body)
-    name = name
-    email = email
-    password = password
-    dateOfBirth = dateOfBirth
+    name = name.trim()
+    email = email.trim()
+    dateOfBirth = dateOfBirth.trim()
 
     if (name == "" || email == "" || password == "" || dateOfBirth == "") {
         res.json({
@@ -25,7 +24,17 @@ router.post('/signup', (req, res) => {
             status: "FAILED",
             message: "Password is too short"
         })
-    } else {
+    } else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+		res.json({
+				status: "FAILED",
+				message: "Invalid email"
+		})
+	} else if (!new Date(dateOfBirth).getTime()) {
+		res.json({
+				status: "FAILED",
+				message: "Invalid date of birth"
+		})
+	} else {
         // Check if user already exists
         User.find({email}).then(result => {
             if (result.length) {
