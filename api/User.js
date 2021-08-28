@@ -83,13 +83,19 @@ router.post('/signup', (req, res) => {
 })
 
 router.post('/signin', (req, res) => {
-    let { email, password } = req.body;
+    let { email, password } = req.body
+    email = email.trim()
     console.log(req.body)
 
     if (email == "" || password == "") {
         res.json({
             status: "FAILED",
             message: "Empty credentials entered"
+        })
+    } else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+        res.json({
+            status: "FAILED",
+            message: "Invalid email"
         })
     } else {
         User.find({ email }).then(data => {
