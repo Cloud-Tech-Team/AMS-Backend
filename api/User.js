@@ -1,21 +1,37 @@
 const express = require('express')
 const router = express.Router()
+const cloudinary=require('cloudinary')
+// const Datauri= require('datauri')
 const path=require('path')
 
-const multer =require('multer'); // form-data multipart
-const storage=multer.diskStorage({
-    destination:function(req,res,cb){
-        cb(null,"uploads");
-    },
-    filename:function(req,file,cb){
-        cb(
-            null,
-            file.fieldname + "-" +Date.now() + path.extname(file.originalname)
-        )
-    }
-})
-const upload = multer({storage:storage});
 
+
+const DatauriParser = require('datauri/parser');
+const parser = new DatauriParser();
+
+const formatBufferTo64 = file =>
+  parser.format(path.extname(file.originalname).toString(), file.buffer)
+
+const cloudinaryUpload = file => cloudinary.uploader.upload(file);
+
+// const multer =require('multer'); // form-data multipart
+// const storage=multer.diskStorage({
+//     destination:function(req,res,cb){
+//         cb(null,"uploads");
+//     },
+//     filename:function(req,file,cb){
+//         cb(
+//             null,
+//             file.fieldname + "-" +Date.now() + path.extname(file.originalname)
+//         )
+//     }
+// })
+// const upload = multer({storage:storage});
+
+require('./../config/cloudinary')
+const upload=require('./../handler/multer')
+
+// const datauri=require('./../handler/datauri')
 
 // mongodb user model
 const User = require('./../models/User')
@@ -23,7 +39,7 @@ const User = require('./../models/User')
 const bcrypt = require('bcrypt')
 
 
-router.post('/signup',upload.none(), (req, res) => {
+router.post('/signup',upload, (req, res) => {
     let {firstName, email, password } = req.body
     console.log(req.body)
     // first_name = first_name;
@@ -91,7 +107,7 @@ router.post('/signup',upload.none(), (req, res) => {
     }
 });
 
-router.post('/signin',upload.none(), (req, res) => {
+router.post('/signin',upload, (req, res) => {
     let { email, password } = req.body
     email = email.trim();
     console.log(req.body)
@@ -148,7 +164,7 @@ router.post('/signin',upload.none(), (req, res) => {
 });
 
 
-router.get('/register',upload.none(),function(req,res){
+router.get('/register',upload,function(req,res){
     User.find(function(err,users){
           if(!err) {
 
@@ -159,7 +175,7 @@ router.get('/register',upload.none(),function(req,res){
 
     });
 });
-router.get('/register/:id',upload.none(),function(req,res){
+router.get('/register/:id',upload,function(req,res){
      User.findOne({_id:req.params.id},function(err,users){
           if(!err) {
 
@@ -171,7 +187,7 @@ router.get('/register/:id',upload.none(),function(req,res){
 
     });
 });
-router.post('/register/',upload.none(),function(req,res){
+router.post('/register/',upload,function(req,res){
   let {firstName,middleName,lastName,email,age,aadhaar,phone,dob,gender,password} = req.body;
   firstName  = firstName.toString().trim();
   middleName = middleName.toString().trim();
@@ -215,7 +231,7 @@ router.post('/register/',upload.none(),function(req,res){
 
 });
 
-router.patch('/register/:id',upload.none(), function(req,res){
+router.patch('/register/:id',upload, function(req,res){
     let {firstName,middleName,lastName,email,age,aadhaar,phone,dob,gender} = req.body;
 //   firstName  = firstName.toString().trim();
 //   middleName = middleName.toString().trim();
@@ -253,7 +269,7 @@ router.patch('/register/:id',upload.none(), function(req,res){
     });
 
 
-router.get('/application/:id',upload.fields([{name:'imgPhotograph',maxCount:1},{name:'imgSign',maxCount:1}]),function(req,res){
+router.get('/application/:id',upload,function(req,res){
     if(req.body.button=="",req.body.button=="save")
      User.findOne({_id:req.params.id},function(err,users){
           if(!err) {
@@ -372,22 +388,36 @@ router.get('/application/:id',upload.fields([{name:'imgPhotograph',maxCount:1},{
     
 });
 
-router.patch('/application/:id',upload.fields([{name:'imgPhotograph',maxCount:1},{name:'imgSign',maxCount:1}]),function(req,res){
+router.patch('/application/:id',upload,async function(req,res){
+
+    
+
+    // res.json({cloudinaryId: uploadResult.public_id, url: uploadResult.secure_url});
+  
+
+
+    ///original code
 
     //edit is clicked
 
 
     //adding url of photograph to body
+
+
     if(req.files.imgPhotograph)
     {
         console.log('img1 uploaded\n')
-        req.body.imgPhotograph=req.files.imgPhotograph[0].path;
+        const file64 = formatBufferTo64(req.files.imgPhotograph[0]);
+        const uploadResult = await cloudinaryUpload(file64.content);
+        req.body.imgPhotograph=uploadResult.secure_url;
     }
     //adding url of sign to body
     if(req.files.imgSign)
     {
         console.log('img2 uploaded\n')
-        req.body.imgSign=req.files.imgSign[0].path;
+        const file64 = formatBufferTo64(req.files.imgSign[0]);
+        const uploadResult = await cloudinaryUpload(file64.content);
+        req.body.imgSign=uploadResult.secure_url;
     }
     // console.log(req.files)
     User.findOne({_id:req.params.id},function(err,users){
