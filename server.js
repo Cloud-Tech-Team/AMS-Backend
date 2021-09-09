@@ -8,7 +8,6 @@ const UserRouter = require('./api/User')
 
 // For accepting post form data
 
-app.use('/uploads',express.static('uploads'))
 app.use('/user', UserRouter)
 
 app.listen(port, () => {
