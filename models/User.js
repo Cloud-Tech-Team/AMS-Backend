@@ -1,81 +1,6 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const addressSchema=new mongoose.Schema({
-  addressLine1:{
-      type:String,
-  },
-  addressLine2:String,
-  city:{
-      type:String,
-  },
-  state:{
-      type:String,
-  },
-  pincode:{
-      type:Number,
-      validate:{
-          validator:value=>/^[1-9]{1}[0-9]{2}[0-9]{3}$/.test(value),
-          message:'Invalid pincode'
-      },
-      required:['This field is required']
-  }
-
-
-})
-
-const parentDetailSchema=new mongoose.Schema({
-  name:{
-      type:String,
-      required:['This field is required']
-  },
-  occupation:{
-      type:String,
-      required:['This field is required']
-  },
-  phoneNo:{
-      type:Number,
-      validate:{
-          validator:value=>/^[6-9]{1}[0-9]{9}$/.test(value),
-          message:"Invalid Mobile Number"
-      }
-  },
-  email:{
-      type: String,
-      validate:{
-        validator: value=> /[a-z0-9]+@([a-z]+.)+[a-z]+/.test(value),
-        message:"Invalid Email"
-      },
-    }
-})
-
-const NRISchema=new mongoose.Schema({
-  name:{
-      type:String,
-      required:['This field is required']
-  },
-  relationship:String
-
-})
-
-const academicDetailSchema=new mongoose.Schema({
-  qualifyingExam:{
-      type:String,
-      required:["This field is required"]
-  },
-  physicsMarks:{
-      type:Number,
-      required:["This field is required"]
-  },
-  chemistryMarks:{
-      type:Number,
-      required:["This field is required"]
-  },
-  mathsMarks:{
-      type:Number,
-      required:["This field is required"]
-  }
-})
 
 
 
@@ -246,7 +171,7 @@ const UserSchema = new Schema ({
       bp1:
       {
         enum: {
-            values: ['CSE', 'ECE','EEE','CE','ME'],
+            values: ['CSE', 'ECE','EEE','CE','ME',null],
             message:'Invalid Branch'
       },
       type:String
@@ -283,7 +208,6 @@ const UserSchema = new Schema ({
         },
         type:String
       },
-      academicDetails:academicDetailSchema,
       busFacility:{
         type:Boolean
       },
@@ -305,12 +229,6 @@ const UserSchema = new Schema ({
       imgSign:{
         type:String
       }
-  
-
-
-    
-      
-
 });
 
 
