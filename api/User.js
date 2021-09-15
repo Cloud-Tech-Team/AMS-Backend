@@ -4,7 +4,8 @@ const cloudinary=require('cloudinary')
 // const Datauri= require('datauri')
 const path=require('path')
 
-
+// For JWT token
+const jwt = require('jsonwebtoken')
 
 const DatauriParser = require('datauri/parser');
 const parser = new DatauriParser();
@@ -129,10 +130,16 @@ router.post('/login',upload, (req, res) => {
                 const hashedPassword = data[0].password
                 bcrypt.compare(password, hashedPassword).then(result => {
                     if (result) {
+						const token = jwt.sign(
+							{ user: email },
+							"secret_key"	// might want to replace
+						)
+
                         // Password matched
                         res.json({
                             status: "SUCCESS",
-                            message: "Sign-in successful"
+                            message: "Sign-in successful",
+							token: token
                         })
                     } else {
                         // Incorrect password
