@@ -107,7 +107,7 @@ router.post('/signup',upload, (req, res) => {
     }
 });
 
-router.post('/signin',upload, (req, res) => {
+router.post('/login',upload, (req, res) => {
     let { email, password } = req.body
     email = email.trim();
     console.log(req.body)
