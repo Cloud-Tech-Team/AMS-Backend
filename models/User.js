@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
+const bcrypt = require('bcrypt')
+const crypto = require('crypto')
+
 const Schema = mongoose.Schema
-
-
-
 
 const UserSchema = new Schema ({
 
@@ -228,9 +228,24 @@ const UserSchema = new Schema ({
       },
       imgSign:{
         type:String
+      },
+
+      // Password reset tokens
+      resetPasswordToken: {
+        type: String,
+        required: false
+      },
+
+      resetPasswordExpires: {
+        type: Date,
+        required: false
       }
 });
 
+UserSchema.methods.generatePasswordReset = function () {
+  this.resetPasswordToken = crypto.randomBytes(20).tostring('hex');
+  this.resetPasswordExpires = Date.now() + 3600000; // expires in 1 hour
+};
 
 const User = mongoose.model('User', UserSchema)
 module.exports = User
