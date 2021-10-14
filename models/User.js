@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 
 const Schema = mongoose.Schema
 
-const UserSchema = new Schema ({
+const UserSchema = new Schema({
 
       firstName:  
         {
@@ -242,7 +242,7 @@ const UserSchema = new Schema ({
         required: false
       }
 });
-
+  
 UserSchema.methods.generatePasswordReset = function () {
   this.resetPasswordToken = crypto.randomBytes(20).tostring('hex');
   this.resetPasswordExpires = Date.now() + 3600000; // expires in 1 hour
