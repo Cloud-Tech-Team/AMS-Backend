@@ -170,7 +170,7 @@ router.post('/login', upload, (req, res) => {
     }
 });
 
-router.patch('/password_reset', function (req, res) {
+router.patch('/password_change', function (req, res) {
     let { currentPassword, newPassword, token, id } = req.body;
 
 	// Verify the token
@@ -180,7 +180,7 @@ router.patch('/password_reset', function (req, res) {
 			// Find user by id
 			User.findOne({ _id: id }).then(user => {
 				if (user) {
-					console.log('password_reset: found user')
+					console.log('password_change: found user')
 					console.log(user);
 					// Check if currentPassword is correct
 					const hashedPassword = user.password;       // Password retrieved from db
