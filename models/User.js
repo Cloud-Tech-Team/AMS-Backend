@@ -247,6 +247,10 @@ UserSchema.methods.generatePasswordReset = function () {
   this.resetPasswordExpires = Date.now() + 3600000; // expires in 1 hour
 };
 
+UserSchema.methods.comparePassword = function(password) {
+	return bcrypt.compareSync(password, this.password);
+}
+
 const User = mongoose.model('User', UserSchema)
 module.exports = User
 
