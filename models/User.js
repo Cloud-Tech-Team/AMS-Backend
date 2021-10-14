@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const crypto = require('crypto')
+const jwt = require('jsonwebtoken')
 
 const Schema = mongoose.Schema
 
@@ -249,6 +250,17 @@ UserSchema.methods.generatePasswordReset = function () {
 
 UserSchema.methods.comparePassword = function(password) {
 	return bcrypt.compareSync(password, this.password);
+}
+
+UserSchema.methods.generateJWT = function() {
+	let payload = {
+		id:	this._id,
+		email:	this.email
+	};
+
+	return jwt.sign(payload, 'secret_key', {
+		expiresIn: '24h'
+	});
 }
 
 const User = mongoose.model('User', UserSchema)
