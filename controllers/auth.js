@@ -85,43 +85,33 @@ exports.login = async(req, res) => {
             message: "Invalid email"
         })
     } else {
-        User.find({ email }).then(data => {
-            console.log(data)
-            if (data.length) {
-                const hashedPassword = data[0].password
-                bcrypt.compare(password, hashedPassword).then(result => {
-                    if (result) {
-                        // Password matched
-                        const token = jwt.sign(
-                            { user: email },
-                            "secret_key"	// might want to replace
-                        )
+        User.findOne({ email }).then(user => {
+            if (user) {
+				console.log('user\n=====\n' + user)
+				if (user.comparePassword(password)) {
+					// Correct password
+					console.log('correct password');
+					const token = user.generateJWT();
 
-                        res.json({
-                            status: "SUCCESS",
-                            message: "Sign-in successful",
-                            token: token,
-                        })
-                    } else {
-                        // Incorrect password
-                        res.json({
-                            status: "FAILED",
-                            message: "Incorrect password or mail"
-                        })
-                    }
-                }).catch(err => {
-                    res.json({
-                        status: "FAILED",
-                        message: "An error occurred while checking the password"
-                    })
-					console.log(err.message)
-                })
-            } else {    // email not found
-                res.json({
-                    status: "FAILED",
-                    message: "Incorrect password or email"
-                })
-            }
+					res.json({
+						status: "SUCCESS",
+						message: "Sign-in successful",
+						token: token,
+					})
+				} else {
+					// Incorrect password
+					res.json({
+						status: "FAILED",
+						message: "Incorrect password or mail"
+					})
+				}
+			} else {
+				res.json({
+					status: "FAILED",
+					message: "Incorrect password or mail"
+				})
+				console.log(err.message)
+			}
         }).catch(err => {
             console.log(req.body)
 			console.log(err.message)
