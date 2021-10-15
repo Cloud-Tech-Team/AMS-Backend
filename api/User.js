@@ -37,6 +37,7 @@ const upload = require('./../handler/multer')
 // mongodb user model
 const User = require('../models/User')
 const Auth = require('../controllers/auth')
+const Password = require('../controllers/password')
 
 const bcrypt = require('bcrypt')
 
@@ -44,6 +45,12 @@ const bcrypt = require('bcrypt')
 router.post('/signup', Auth.signup);
 
 router.post('/login', Auth.login);
+
+router.post('/recover', Password.recover);
+
+router.get('/reset/:token', Password.reset);
+
+router.post('/reset/:token', Password.resetPassword);
 
 router.patch('/password_change', function (req, res) {
     let { currentPassword, newPassword, token, id } = req.body;
