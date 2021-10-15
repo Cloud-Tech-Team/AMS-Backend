@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt')
 const User = require('../models/User')
 const jwt = require('jsonwebtoken')
 
-exports.signup = async(req, res) => { 
+exports.signup = async (req, res) => {
     let { firstName, email, password } = req.body
     console.log(req.body)
     // first_name = first_name;
@@ -69,7 +69,7 @@ exports.signup = async(req, res) => {
     }
 };
 
-exports.login = async(req, res) => {
+exports.login = async (req, res) => {
     let { email, password } = req.body
     email = email.trim();
     console.log(req.body)
@@ -87,36 +87,39 @@ exports.login = async(req, res) => {
     } else {
         User.findOne({ email }).then(user => {
             if (user) {
-				console.log('user\n=====\n' + user)
-				if (user.comparePassword(password)) {
-					// Correct password
-					console.log('correct password');
-					const token = user.generateJWT();
+                console.log('user\n=====\n' + user)
+				console.log('password: ' + password);
+                if (user.comparePassword(password)) {
+                    // Correct password
+                    console.log('correct password');
+                    const token = user.generateJWT();
 
-					res.json({
-						status: "SUCCESS",
-						message: "Sign-in successful",
-						token: token,
-					})
-				} else {
-					// Incorrect password
-					res.json({
-						status: "FAILED",
-						message: "Incorrect password or mail"
-					})
-				}
-			} else {
-				res.json({
-					status: "FAILED",
-					message: "Incorrect password or mail"
-				})
-				console.log(err.message)
-			}
+                    res.json({
+                        status: "SUCCESS",
+                        message: "Sign-in successful",
+                        token: token,
+                    })
+                } else {
+					console.log(password);
+                    // Incorrect password
+                    res.json({
+                        status: "FAILED",
+                        message: "Incorrect password or mail"
+                    })
+                }
+            } else {	// invalid email
+                res.json({
+                    status: "FAILED",
+                    message: "Incorrect password or mail"
+                })
+                console.log(err.message)
+            }
         }).catch(err => {
+			console.log('could not find user ' + email)
             console.log(req.body)
-			console.log(err.message)
+            console.log(err.message)
             res.json({
-                status: "FAILED",
+        	status: "FAILED",
                 message: "An error occured while checking for existance of user"
             })
         })
