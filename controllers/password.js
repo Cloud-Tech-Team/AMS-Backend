@@ -1,4 +1,4 @@
-const User = require('../models/user');
+const User = require('../models/User');
 
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -20,7 +20,7 @@ exports.recover = (req, res) => {
 				const mailOptions = {
 					to: user.email,
 					from: process.env.FROM_EMAIL,
-					subject: 'Password reset request",
+					subject: 'Password reset request',
 					text: `Hi ${user.firstName}\n
 							Please click on the following link ${link} to reset your password.\n\n
 							If you did not request this, please ignore this email and your password
@@ -28,13 +28,11 @@ exports.recover = (req, res) => {
 				};
 
 				sgMail.send(mailOptions, (error, result) => {
-					if (err)
+					if (error)
 						return res.status(500).json({message: error.message});
 					res.status(200).json({message: 'A password reset mail has been sent to ' + user.email});
 				});
-			}).catch(err =>
-				res.status(500).json({message: err.message});
-			);
+			}).catch(err => res.status(500).json({message: err.message}));
 		}).catch(err => res.status(500).json({message: err.message}));
 }
 
@@ -78,7 +76,7 @@ exports.resetPassword = (req, res) => {
 				// send mail
 				const mailOptions = {
 					to: user.email,
-					from: process.env.FROM_EMAIL;
+					from: process.env.FROM_EMAIL,
 					subject: 'Your password has been changed',
 					text: `Hi ${user.username}\n
 					The password for your account ${user.email} has been changed\n`
