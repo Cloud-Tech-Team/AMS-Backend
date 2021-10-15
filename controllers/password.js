@@ -16,7 +16,7 @@ exports.recover = (req, res) => {
 
 			// Save the updated user
 			user.save().then(user => {
-				let link = 'http://' + req.headers.host + '/api/auth/reset' + user.resetPasswordToken;
+				let link = 'http://' + req.headers.host + '/user/reset/' + user.resetPasswordToken;
 				const mailOptions = {
 					to: user.email,
 					from: process.env.FROM_EMAIL,
@@ -40,6 +40,7 @@ exports.recover = (req, res) => {
 exports.reset = (req, res) => {
 	User.findOne({resetPasswordToken: req.params.token, resetPasswordExpires: {$gt: Date.now()}})
 		.then((user) => {
+			console.log(req);
 			if (!user)
 				return res.status(401).json(
 					{ message: 'Password reset token is invalid'}
