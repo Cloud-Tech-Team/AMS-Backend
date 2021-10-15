@@ -56,7 +56,7 @@ exports.reset = (req, res) => {
  * If valid set the new password and send a mail informing the user of the change
  */
 exports.resetPassword = (req, res) => {
-	User.findOne({resetPasswordToken: req.params.token, ressetPasswordExpires: {$gt: Date.now()}})
+	User.findOne({resetPasswordToken: req.params.token, resetPasswordExpires: {$gt: Date.now()}})
 		.then((user) => {
 			console.log('token: ' + req.params.token);
 			if (!user) {
