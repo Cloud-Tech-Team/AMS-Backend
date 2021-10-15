@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const bcrypt = require('bcrypt');
 
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -13,6 +14,7 @@ exports.recover = (req, res) => {
 
 			// Generate and set password reset token
 			user.generatePasswordReset();
+			console.log('generated new password reset token')
 
 			// Save the updated user
 			user.save().then(user => {
@@ -30,6 +32,7 @@ exports.recover = (req, res) => {
 				sgMail.send(mailOptions, (error, result) => {
 					if (error)
 						return res.status(500).json({message: error.message});
+					console.log('sent password reset mail');
 					res.status(200).json({message: 'A password reset mail has been sent to ' + user.email});
 				});
 			}).catch(err => res.status(500).json({message: err.message}));
@@ -40,11 +43,9 @@ exports.recover = (req, res) => {
 exports.reset = (req, res) => {
 	User.findOne({resetPasswordToken: req.params.token, resetPasswordExpires: {$gt: Date.now()}})
 		.then((user) => {
-			console.log(req);
-			if (!user)
-				return res.status(401).json(
-					{ message: 'Password reset token is invalid'}
-				);
+			if (!user) {
+				return res.status(401).json({message: 'Password reset token is invalid'});
+			}
 			// Redirect user to form with the email address
 			res.render('reset', {user});
 		}).catch(err => res.status(500).json({message: err.message}));
@@ -57,42 +58,45 @@ exports.reset = (req, res) => {
 exports.resetPassword = (req, res) => {
 	User.findOne({resetPasswordToken: req.params.token, ressetPasswordExpires: {$gt: Date.now()}})
 		.then((user) => {
-			if (!user)
-				return res.status(401).json(
-					{message: 'Password reset token is invalid'}
-				);
+			console.log('token: ' + req.params.token);
+			if (!user) {
+				return res.status(401).json({message: 'Password reset token is invalid'});
+			}
 
 			// Set the new password
-			user.password = req.body.password;
-			user.resetPasswordToken = undefined;
-			user.resetPasswordExpires = undefined;
+			console.log('new password: ' + req.body.password);
+			bcrypt.hash(req.body.password, 10).then(hashedPassword => {
 
-			// Save to db
-			user.save((err) => {
-				if (err)
-					return res.status(500).json(
-						{message: err.message}
-					);
+				user.password = hashedPassword;
+				console.log('new password hash: ' + user.password);
+				user.resetPasswordToken = undefined;
+				user.resetPasswordExpires = undefined;
 
-				// send mail
-				const mailOptions = {
-					to: user.email,
-					from: process.env.FROM_EMAIL,
-					subject: 'Your password has been changed',
-					text: `Hi ${user.username}\n
+				// Save to db
+				user.save((err) => {
+					if (err)
+						return res.status(500).json({message: err.message});
+					// send mail
+					const mailOptions = {
+						to: user.email,
+						from: process.env.FROM_EMAIL,
+						subject: 'Your password has been changed',
+						text: `Hi ${user.username}\n
 					The password for your account ${user.email} has been changed\n`
-				};
+					};
 
-				sgMail.send(mailOptions, (error, result) => {
-					if (error)
-						return res.status(500).json(
-							{message: error.message}
-						);
+					sgMail.send(mailOptions, (error, result) => {
+						if (error)
+							return res.status(500).json({message: error.message});
 
-					res.status(200).json({
-						message: 'Your password has been updated'
+						res.status(200).json({message: 'Your password has been updated'});
 					});
 				});
+			}).catch(err => {
+				res.json({
+					status: 'FAILED',
+					message: 'An error occurred while hashing the password'
+				})
 			});
 		});
 }
