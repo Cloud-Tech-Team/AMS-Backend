@@ -63,6 +63,10 @@ exports.resetPassword = (req, res) => {
 				return res.status(401).json({message: 'Password reset token is invalid'});
 			}
 
+			// Check if both password fields match (confirm password)
+			if (req.body.password != req.body.confirmPassword)
+				return res.status(401).json({message: 'Password fields do not match'});
+
 			// Set the new password
 			console.log('new password: ' + req.body.password);
 			bcrypt.hash(req.body.password, 10).then(hashedPassword => {
