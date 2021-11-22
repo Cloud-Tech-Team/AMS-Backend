@@ -9,8 +9,9 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 exports.recover = (req, res) => {
 	User.findOne({email: req.body.email})
 		.then(user => {
-			if (!user)
+			if (!user){
 				return res.status(401).json({message: 'Invalid email address: ' + req.body.email});
+			}
 
 			// Generate and set password reset token
 			user.generatePasswordReset();
