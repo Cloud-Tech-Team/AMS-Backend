@@ -6,7 +6,13 @@ const jwt = require('jsonwebtoken')
 const Schema = mongoose.Schema
 
 const UserSchema = new Schema({
-
+      quota:{
+        enum:{
+          values:['Management','Merit','NRI'],
+          message:"Invalid quota"
+        },
+        type:String
+      },
       firstName:  
         {
           type: String,
@@ -263,6 +269,61 @@ UserSchema.methods.generateJWT = function() {
 	});
 }
 
-const User = mongoose.model('User', UserSchema)
+const User = mongoose.model('NRI', UserSchema)
 module.exports = User
 
+// fname
+// mName
+// lName
+// age
+// aadhaar
+// phone
+// aPhone
+// dob
+// gender
+// password
+// nationality
+// motherTongue
+// bloodGroup
+// addressL1C
+// addressL2C
+// cityC
+// stateC
+// pincodeC
+// addressL1P
+// addressL2P
+// cityP
+// stateP
+// pincodeP
+// fatherName
+// fatherOccupation
+// fatherMobile
+// fatherEmail
+// motherName
+// motherOccupation
+// motherMobile
+// motherEmail
+// guardianName
+// guardianRelation
+// guardianMobile
+// guardianEmail
+// annualIncome
+// NRIname
+// NRIrelation
+// bp1
+// bp2
+// bp3
+// bp4
+// bp5
+// busFacility
+// hostelFacility
+// qualifyingExam
+// phyMarkObtained
+// phyMaxMarks
+// chemMarkObtained
+// chemMaxMarks
+// mathsMarkObtained
+// mathsMaxMarks
+// imgPhotograph
+// imgSign
+//quota

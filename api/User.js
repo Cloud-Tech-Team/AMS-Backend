@@ -1,12 +1,16 @@
 const express = require('express')
 const router = express.Router()
+
+//for uploading to cloudinary
 const cloudinary = require('cloudinary')
+
 // const Datauri= require('datauri')
 const path = require('path')
 
 // For JWT token
 const jwt = require('jsonwebtoken')
 
+//uploading files
 const DatauriParser = require('datauri/parser');
 const parser = new DatauriParser();
 
@@ -15,29 +19,17 @@ const formatBufferTo64 = file =>
 
 const cloudinaryUpload = file => cloudinary.uploader.upload(file);
 
-// const multer =require('multer'); // form-data multipart
-// const storage=multer.diskStorage({
-//     destination:function(req,res,cb){
-//         cb(null,"uploads");
-//     },
-//     filename:function(req,file,cb){
-//         cb(
-//             null,
-//             file.fieldname + "-" +Date.now() + path.extname(file.originalname)
-//         )
-//     }
-// })
-// const upload = multer({storage:storage});
 
 require('./../config/cloudinary')
 const upload = require('./../handler/multer')
 
-// const datauri=require('./../handler/datauri')
 
-// mongodb user model
+
+
 const User = require('../models/User')
 const Auth = require('../controllers/auth')
-const Password = require('../controllers/password')
+const Password = require('../controllers/password') 
+
 
 const bcrypt = require('bcrypt')
 
@@ -135,17 +127,18 @@ router.get('/register/:id', upload, function (req, res) {
     });
 });
 router.post('/register/', upload, function (req, res) {
-    let { firstName, middleName, lastName, email, age, aadhaar, phone, dob, gender, password } = req.body;
-    firstName = firstName.toString().trim();
-    middleName = middleName.toString().trim();
-    lastName = lastName.toString().trim();
+    let { quota,fName, mName, lName, email, age, aadhaar, phone, dob, gender, password } = req.body;
+    quota = quota.toString().trim();
+    fName = fName.toString().trim();
+    mName = mName.toString().trim();
+    lName = lName.toString().trim();
     email = email.toString().trim();
     aadhaar = aadhaar.toString().trim();
     phone = phone.toString().trim();
     dob = dob.toString().trim();
     gender = gender.toString().trim();
 
-    if (firstName == "" || lastName == "" || email == "" || age == "" || dob == "" || gender == "" || phone == "") {
+    if (fName == "" || lName == "" || email == "" || age == "" || dob == "" || gender == "" || phone == "") {
         res.json({
             status: "FAILED",
             message: "Empty input field(s)"
@@ -154,9 +147,9 @@ router.post('/register/', upload, function (req, res) {
     }
     else {
         const user = new User({
-            firstName: req.body.firstName,
-            middleName: req.body.middleName,
-            lastName: req.body.lastName,
+            firstName: req.body.fName,
+            middleName: req.body.mName,
+            lastName: req.body.lName,
             email: req.body.email,
             age: req.body.age,
             aadhaar: req.body.aadhaar,
@@ -167,7 +160,10 @@ router.post('/register/', upload, function (req, res) {
         });
         user.save(function (err) {
             if (err) {
-                res.json({ error_message: /:(.+)/.exec(err.message)[1], status: "Failed" });
+                res.json({
+                     error_message: /:(.+)/.exec(err.message)[1], 
+                     status: "Failed" });
+                
             } else {
                 res.json({
                     status: "SUCCESS",
@@ -180,14 +176,7 @@ router.post('/register/', upload, function (req, res) {
 
 router.patch('/register/:id', upload, function (req, res) {
     let { firstName, middleName, lastName, email, age, aadhaar, phone, dob, gender } = req.body;
-    //   firstName  = firstName.toString().trim();
-    //   middleName = middleName.toString().trim();
-    //   lastName   = lastName.toString().trim();
-    //   email       = email.toString().trim();
-    //   aadhaar     = aadhaar.toString().trim();
-    //   phone       = phone.toString().trim();
-    //   dob         = dob.toString().trim();
-    //   gender      = gender.toString().trim();
+  
 
     if (!(firstName && lastName && email && age && dob && gender && phone)) {
         res.json({
@@ -222,7 +211,6 @@ router.get('/application/:id', upload, function (req, res) {
 
                 res.send(users);
             } else {
-                // console.log("ahaa kollaalo");
                 res.send(err);
             }
 
@@ -251,7 +239,6 @@ router.get('/application/:id', upload, function (req, res) {
                             })
                             console.log(req.body)
                             console.log(req.body.contactAddress.addressL1)
-                            //res.redirect()
 
                         }
                         else
@@ -331,7 +318,7 @@ router.get('/application/:id', upload, function (req, res) {
 
 router.patch('/application/:id', upload, async function (req, res) {
 
-    ///original code
+  
     //edit is clicked
     //adding url of photograph to body
     if (req.files.imgPhotograph) {
@@ -358,10 +345,10 @@ router.patch('/application/:id', upload, async function (req, res) {
                 a = req.body
                 const update = {
 
-                    firstName: a.fname || users.firstName || users.a,
+                    firstName: a.fName || users.firstName || users.a,
                     middleName: a.mName || users.middleName || users.a,
                     lastName: a.lName || users.lastName || users.a,
-                    email: a.lName || users.email || users.a,
+                    email: a.email || users.email || users.a,
                     age: a.age || users.age || users.a,
                     aadhaar: a.aadhaar || users.aadhaar || users.a,
                     phone: a.phone || users.phone || users.a,
