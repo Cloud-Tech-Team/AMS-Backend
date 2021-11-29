@@ -6,9 +6,12 @@ const jwt = require('jsonwebtoken')
 const Schema = mongoose.Schema
 
 const UserSchema = new Schema({
+      applicationNo:{
+        type:String
+      },
       quota:{
         enum:{
-          values:['Management','Merit','NRI'],
+          values:['Management','Government','NRI'],//TODO
           message:"Invalid quota"
         },
         type:String
@@ -70,9 +73,10 @@ const UserSchema = new Schema({
           },
         type:String
       },
+    
       password:
       {
-          type: String,
+          type: Number,
           // required:['This field is required']
       },
       nationality:String,
@@ -183,38 +187,38 @@ const UserSchema = new Schema({
       },
       type:String
       },
-      bp2:
-      {
-          enum: {
-              values: ['CSE', 'ECE','EEE','CE','ME'],
-              message:'Invalid Branch'
-        },
-        type:String
-      },
-      bp3:
-      {
-          enum: {
-              values: ['CSE', 'ECE','EEE','CE','ME'],
-              message:'Invalid Branch'
-        },
-        type:String
-      },
-      bp4:
-      {
-          enum: {
-              values: ['CSE', 'ECE','EEE','CE','ME'],
-              message:'Invalid Branch'
-        },
-        type:String
-      },
-      bp5:
-      {
-          enum: {
-              values: ['CSE', 'ECE','EEE','CE','ME'],
-              message:'Invalid Branch'
-        },
-        type:String
-      },
+      // bp2:
+      // {
+      //     enum: {
+      //         values: ['CSE', 'ECE','EEE','CE','ME'],
+      //         message:'Invalid Branch'
+      //   },
+      //   type:String
+      // },
+      // bp3:
+      // {
+      //     enum: {
+      //         values: ['CSE', 'ECE','EEE','CE','ME'],
+      //         message:'Invalid Branch'
+      //   },
+      //   type:String
+      // },
+      // bp4:
+      // {
+      //     enum: {
+      //         values: ['CSE', 'ECE','EEE','CE','ME'],
+      //         message:'Invalid Branch'
+      //   },
+      //   type:String
+      // },
+      // bp5:
+      // {
+      //     enum: {
+      //         values: ['CSE', 'ECE','EEE','CE','ME'],
+      //         message:'Invalid Branch'
+      //   },
+      //   type:String
+      // },
       busFacility:{
         type:Boolean
       },

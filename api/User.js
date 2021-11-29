@@ -128,49 +128,161 @@ router.get('/register/:id', upload, function (req, res) {
 });
 router.post('/register/', upload, function (req, res) {
     let { quota,fName, mName, lName, email, age, aadhaar, phone, dob, gender, password } = req.body;
-    quota = quota.toString().trim();
-    fName = fName.toString().trim();
-    mName = mName.toString().trim();
-    lName = lName.toString().trim();
-    email = email.toString().trim();
-    aadhaar = aadhaar.toString().trim();
-    phone = phone.toString().trim();
+    // quota = quota.toString().trim();
+    // fName = fName.toString().trim();
+    // mName = mName.toString().trim();
+    // lName = lName.toString().trim();
+    // email = email.toString().trim();
+    // aadhaar = aadhaar.toString().trim();
+    // phone = phone.toString().trim();
     dob = dob.toString().trim();
-    gender = gender.toString().trim();
+    // gender = gender.toString().trim();
 
-    if (fName == "" || lName == "" || email == "" || age == "" || dob == "" || gender == "" || phone == "") {
+
+    
+    if (fName == "" || lName == "" || email == "" || dob == "" || gender == "" || quota == "") {
         res.json({
             status: "FAILED",
             message: "Empty input field(s)"
         })
         console.log(req.body)
     }
-    else {
-        const user = new User({
-            firstName: req.body.fName,
-            middleName: req.body.mName,
-            lastName: req.body.lName,
-            email: req.body.email,
-            age: req.body.age,
-            aadhaar: req.body.aadhaar,
-            phone: req.body.phone,
-            dob: req.body.dob,
-            gender: req.body.gender
-
-        });
-        user.save(function (err) {
-            if (err) {
-                res.json({
-                     error_message: /:(.+)/.exec(err.message)[1], 
-                     status: "Failed" });
-                
-            } else {
-                res.json({
-                    status: "SUCCESS",
-                });
-            }
-        });
+    else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+        res.json({
+            status: "FAILED",
+            message: "Invalid email"
+        })
     }
+    else {
+        User.find({ email }).then(result => {
+            if (result.length) {
+                // A user already exists
+                res.json({
+                    status: "FAILED",
+                    message: "User with given email already exists"
+                })
+            }
+            else
+            {
+                //application no. generation
+                quota=req.body.quota.toString().toUpperCase()[0];
+                appliNumber=220000 //TODO
+                User.find({},function(err,result1){
+                    appliNumber=220000+result1.length+1
+
+                    // console.log(dob[8]+dob[9]+dob[5]+dob[6]+dob[2]+dob[3]);
+
+                    applicationNo=quota+"BT"+appliNumber.toString();//TODO
+                    // console.log(applicationNo);
+
+                    number=Number(dob[3])*10000+result1.length+1
+
+                    password=dob[8]+dob[9]+dob[5]+dob[6]+dob[2]+number;
+                    // console.log(password);
+                    
+                    //TODO
+                    // hashedPassword=bcrypt.hash(password, 10).then(hashedPassword => {
+                    //     console.log(hashedPassword)
+                    // })
+
+                    const user = new User({
+                        applicationNo:applicationNo,
+                        quota:req.body.quota,
+                        firstName: req.body.fName,
+                        middleName: req.body.mName,
+                        lastName: req.body.lName,
+                        email: req.body.email,
+                        age: req.body.age,
+                        aadhaar: req.body.aadhaar,
+                        phone: req.body.phone,
+                        dob: req.body.dob,
+                        gender: req.body.gender,
+                        password: password
+            
+                    });
+                    user.save(function (err) {
+                        if (err) {
+                            res.json({
+                                error_message: /:(.+)/.exec(err.message)[1], 
+                                status: "Failed" });
+                            
+                        } else {
+                            res.json({
+                                status: "SUCCESS",
+                            });
+                        }
+                    });
+                });
+                
+                
+            }
+        }).catch(err => {
+            console.log(err)
+            res.json({
+                status: "FAILED",
+                message: "An error occurred while checking for existance of user"
+            })
+        });
+        
+    }
+
+
+    // else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+    //     res.json({
+    //         status: "FAILED",
+    //         message: "Invalid email"
+    //     })
+    // } else {
+    //     // Check if user already exists
+    //     User.find({ email }).then(result => {
+    //         if (result.length) {
+    //             // A user already exists
+    //             res.json({
+    //                 status: "FAILED",
+    //                 message: "User with given email already exists"
+    //             })
+    //         } else {
+    //             bcrypt.hash(password, 10).then(hashedPassword => {
+    //                 const newUser = new User({
+    //                     fName,
+    //                     mName,
+    //                     lName,
+    //                     email,
+    //                     aadhaar,
+    //                     phone,
+    //                     dob,
+    //                     gender,
+    //                     quota,
+    //                     password: hashedPassword,
+
+    //                 })
+
+    //                 newUser.save().then(result => {
+    //                     res.json({
+    //                         status: "SUCCESS",
+    //                         message: "Signup Successful",
+    //                     })
+    //                 }).catch(err => {
+    //                     res.json({
+    //                         status: "FAILED",
+    //                         message: "An error occured while adding the user"
+    //                     })
+    //                 })
+    //             }).catch(err => {
+    //                 res.json({
+    //                     status: "FAILED",
+    //                     message: "An error occurred while hashing the password"
+    //                 })
+    //             })
+    //         }
+    //     }).catch(err => {
+    //         console.log(err)
+    //         res.json({
+    //             status: "FAILED",
+    //             message: "An error occurred while checking for existance of user"
+    //         })
+    //     })
+    // }
 
 });
 
@@ -220,7 +332,7 @@ router.get('/application/:id', upload, function (req, res) {
             if (!err) {
                 {
                     let {
-                        nationality, motherTongue, bloodGroup, aPhone, annualIncome, bp1, bp2, bp3, hostelFacility, busFacility, imgPhotograph, imgSign } = users;
+                        nationality, motherTongue, bloodGroup, aPhone, annualIncome, bp1, hostelFacility, busFacility, imgPhotograph, imgSign } = users;
                     a = users;
                     console.log(users)
                     if (!(nationality && motherTongue && bloodGroup && aPhone && annualIncome)) {
@@ -266,10 +378,10 @@ router.get('/application/:id', upload, function (req, res) {
 
                                         })
                                     else
-                                        if (!(bp1 && bp2 && bp3))
+                                        if (!(bp1))
                                             res.json({
                                                 status: "FAILED",
-                                                message: "Atleast 3 branchs should be kept"
+                                                message: "Atleast 1 branchs should be kept"
 
                                             })
                                         else {
