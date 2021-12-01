@@ -128,6 +128,7 @@ router.get('/register/:id', upload, function (req, res) {
 });
 router.post('/register/', upload, function (req, res) {
     let { quota,fName, mName, lName, email, age, aadhaar, phone, dob, gender, password } = req.body;
+	console.log(req.body);
     // quota = quota.toString().trim();
     // fName = fName.toString().trim();
     // mName = mName.toString().trim();
@@ -178,40 +179,44 @@ router.post('/register/', upload, function (req, res) {
                     number=Number(dob[3])*10000+result1.length+1
 
                     password=dob[8]+dob[9]+dob[5]+dob[6]+dob[2]+number;
-                    // console.log(password);
+					console.log('generated password: ' + password);
                     
-                    //TODO
-                    // hashedPassword=bcrypt.hash(password, 10).then(hashedPassword => {
-                    //     console.log(hashedPassword)
-                    // })
+					// hash password (bcrypt.hash is async)
+					hashedPassword = bcrypt.hash(password, 10).then(hashedPassword => {
+						console.log('Hashed password: ' + hashedPassword)
+						const user = new User({
+							applicationNo:applicationNo,
+							quota:req.body.quota,
+							firstName: req.body.fName,
+							middleName: req.body.mName,
+							lastName: req.body.lName,
+							email: req.body.email,
+							age: req.body.age,
+							aadhaar: req.body.aadhaar,
+							phone: req.body.phone,
+							dob: req.body.dob,
+							gender: req.body.gender,
+							password: hashedPassword
+						});
+						console.log(user);
+						user.save(function (err) {
+							if (err) {
+								res.json({
+									error_message: /:(.+)/.exec(err.message)[1], 
+									status: "Failed" });
 
-                    const user = new User({
-                        applicationNo:applicationNo,
-                        quota:req.body.quota,
-                        firstName: req.body.fName,
-                        middleName: req.body.mName,
-                        lastName: req.body.lName,
-                        email: req.body.email,
-                        age: req.body.age,
-                        aadhaar: req.body.aadhaar,
-                        phone: req.body.phone,
-                        dob: req.body.dob,
-                        gender: req.body.gender,
-                        password: password
-            
-                    });
-                    user.save(function (err) {
-                        if (err) {
-                            res.json({
-                                error_message: /:(.+)/.exec(err.message)[1], 
-                                status: "Failed" });
-                            
-                        } else {
-                            res.json({
-                                status: "SUCCESS",
-                            });
-                        }
-                    });
+							} else {
+								res.json({
+									status: "SUCCESS",
+								});
+							}
+						});
+					}).catch(err => {
+						res.json({
+							status: 'FAILED',
+							message: 'An error occurred while storing the user'
+						})
+					})
                 });
                 
                 

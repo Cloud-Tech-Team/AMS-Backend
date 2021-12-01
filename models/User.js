@@ -76,7 +76,7 @@ const UserSchema = new Schema({
     
       password:
       {
-          type: Number,
+          type: String,	// stores hash
           // required:['This field is required']
       },
       nationality:String,
