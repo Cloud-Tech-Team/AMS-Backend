@@ -70,24 +70,20 @@ exports.signup = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-    let { email, password } = req.body
-    email = email.trim();
+    let { applicationNo, password } = req.body
+	console.log(req.body);
+    applicationNo = applicationNo.trim();
     console.log(req.body)
 
-    if (email == "" || password == "") {
+    if (applicationNo == "" || password == "") {
         res.json({
             status: "FAILED",
             message: "Empty credentials entered"
         })
-    } else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
-        res.json({
-            status: "FAILED",
-            message: "Invalid email"
-        })
     } else {
-        User.findOne({ email }).then(user => {
+        User.findOne({ applicationNo }).then(user => {
             if (user) {
-                console.log('user\n=====\n' + user)
+                console.log('user\n=====\n' + user.applicationNo)
 				console.log('password: ' + password);
                 if (user.comparePassword(password)) {
                     // Correct password
@@ -104,7 +100,7 @@ exports.login = async (req, res) => {
                     // Incorrect password
                     res.json({
                         status: "FAILED",
-                        message: "Incorrect password or mail"
+                        message: "Incorrect password or application number"
                     })
                 }
             } else {	// invalid email
@@ -115,7 +111,7 @@ exports.login = async (req, res) => {
                 console.log(err.message)
             }
         }).catch(err => {
-			console.log('could not find user ' + email)
+			console.log('could not find user ' + applicationNo)
             console.log(req.body)
             console.log(err.message)
             res.json({
