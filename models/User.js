@@ -261,7 +261,7 @@ const UserSchema = new Schema({
 });
 
 UserSchema.methods.generateApplicationNo = function(number) {
-	quota=this.quota.toString().toUpperCase()[0];
+  quota=this.quota.toString().toUpperCase()[0];
   course=this.course.toString().toUpperCase().slice(0,2);
   year=220000 //TODO:remove hard-coded year 
   applicationNo=year+Number(number);
@@ -270,15 +270,14 @@ UserSchema.methods.generateApplicationNo = function(number) {
 }
 
 UserSchema.methods.generatePassword = function(number) {
-	dob=this.dob;
-  date=(dob.getDate()<9) ? '0'+dob.getDate():dob.getDate().toString();
-  month= (dob.getMonth()<9) ? '0'+(dob.getMonth()+1):dob.getMonth()+1;
-  year=dob.getFullYear().toString().slice(2,);
-  applicationNo=year[0]+(Number(year[1])*10000+number)
+  dob=this.dob;
+  date = dob.getDate().toString().padStart(2, '0');	// Pad with zeroes to make it atleast 2 digits
+  month = (dob.getMonth()+1).toString().padStart(2, '0');
+  year = dob.getFullYear().toString().slice(2,);
+  applicationNo = year[0] + (Number(year[1])*10000 + number)
 
   password=date+month+applicationNo;
   return password;
-  
 }
   
 UserSchema.methods.generatePasswordReset = function () {
