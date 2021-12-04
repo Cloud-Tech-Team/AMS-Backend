@@ -36,7 +36,7 @@ const bcrypt = require('bcrypt')
 
 router.post('/signup', Auth.signup);
 
-router.post('/login', Auth.login);
+router.post('/login', upload, Auth.login);
 
 router.post('/recover', Password.recover);
 
