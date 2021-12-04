@@ -136,7 +136,7 @@ router.post('/register/', upload, function (req, res) {
     // email = email.toString().trim();
     // aadhaar = aadhaar.toString().trim();
     // phone = phone.toString().trim();
-    dob = dob.toString().trim();
+   // dob = dob.toString().trim();
     // gender = gender.toString().trim();
 
 
@@ -165,28 +165,9 @@ router.post('/register/', upload, function (req, res) {
             }
             else
             {
-                //application no. generation
-                quota=req.body.quota.toString().toUpperCase()[0];
-                appliNumber=220000 //TODO
-                User.find({},function(err,result1){
-                    appliNumber=220000+result1.length+1
-
-                    // console.log(dob[8]+dob[9]+dob[5]+dob[6]+dob[2]+dob[3]);
-
-                    applicationNo=quota+"BT"+appliNumber.toString();//TODO
-                    // console.log(applicationNo);
-
-                    number=Number(dob[3])*10000+result1.length+1
-
-                    password=dob[8]+dob[9]+dob[5]+dob[6]+dob[2]+number;
-					console.log('generated password: ' + password);
-                    
-					// hash password (bcrypt.hash is async)
-					hashedPassword = bcrypt.hash(password, 10).then(hashedPassword => {
-						console.log('Hashed password: ' + hashedPassword)
 						const user = new User({
-							applicationNo:applicationNo,
 							quota:req.body.quota,
+                            course:req.body.course,
 							firstName: req.body.fName,
 							middleName: req.body.mName,
 							lastName: req.body.lName,
@@ -196,7 +177,6 @@ router.post('/register/', upload, function (req, res) {
 							phone: req.body.phone,
 							dob: req.body.dob,
 							gender: req.body.gender,
-							password: hashedPassword
 						});
 						console.log(user);
 						user.save(function (err) {
@@ -209,15 +189,33 @@ router.post('/register/', upload, function (req, res) {
 								res.json({
 									status: "SUCCESS",
 								});
+                                
+                                User.find({},function(err,result1){
+                                    user.generateApplicationNo(result1.length);
+                                    password= user.generatePassword(result1.length);
+
+                                    hashedPassword = bcrypt.hash(password.toString(), 10).then(hashedPassword => {
+                                        console.log('Hashed password: ' + hashedPassword +password)
+                                        user.password=hashedPassword;
+                                        user.save();
+                                      }).catch(err => {
+                                        res.json({
+                                            status: 'FAILED',
+                                            message: 'An error occurred while storing the user'
+                                        })
+                                    });
+                                    
+                                }).catch(err => {
+                                    console.log(err)
+                                    res.json({
+                                        status: "FAILED",
+                                        message: "An error occurred while checking for existance of user"
+                                    })
+                                });
 							}
 						});
-					}).catch(err => {
-						res.json({
-							status: 'FAILED',
-							message: 'An error occurred while storing the user'
-						})
-					})
-                });
+					
+                
                 
                 
             }
@@ -231,63 +229,6 @@ router.post('/register/', upload, function (req, res) {
         
     }
 
-
-    // else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
-    //     res.json({
-    //         status: "FAILED",
-    //         message: "Invalid email"
-    //     })
-    // } else {
-    //     // Check if user already exists
-    //     User.find({ email }).then(result => {
-    //         if (result.length) {
-    //             // A user already exists
-    //             res.json({
-    //                 status: "FAILED",
-    //                 message: "User with given email already exists"
-    //             })
-    //         } else {
-    //             bcrypt.hash(password, 10).then(hashedPassword => {
-    //                 const newUser = new User({
-    //                     fName,
-    //                     mName,
-    //                     lName,
-    //                     email,
-    //                     aadhaar,
-    //                     phone,
-    //                     dob,
-    //                     gender,
-    //                     quota,
-    //                     password: hashedPassword,
-
-    //                 })
-
-    //                 newUser.save().then(result => {
-    //                     res.json({
-    //                         status: "SUCCESS",
-    //                         message: "Signup Successful",
-    //                     })
-    //                 }).catch(err => {
-    //                     res.json({
-    //                         status: "FAILED",
-    //                         message: "An error occured while adding the user"
-    //                     })
-    //                 })
-    //             }).catch(err => {
-    //                 res.json({
-    //                     status: "FAILED",
-    //                     message: "An error occurred while hashing the password"
-    //                 })
-    //             })
-    //         }
-    //     }).catch(err => {
-    //         console.log(err)
-    //         res.json({
-    //             status: "FAILED",
-    //             message: "An error occurred while checking for existance of user"
-    //         })
-    //     })
-    // }
 
 });
 
