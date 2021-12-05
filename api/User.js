@@ -19,6 +19,12 @@ const formatBufferTo64 = file =>
 
 const cloudinaryUpload = file => cloudinary.uploader.upload(file);
 
+//textmessaging
+var client = require('twilio')(
+    process.env.TWILIO_ACCOUNT_SID,
+    process.env.TWILIO_AUTH_TOKEN
+  );
+
 
 require('./../config/cloudinary')
 const upload = require('./../handler/multer')
@@ -126,6 +132,7 @@ router.get('/register/:id', upload, function (req, res) {
 
     });
 });
+
 router.post('/register/', upload, function (req, res) {
     let { quota,fName, mName, lName, email, age, aadhaar, phone, dob, gender, password } = req.body;
 	console.log(req.body);
@@ -174,6 +181,7 @@ router.post('/register/', upload, function (req, res) {
 							email: req.body.email,
 							age: req.body.age,
 							aadhaar: req.body.aadhaar,
+                            countryCode:req.body.countryCode,
 							phone: req.body.phone,
 							dob: req.body.dob,
 							gender: req.body.gender,
@@ -194,15 +202,33 @@ router.post('/register/', upload, function (req, res) {
                                     user.generateApplicationNo(result1.length);
                                     password= user.generatePassword(result1.length);
 
+                                    
+                                    // password hashing
                                     hashedPassword = bcrypt.hash(password.toString(), 10).then(hashedPassword => {
                                         console.log('Hashed password: ' + hashedPassword +password)
                                         user.password=hashedPassword;
+                                        
                                         user.save();
+
+                                        // creating text message
+                                        if(user.phone){
+                                            //merging country code and phone number
+                                            phone=user.countryCode+user.phone;
+                                            client.messages.create({
+                                                from: process.env.TWILIO_PHONE_NUMBER,
+                                                to: phone,
+                                                body: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} at Muthoot Institute of Technology and Science\nYour application number: ${user.applicationNo}\nPassword: ${password}
+                                                \n`
+                                            }).then((message) => console.log(message.sid)).catch(err => {
+                                                console.log(err)
+                                            });
+                                        }
                                       }).catch(err => {
                                         res.json({
                                             status: 'FAILED',
                                             message: 'An error occurred while storing the user'
                                         })
+                                        console.log(err)
                                     });
                                     
                                 }).catch(err => {
@@ -211,6 +237,7 @@ router.post('/register/', upload, function (req, res) {
                                         status: "FAILED",
                                         message: "An error occurred while checking for existance of user"
                                     })
+                                    console.log(err)
                                 });
 							}
 						});
