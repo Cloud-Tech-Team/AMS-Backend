@@ -12,7 +12,7 @@ const UserSchema = new Schema({
       course:{
         type:String,
         enum:{
-          values:['MTech','Btech'],
+          values:['MTech','BTech'],
           message:"Invalid course"
         },
       },
@@ -55,6 +55,9 @@ const UserSchema = new Schema({
             message:"Invalid Aadhar Number"
         },
       },
+      countryCode:{
+        type:String
+      },
       phone:     
       {
         type:Number,
@@ -83,8 +86,7 @@ const UserSchema = new Schema({
     
       password:
       {
-          type: String,	// stores hash
-          // required:['This field is required']
+          type: String,	
       },
       nationality:String,
       motherTongue:String,
@@ -194,38 +196,38 @@ const UserSchema = new Schema({
       },
       type:String
       },
-      // bp2:
-      // {
-      //     enum: {
-      //         values: ['CSE', 'ECE','EEE','CE','ME'],
-      //         message:'Invalid Branch'
-      //   },
-      //   type:String
-      // },
-      // bp3:
-      // {
-      //     enum: {
-      //         values: ['CSE', 'ECE','EEE','CE','ME'],
-      //         message:'Invalid Branch'
-      //   },
-      //   type:String
-      // },
-      // bp4:
-      // {
-      //     enum: {
-      //         values: ['CSE', 'ECE','EEE','CE','ME'],
-      //         message:'Invalid Branch'
-      //   },
-      //   type:String
-      // },
-      // bp5:
-      // {
-      //     enum: {
-      //         values: ['CSE', 'ECE','EEE','CE','ME'],
-      //         message:'Invalid Branch'
-      //   },
-      //   type:String
-      // },
+      bp2:
+      {
+          enum: {
+              values: ['CSE', 'ECE','EEE','CE','ME'],
+              message:'Invalid Branch'
+        },
+        type:String
+      },
+      bp3:
+      {
+          enum: {
+              values: ['CSE', 'ECE','EEE','CE','ME'],
+              message:'Invalid Branch'
+        },
+        type:String
+      },
+      bp4:
+      {
+          enum: {
+              values: ['CSE', 'ECE','EEE','CE','ME'],
+              message:'Invalid Branch'
+        },
+        type:String
+      },
+      bp5:
+      {
+          enum: {
+              values: ['CSE', 'ECE','EEE','CE','ME'],
+              message:'Invalid Branch'
+        },
+        type:String
+      },
       busFacility:{
         type:Boolean
       },
@@ -304,7 +306,7 @@ const User = mongoose.model('NRI', UserSchema)
 module.exports = User
 
 
-//course
+// course
 // fname
 // mName
 // lName
@@ -359,4 +361,5 @@ module.exports = User
 // mathsMaxMarks
 // imgPhotograph
 // imgSign
-//quota
+// quota
+// countryCode
