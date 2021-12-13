@@ -25,6 +25,11 @@ var client = require('twilio')(
     process.env.TWILIO_AUTH_TOKEN
   );
 
+//Email
+const sgMail = require('@sendgrid/mail')
+require('dotenv').config();
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+
 
 require('./../config/cloudinary')
 const upload = require('./../handler/multer')
@@ -34,7 +39,7 @@ const upload = require('./../handler/multer')
 
 const User = require('../models/User')
 const Auth = require('../controllers/auth')
-const Password = require('../controllers/password') 
+const Password = require('../controllers/password')
 
 
 const bcrypt = require('bcrypt')
@@ -147,7 +152,7 @@ router.post('/register/', upload, function (req, res) {
     // gender = gender.toString().trim();
 
 
-    
+
     if (fName == "" || lName == "" || email == "" || dob == "" || gender == "" || quota == "") {
         res.json({
             status: "FAILED",
@@ -190,24 +195,24 @@ router.post('/register/', upload, function (req, res) {
 						user.save(function (err) {
 							if (err) {
 								res.json({
-									error_message: /:(.+)/.exec(err.message)[1], 
+									error_message: /:(.+)/.exec(err.message)[1],
 									status: "Failed" });
 
 							} else {
 								res.json({
 									status: "SUCCESS",
 								});
-                                
+
                                 User.find({},function(err,result1){
                                     user.generateApplicationNo(result1.length);
                                     password= user.generatePassword(result1.length);
 
-                                    
+
                                     // password hashing
                                     hashedPassword = bcrypt.hash(password.toString(), 10).then(hashedPassword => {
                                         console.log('Hashed password: ' + hashedPassword +password)
                                         user.password=hashedPassword;
-                                        
+
                                         user.save();
 
                                         // creating text message
@@ -217,12 +222,30 @@ router.post('/register/', upload, function (req, res) {
                                             client.messages.create({
                                                 from: process.env.TWILIO_PHONE_NUMBER,
                                                 to: phone,
-                                                body: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} at Muthoot Institute of Technology and Science\nYour application number: ${user.applicationNo}\nPassword: ${password}
-                                                \n`
+                                                body: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} 20${user.academicYear} at Muthoot Institute of Technology and Science\nYour Registration Number: ${user.applicationNo}\nPassword: ${password}
+                                                \n Kindly login with the given credentials and complete the registration`
                                             }).then((message) => console.log(message.sid)).catch(err => {
                                                 console.log(err)
                                             });
                                         }
+                                      if(user.email){
+                                        const msg = {
+                                              to: user.email, // Change to your recipient
+                                              from: 'ams.mits23@gmail.com', // Change to your verified sender
+                                              subject: 'Registration Successful',
+                                              text: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} 20${user.academicYear} at Muthoot Institute of Technology and Science\nYour Registration Number: ${user.applicationNo}\nPassword: ${password}
+  \n`
+                                            }
+                                            sgMail
+                                              .send(msg)
+                                              .then((response) => {
+                                                console.log(response[0].statusCode)
+                                                console.log(response[0].headers)
+                                              })
+                                              .catch((error) => {
+                                                console.error(error)
+                                              })
+                                            }
                                       }).catch(err => {
                                         res.json({
                                             status: 'FAILED',
@@ -230,7 +253,7 @@ router.post('/register/', upload, function (req, res) {
                                         })
                                         console.log(err)
                                     });
-                                    
+
                                 }).catch(err => {
                                     console.log(err)
                                     res.json({
@@ -241,10 +264,10 @@ router.post('/register/', upload, function (req, res) {
                                 });
 							}
 						});
-					
-                
-                
-                
+
+
+
+
             }
         }).catch(err => {
             console.log(err)
@@ -253,7 +276,7 @@ router.post('/register/', upload, function (req, res) {
                 message: "An error occurred while checking for existance of user"
             })
         });
-        
+
     }
 
 
@@ -261,7 +284,7 @@ router.post('/register/', upload, function (req, res) {
 
 router.patch('/register/:id', upload, function (req, res) {
     let { firstName, middleName, lastName, email, age, aadhaar, phone, dob, gender } = req.body;
-  
+
 
     if (!(firstName && lastName && email && age && dob && gender && phone)) {
         res.json({
@@ -403,7 +426,7 @@ router.get('/application/:id', upload, function (req, res) {
 
 router.patch('/application/:id', upload, async function (req, res) {
 
-  
+
     //edit is clicked
     //adding url of photograph to body
     if (req.files.imgPhotograph) {
