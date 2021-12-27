@@ -180,7 +180,6 @@ router.post('/register/', upload, function (req, res) {
 					email: req.body.email,
 					age: req.body.age,
 					aadhaar: req.body.aadhaar,
-					countryCode:req.body.countryCode,
 					phone: req.body.phone,
 					dob: req.body.dob,
 					gender: req.body.gender,
