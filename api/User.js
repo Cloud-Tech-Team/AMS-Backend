@@ -134,19 +134,19 @@ router.get('/register/:id', upload, function (req, res) {
 });
 
 router.post('/register/', upload, function (req, res) {
-    let { quota,fName, mName, lName, email, age, aadhaar, phone, dob, gender, password } = req.body;
+    let { quota, firstName, middleName, lastName, email, age, aadhaar, phone, dob, gender, password } = req.body;
 	console.log(req.body);
     // quota = quota.toString().trim();
-    // fName = fName.toString().trim();
-    // mName = mName.toString().trim();
-    // lName = lName.toString().trim();
+    // firstName = firstName.toString().trim();
+    // middleName = middleName.toString().trim();
+    // lastName = lastName.toString().trim();
     // email = email.toString().trim();
     // aadhaar = aadhaar.toString().trim();
     // phone = phone.toString().trim();
    // dob = dob.toString().trim();
     // gender = gender.toString().trim();
 
-    if (fName == "" || lName == "" || email == "" || dob == "" || gender == "" || quota == "") {
+    if (firstName == "" || lastName == "" || email == "" || dob == "" || gender == "" || quota == "") {
         res.json({
             status: "FAILED",
             message: "Empty input field(s)"
@@ -174,9 +174,9 @@ router.post('/register/', upload, function (req, res) {
 				const user = new User({
 					quota:req.body.quota,
 					course:req.body.course,
-					firstName: req.body.fName,
-					middleName: req.body.mName,
-					lastName: req.body.lName,
+					firstName: req.body.firstName,
+					middleName: req.body.middleName,
+					lastName: req.body.lastName,
 					email: req.body.email,
 					age: req.body.age,
 					aadhaar: req.body.aadhaar,
@@ -202,6 +202,7 @@ router.post('/register/', upload, function (req, res) {
 							user.save(function (err) {
 								if (err) {
 									res.json({status: "FAILED"});
+									console.log(err);
 								} else {
 									res.json({status: "SUCCESS"});
 									if (user.phone) {
@@ -410,9 +411,9 @@ router.patch('/application/:id', upload, async function (req, res) {
                 a = req.body
                 const update = {
 
-                    firstName: a.fName || users.firstName || users.a,
-                    middleName: a.mName || users.middleName || users.a,
-                    lastName: a.lName || users.lastName || users.a,
+                    firstName: a.firstName || users.firstName || users.a,
+                    middleName: a.middleName || users.middleName || users.a,
+                    lastName: a.lastName || users.lastName || users.a,
                     email: a.email || users.email || users.a,
                     age: a.age || users.age || users.a,
                     aadhaar: a.aadhaar || users.aadhaar || users.a,
