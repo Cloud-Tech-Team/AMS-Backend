@@ -25,6 +25,11 @@ var client = require('twilio')(
     process.env.TWILIO_AUTH_TOKEN
   );
 
+//Email
+const sgMail = require('@sendgrid/mail')
+require('dotenv').config();
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+
 
 require('./../config/cloudinary')
 const upload = require('./../handler/multer')
@@ -34,7 +39,7 @@ const upload = require('./../handler/multer')
 
 const User = require('../models/User')
 const Auth = require('../controllers/auth')
-const Password = require('../controllers/password') 
+const Password = require('../controllers/password')
 
 
 const bcrypt = require('bcrypt')
@@ -241,7 +246,7 @@ router.post('/register/', upload, function (req, res) {
 
 router.patch('/register/:id', upload, function (req, res) {
     let { firstName, middleName, lastName, email, age, aadhaar, phone, dob, gender } = req.body;
-  
+
 
     if (!(firstName && lastName && email && age && dob && gender && phone)) {
         res.json({
@@ -383,7 +388,7 @@ router.get('/application/:id', upload, function (req, res) {
 
 router.patch('/application/:id', upload, async function (req, res) {
 
-  
+
     //edit is clicked
     //adding url of photograph to body
     if (req.files.imgPhotograph) {

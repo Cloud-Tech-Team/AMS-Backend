@@ -23,7 +23,7 @@ const UserSchema = new Schema({
         },
         type:String
       },
-      firstName:  
+      firstName:
         {
           type: String,
           required:['This field is required']
@@ -34,20 +34,20 @@ const UserSchema = new Schema({
           type: String,
           // required:['This field is required']
         },
-      email:       
+      email:
         {
           type: String,
           validate:{
             validator: value=> /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value)
           },
         },
-      age :    
+      age :
       {
         type:Number,
         min:16,
         max:90,
       },
-      aadhaar:   
+      aadhaar:
       {
         type: Number,
         validate: {
@@ -56,9 +56,11 @@ const UserSchema = new Schema({
         },
       },
       countryCode:{
-        type:String
+        type:String,
+        default: '+91',
+
       },
-      phone:     
+      phone:
       {
         type:Number,
         validate:{
@@ -75,7 +77,7 @@ const UserSchema = new Schema({
         }
       },
       dob:       Date,
-      gender: 
+      gender:
       {
         enum: {
             values: ['Male', 'Female','Others'],
@@ -83,10 +85,10 @@ const UserSchema = new Schema({
           },
         type:String
       },
-    
+
       password:
       {
-          type: String,	
+          type: String,
       },
       nationality:String,
       motherTongue:String,
@@ -110,7 +112,7 @@ const UserSchema = new Schema({
                 message:'Invalid pincode'
             }
         }
-        
+
       },
       permanentAddress:{
         addressL1:String,
@@ -124,7 +126,7 @@ const UserSchema = new Schema({
                 message:'Invalid pincode'
             }
         }
-        
+
       },
       fatherDetails: {
         name:String,
@@ -259,16 +261,28 @@ const UserSchema = new Schema({
       resetPasswordExpires: {
         type: Date,
         required: false
+      },
+      registrationTimeStamp : {
+        type:Date,
+        default: Date.now()
+      },
+      academicYear:{
+        type:String
       }
+
 });
 
 UserSchema.methods.generateApplicationNo = function(number) {
   quota=this.quota.toString().toUpperCase()[0];
   course=this.course.toString().toUpperCase().slice(0,2);
-  year=220000 //TODO:remove hard-coded year 
-  applicationNo=year+Number(number);
+  month=this.registrationTimeStamp.getMonth();
+  year = this.registrationTimeStamp.getFullYear().toString().slice(2,);
+  if(month > 9)
+    year++;
+  this.academicYear=year;
+  applicationNo=(year*10000)+Number(number);
   this.applicationNo=quota+course+applicationNo;
-  
+
 }
 
 UserSchema.methods.generatePassword = function(number) {
@@ -281,7 +295,7 @@ UserSchema.methods.generatePassword = function(number) {
   password=date+month+applicationNo;
   return password;
 }
-  
+
 UserSchema.methods.generatePasswordReset = function () {
   this.resetPasswordToken = crypto.randomBytes(20).toString('hex');
   this.resetPasswordExpires = Date.now() + 3600000; // expires in 1 hour
