@@ -139,21 +139,19 @@ router.get('/register/:id', upload, function (req, res) {
 });
 
 router.post('/register/', upload, function (req, res) {
-    let { quota,fName, mName, lName, email, age, aadhaar, phone, dob, gender, password } = req.body;
+    let { quota, firstName, middleName, lastName, email, age, aadhaar, phone, dob, gender, password } = req.body;
 	console.log(req.body);
     // quota = quota.toString().trim();
-    // fName = fName.toString().trim();
-    // mName = mName.toString().trim();
-    // lName = lName.toString().trim();
+    // firstName = firstName.toString().trim();
+    // middleName = middleName.toString().trim();
+    // lastName = lastName.toString().trim();
     // email = email.toString().trim();
     // aadhaar = aadhaar.toString().trim();
     // phone = phone.toString().trim();
    // dob = dob.toString().trim();
     // gender = gender.toString().trim();
 
-
-
-    if (fName == "" || lName == "" || email == "" || dob == "" || gender == "" || quota == "") {
+    if (firstName == "" || lastName == "" || email == "" || dob == "" || gender == "" || quota == "") {
         res.json({
             status: "FAILED",
             message: "Empty input field(s)"
@@ -169,6 +167,7 @@ router.post('/register/', upload, function (req, res) {
     else {
         User.find({ email }).then(result => {
             if (result.length) {
+				console.log('existing email: ' + result);
                 // A user already exists
                 res.json({
                     status: "FAILED",
@@ -177,109 +176,72 @@ router.post('/register/', upload, function (req, res) {
             }
             else
             {
-						const user = new User({
-							quota:req.body.quota,
-                            course:req.body.course,
-							firstName: req.body.fName,
-							middleName: req.body.mName,
-							lastName: req.body.lName,
-							email: req.body.email,
-							age: req.body.age,
-							aadhaar: req.body.aadhaar,
-                            countryCode:req.body.countryCode,
-							phone: req.body.phone,
-							dob: req.body.dob,
-							gender: req.body.gender,
+				const user = new User({
+					quota:req.body.quota,
+					course:req.body.course,
+					firstName: req.body.firstName,
+					middleName: req.body.middleName,
+					lastName: req.body.lastName,
+					email: req.body.email,
+					age: req.body.age,
+					aadhaar: req.body.aadhaar,
+					phone: req.body.phone,
+					dob: req.body.dob,
+					gender: req.body.gender,
+				});
+
+				User.find({}, function(err, result1) {	// Find total no of users to generate applicationNo
+					if (err) {
+						res.json({
+							status: "FAILED",
+							message: "Error generating application number"
 						});
-						console.log(user);
-						user.save(function (err) {
-							if (err) {
-								res.json({
-									error_message: /:(.+)/.exec(err.message)[1],
-									status: "Failed" });
+					} else {
+						user.generateApplicationNo(result1.length);
+						password = user.generatePassword(result1.length);
 
-							} else {
-								res.json({
-									status: "SUCCESS",
-								});
-
-                                User.find({},function(err,result1){
-                                    user.generateApplicationNo(result1.length);
-                                    password= user.generatePassword(result1.length);
-
-
-                                    // password hashing
-                                    hashedPassword = bcrypt.hash(password.toString(), 10).then(hashedPassword => {
-                                        console.log('Hashed password: ' + hashedPassword +password)
-                                        user.password=hashedPassword;
-
-                                        user.save();
-
-                                        // creating text message
-                                        if(user.phone){
-                                            //merging country code and phone number
-                                            phone=user.countryCode+user.phone;
-                                            client.messages.create({
-                                                from: process.env.TWILIO_PHONE_NUMBER,
-                                                to: phone,
-                                                body: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} 20${user.academicYear} at Muthoot Institute of Technology and Science\nYour Registration Number: ${user.applicationNo}\nPassword: ${password}
-                                                \n Kindly login with the given credentials and complete the registration`
-                                            }).then((message) => console.log(message.sid)).catch(err => {
-                                                console.log(err)
-                                            });
-                                        }
-                                      if(user.email){
-                                        const msg = {
-                                              to: user.email, // Change to your recipient
-                                              from: 'ams.mits23@gmail.com', // Change to your verified sender
-                                              subject: 'Registration Successful',
-                                              text: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} 20${user.academicYear} at Muthoot Institute of Technology and Science\nYour Registration Number: ${user.applicationNo}\nPassword: ${password}
-  \n`
-                                            }
-                                            sgMail
-                                              .send(msg)
-                                              .then((response) => {
-                                                console.log(response[0].statusCode)
-                                                console.log(response[0].headers)
-                                              })
-                                              .catch((error) => {
-                                                console.error(error)
-                                              })
-                                            }
-                                      }).catch(err => {
-                                        res.json({
-                                            status: 'FAILED',
-                                            message: 'An error occurred while storing the user'
-                                        })
-                                        console.log(err)
-                                    });
-
-                                }).catch(err => {
-                                    console.log(err)
-                                    res.json({
-                                        status: "FAILED",
-                                        message: "An error occurred while checking for existance of user"
-                                    })
-                                    console.log(err)
-                                });
-							}
+						hashedPassword = bcrypt.hash(password.toString(), 10).then(hashedPassword => {
+							console.log('Hashed password: ' + hashedPassword + password);
+							user.password = hashedPassword;
+							user.save(function (err) {
+								if (err) {
+									res.json({status: "FAILED"});
+									console.log(err);
+								} else {
+									res.json({status: "SUCCESS"});
+									if (user.phone) {
+										//merging country code and phone number
+										//phone=user.countryCode+user.phone;
+										phone = '+91' + user.phone;
+										client.messages.create({
+											from: process.env.TWILIO_PHONE_NUMBER,
+											to: phone,
+											body: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} at Muthoot Institute of Technology and Science\nYour application number: ${user.applicationNo}\nPassword: ${password}
+												\n`
+										}).then((message) => console.log(message.sid)).catch(err => {
+											console.log(err)
+										});
+									}
+								}
+							});
+						}).catch(err => {
+							res.json({
+								status: "FAILED",
+								message: "An error occurred while saving the user info"
+							})
+							console.log(err);
 						});
-
-
-
-
-            }
-        }).catch(err => {
-            console.log(err)
-            res.json({
-                status: "FAILED",
-                message: "An error occurred while checking for existance of user"
-            })
-        });
-
-    }
-
-
+					}
+				});
+			}
+		}).catch(err => {
+			console.log(err);
+			res.json({
+				status: "FAILED",
+				messsage: "An error occurred while checking for existance of user"
+			})
+		});
+	}
 });
 
 router.patch('/register/:id', upload, function (req, res) {
@@ -453,9 +415,9 @@ router.patch('/application/:id', upload, async function (req, res) {
                 a = req.body
                 const update = {
 
-                    firstName: a.fName || users.firstName || users.a,
-                    middleName: a.mName || users.middleName || users.a,
-                    lastName: a.lName || users.lastName || users.a,
+                    firstName: a.firstName || users.firstName || users.a,
+                    middleName: a.middleName || users.middleName || users.a,
+                    lastName: a.lastName || users.lastName || users.a,
                     email: a.email || users.email || users.a,
                     age: a.age || users.age || users.a,
                     aadhaar: a.aadhaar || users.aadhaar || users.a,
