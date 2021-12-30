@@ -9,16 +9,19 @@ exports.signup = async (req, res) => {
     // email = email;
 
     if (firstName == "" || email == "" || password == "") {
+		res.status(204);	// 204 No Content
         res.json({
             status: "FAILED",
             message: "Empty input field(s)"
         })
     } else if (password.length < 8) {
+		res.status(204);
         res.json({
             status: "FAILED",
             message: "Password is too short"
         })
     } else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+		res.status(400);
         res.json({
             status: "FAILED",
             message: "Invalid email"
@@ -28,6 +31,7 @@ exports.signup = async (req, res) => {
         User.find({ email }).then(result => {
             if (result.length) {
                 // A user already exists
+				res.status(409);	// 409 Conflict
                 res.json({
                     status: "FAILED",
                     message: "User with given email already exists"
@@ -42,17 +46,20 @@ exports.signup = async (req, res) => {
                     })
 
                     newUser.save().then(result => {
+						res.status(200);
                         res.json({
                             status: "SUCCESS",
                             message: "Signup Successful",
                         })
                     }).catch(err => {
+						res.status(500);
                         res.json({
                             status: "FAILED",
                             message: "An error occured while adding the user"
                         })
                     })
                 }).catch(err => {
+					res.status(500);
                     res.json({
                         status: "FAILED",
                         message: "An error occurred while hashing the password"
@@ -61,6 +68,7 @@ exports.signup = async (req, res) => {
             }
         }).catch(err => {
             console.log(err)
+			res.status(500);
             res.json({
                 status: "FAILED",
                 message: "An error occurred while checking for existance of user"
@@ -76,6 +84,7 @@ exports.login = async (req, res) => {
     console.log(req.body)
 
     if (applicationNo == "" || password == "") {
+		res.status(204);
         res.json({
             status: "FAILED",
             message: "Empty credentials entered"
@@ -90,6 +99,7 @@ exports.login = async (req, res) => {
                     console.log('correct password');
                     const token = user.generateJWT();
 
+					res.status(200);
                     res.json({
                         status: "SUCCESS",
                         message: "Sign-in successful",
@@ -98,12 +108,14 @@ exports.login = async (req, res) => {
                 } else {
 					console.log(password);
                     // Incorrect password
+					res.status(400);
                     res.json({
                         status: "FAILED",
                         message: "Incorrect password or application number"
                     })
                 }
             } else {	// invalid email
+				res.status(400);
                 res.json({
                     status: "FAILED",
                     message: "Incorrect password or mail"
@@ -114,8 +126,9 @@ exports.login = async (req, res) => {
 			console.log('could not find user ' + applicationNo)
             console.log(req.body)
             console.log(err.message)
+			res.status(500);
             res.json({
-        	status: "FAILED",
+				status: "FAILED",
                 message: "An error occured while checking for existance of user"
             })
         })

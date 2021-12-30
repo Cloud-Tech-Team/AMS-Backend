@@ -10,7 +10,7 @@ exports.recover = (req, res) => {
 	User.findOne({email: req.body.email})
 		.then(user => {
 			if (!user){
-				return res.status(401).json({message: 'Invalid email address: ' + req.body.email});
+				return res.status(400).json({message: 'Invalid email address: ' + req.body.email});
 			}
 
 			// Generate and set password reset token
@@ -31,8 +31,10 @@ exports.recover = (req, res) => {
 				};
 
 				sgMail.send(mailOptions, (error, result) => {
-					if (error)
-						return res.status(500).json({message: error.message});
+					if (error) {
+						res.status(500).json({message: error.message}); // probably should not send actual error
+						return;
+					}
 					console.log('sent password reset mail');
 					res.status(200).json({message: 'A password reset mail has been sent to ' + user.email});
 				});
@@ -66,7 +68,7 @@ exports.resetPassword = (req, res) => {
 
 			// Check if both password fields match (confirm password)
 			if (req.body.password != req.body.confirmPassword)
-				return res.status(401).json({message: 'Password fields do not match'});
+				return res.status(204).json({message: 'Password fields do not match'});
 
 			// Set the new password
 			console.log('new password: ' + req.body.password);
@@ -98,6 +100,7 @@ exports.resetPassword = (req, res) => {
 					});
 				});
 			}).catch(err => {
+				res.status(500);
 				res.json({
 					status: 'FAILED',
 					message: 'An error occurred while hashing the password'
