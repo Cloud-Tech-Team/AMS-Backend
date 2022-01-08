@@ -152,6 +152,7 @@ router.post('/register/', upload, function (req, res) {
     // gender = gender.toString().trim();
 
     if (firstName == "" || lastName == "" || email == "" || dob == "" || gender == "" || quota == "") {
+		res.status(204);	// 204 No content
         res.json({
             status: "FAILED",
             message: "Empty input field(s)"
@@ -159,6 +160,7 @@ router.post('/register/', upload, function (req, res) {
         console.log(req.body)
     }
     else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+		res.status(400);
         res.json({
             status: "FAILED",
             message: "Invalid email"
@@ -169,6 +171,7 @@ router.post('/register/', upload, function (req, res) {
             if (result.length) {
 				console.log('existing email: ' + result);
                 // A user already exists
+				res.status(409);	// 409 Conflict
                 res.json({
                     status: "FAILED",
                     message: "User with given email already exists"
@@ -192,6 +195,7 @@ router.post('/register/', upload, function (req, res) {
 
 				User.find({}, function(err, result1) {	// Find total no of users to generate applicationNo
 					if (err) {
+						res.status(500);	// 500 Internal Server Error
 						res.json({
 							status: "FAILED",
 							message: "Error generating application number"
@@ -199,15 +203,19 @@ router.post('/register/', upload, function (req, res) {
 					} else {
 						user.generateApplicationNo(result1.length);
 						password = user.generatePassword(result1.length);
+						console.log('AppNo: ' + user.applicationNo);
+						console.log('Password: ' + password);
 
 						hashedPassword = bcrypt.hash(password.toString(), 10).then(hashedPassword => {
 							console.log('Hashed password: ' + hashedPassword + password);
 							user.password = hashedPassword;
 							user.save(function (err) {
 								if (err) {
+									res.status(500);
 									res.json({status: "FAILED"});
 									console.log(err);
 								} else {
+									res.status(200);
 									res.json({status: "SUCCESS"});
 									if (user.phone) {
 										//merging country code and phone number
@@ -225,6 +233,7 @@ router.post('/register/', upload, function (req, res) {
 								}
 							});
 						}).catch(err => {
+							res.status(500);
 							res.json({
 								status: "FAILED",
 								message: "An error occurred while saving the user info"
@@ -236,6 +245,7 @@ router.post('/register/', upload, function (req, res) {
 			}
 		}).catch(err => {
 			console.log(err);
+			res.status(500);
 			res.json({
 				status: "FAILED",
 				messsage: "An error occurred while checking for existance of user"
@@ -249,6 +259,7 @@ router.patch('/register/:id', upload, function (req, res) {
 
 
     if (!(firstName && lastName && email && age && dob && gender && phone)) {
+		res.status(204);	// 204 No Content
         res.json({
             status: "FAILED",
             message: "Empty input field(s)"
@@ -262,8 +273,11 @@ router.patch('/register/:id', upload, function (req, res) {
             { $set: req.body }, { runValidators: true },
             function (err) {
                 if (err) {
-                    res.json({ error_message: /:(.+)/.exec(err.message)[1], status: "FAILED" });
+					res.status(500);
+                    res.json({ error_message: /:(.+)/.exec(err.message)[1], status: "Failed" });
+
                 } else {
+					res.status(200);
                     res.json({
                         status: "SUCCESS",
                     });
@@ -278,7 +292,7 @@ router.get('/application/:id', upload, function (req, res) {
     if (req.body.button == "", req.body.button == "save")
         User.findOne({ _id: req.params.id }, function (err, users) {
             if (!err) {
-
+				res.status(200);
                 res.send(users);
             } else {
                 res.send(err);
@@ -294,6 +308,7 @@ router.get('/application/:id', upload, function (req, res) {
                     a = users;
                     console.log(users)
                     if (!(nationality && motherTongue && bloodGroup && aPhone && annualIncome)) {
+						res.status(204);	// 204 No Content
                         res.json({
                             status: "FAILED",
                             message: "All fields are required"
