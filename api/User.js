@@ -230,6 +230,21 @@ router.post('/register/', upload, function (req, res) {
 											console.log(err)
 										});
 									}
+									if (user.email) {
+										const msg = {
+											to: user.email, // Change to your recipient
+											from: 'ams.mits23@gmail.com', // Change to your verified sender
+											subject: 'Registration Successful',
+											text: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} 20${user.academicYear} at Muthoot Institute of Technology and Science\nYour Registration Number: ${user.applicationNo}\nPassword: ${password}
+  \n`
+										}
+										sgMail.send(msg).then((response) => {
+												console.log(response[0].statusCode)
+												console.log(response[0].headers)
+											}) .catch((error) => {
+												console.error(error)
+											})
+									}
 								}
 							});
 						}).catch(err => {
