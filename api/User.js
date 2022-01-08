@@ -275,6 +275,7 @@ router.patch('/register/:id', upload, function (req, res) {
                 if (err) {
 					res.status(500);
                     res.json({ error_message: /:(.+)/.exec(err.message)[1], status: "Failed" });
+
                 } else {
 					res.status(200);
                     res.json({
@@ -505,7 +506,7 @@ router.patch('/application/:id', upload, async function (req, res) {
                     { $set: update }, { runValidators: true },
                     function (err) {
                         if (err) {
-                            res.json({ error_message: /:(.+)/.exec(err.message)[1], status: "Failed" });
+                            res.json({ error_message: /:(.+)/.exec(err.message)[1], status: "FAILED" });
                         } else {
                             res.json({
                                 status: "SUCCESS ",
