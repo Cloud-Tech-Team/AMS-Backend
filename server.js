@@ -5,6 +5,12 @@ const app = express()
 const port = process.env.PORT || 3000
 const path = require('path');
 
+//cors policy
+const cors=require('cors');
+
+app.use(cors());
+app.options('*',cors());
+
 const bodyParser = require('body-parser')
 const UserRouter = require('./api/User')
 
