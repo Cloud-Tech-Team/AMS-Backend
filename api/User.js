@@ -45,7 +45,7 @@ const Password = require('../controllers/password')
 const bcrypt = require('bcrypt')
 
 
-router.post('/signup', Auth.signup);
+// router.post('/signup', Auth.signup);
 
 router.post('/login', upload, Auth.login);
 
@@ -113,32 +113,8 @@ router.patch('/password_change', function (req, res) {
     });
 })
 
-router.get('/register', upload, function (req, res) {
-    User.find(function (err, users) {
-        if (!err) {
 
-            res.send(users);
-        } else {
-            res.send(err);
-        }
-
-    });
-});
-
-router.get('/register/:id', upload, function (req, res) {
-    User.findOne({ _id: req.params.id }, function (err, users) {
-        if (!err) {
-
-            res.send(users);
-        } else {
-            // console.log("ahaa kollaalo");
-            res.send(err);
-        }
-
-    });
-});
-
-router.post('/register/', upload, function (req, res) {
+router.post('/register', upload, function (req, res) {
     let { quota, firstName, middleName, lastName, email, age, aadhaar, phone, dob, gender, password } = req.body;
 	console.log(req.body);
     // quota = quota.toString().trim();
@@ -224,7 +200,7 @@ router.post('/register/', upload, function (req, res) {
 										client.messages.create({
 											from: process.env.TWILIO_PHONE_NUMBER,
 											to: phone,
-											body: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} at Muthoot Institute of Technology and Science\nYour application number: ${user.applicationNo}\nPassword: ${password}
+											body: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} 20${user.academicYear} at Muthoot Institute of Technology and Science\nYour application number: ${user.applicationNo}\nPassword: ${password}.\n\nPlease login and complete the application.\n\nTeam MITS
 												\n`
 										}).then((message) => console.log(message.sid)).catch(err => {
 											console.log(err)
@@ -235,7 +211,7 @@ router.post('/register/', upload, function (req, res) {
 											to: user.email, // Change to your recipient
 											from: 'ams.mits23@gmail.com', // Change to your verified sender
 											subject: 'Registration Successful',
-											text: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} 20${user.academicYear} at Muthoot Institute of Technology and Science\nYour Registration Number: ${user.applicationNo}\nPassword: ${password}
+											text: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} 20${user.academicYear} at Muthoot Institute of Technology and Science\nYour Registration Number: ${user.applicationNo}\nPassword: ${password}.\n\nPlease login and complete the application.\n\nTeam MITS
   \n`
 										}
 										sgMail.send(msg).then((response) => {
