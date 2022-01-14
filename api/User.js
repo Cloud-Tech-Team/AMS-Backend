@@ -200,7 +200,7 @@ router.post('/register', upload, function (req, res) {
 										client.messages.create({
 											from: process.env.TWILIO_PHONE_NUMBER,
 											to: phone,
-											body: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} at Muthoot Institute of Technology and Science\nYour application number: ${user.applicationNo}\nPassword: ${password}.\n\nPlease login and complete the application.\n\nTeam MITS
+											body: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} 20${user.academicYear} at Muthoot Institute of Technology and Science\nYour application number: ${user.applicationNo}\nPassword: ${password}.\n\nPlease login and complete the application.\n\nTeam MITS
 												\n`
 										}).then((message) => console.log(message.sid)).catch(err => {
 											console.log(err)
