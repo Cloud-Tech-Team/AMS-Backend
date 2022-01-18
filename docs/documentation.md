@@ -8,9 +8,26 @@
 |course		| ['MTech', 'BTech']|
 |firstName	| String	|
 |middleName	| String	|
+|lastName	| String	|
 |email		| String	|
 |age		| Number	|
 |aadhar		| Number	|
 |phone		| Number	|
 |dob		| Date (YYMMDD)|
 |gender		| ['Male', 'Female', 'Others']|
+
+### /user/application/:applicationNo (Accepts form-data)
+|Fields     |Data Type  |
+|-----------|-----------|
+|-----------|-----------|
+|aPhone 	| Number	|
+|bloodGroup	| ['O+','O-','A+','A-','B+','B-','AB+','AB-']|
+|contactAddress | Object |
+|-----------|-----------|
+|addressL1  | String    |
+|district   | String    |
+|city       | String    |
+|state      | String    |
+|pincode    | Number    |
+
+
