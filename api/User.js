@@ -44,7 +44,8 @@ const Password = require('../controllers/password')
 
 const bcrypt = require('bcrypt')
 
-
+//verify jwt  
+const verifyToken = require('../middleware/verifyToken');
 // router.post('/signup', Auth.signup);
 
 router.post('/login', upload, Auth.login);
@@ -59,7 +60,7 @@ router.patch('/password_change', function (req, res) {
     let { currentPassword, newPassword, token, id } = req.body;
 
 	// Verify the token
-	jwt.verify(token, 'secret_key', function (err, decoded) {
+	jwt.verify(token, process.env.JWT_SECRET_KEY, function (err, decoded) {
 		if (!err) {
 			console.log('token verified');
 			// Find user by id
@@ -275,12 +276,12 @@ router.post('/register', upload, function (req, res) {
 // });
 
 
-router.get('/application/:id', upload, function (req, res) {
+router.get('/application/:id', verifyToken, upload, function (req, res) {
     if (req.body.button == "", req.body.button == "save")
-        User.findOne({ _id: req.params.id }, function (err, users) {
+        User.findOne({ _id: req.params.id }, function (err, user) {
             if (!err) {
 				res.status(200);
-                res.send(users);
+                res.send(user);
             } else {
                 res.send(err);
             }
@@ -388,7 +389,7 @@ router.get('/application/:id', upload, function (req, res) {
 
 });
 
-router.patch('/application/:id', upload, async function (req, res) {
+router.patch('/application/:id', verifyToken, upload, async function (req, res) {
 
 
     //edit is clicked
