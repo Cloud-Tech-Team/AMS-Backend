@@ -22,8 +22,7 @@
 |-----------|-----------|
 |aPhone 	| Number	|
 |bloodGroup	| ['O+','O-','A+','A-','B+','B-','AB+','AB-']|
-|contactAddress | Object |
-|-----------|-----------|
+|contactAddress         |
 |addressL1  | String    |
 |district   | String    |
 |city       | String    |
