@@ -241,38 +241,38 @@ router.post('/register', upload, function (req, res) {
 	}
 });
 
-router.patch('/register/:id', upload, function (req, res) {
-    let { firstName, middleName, lastName, email, age, aadhaar, phone, dob, gender } = req.body;
+// router.patch('/register/:id', upload, function (req, res) {
+//     let { firstName, middleName, lastName, email, age, aadhaar, phone, dob, gender } = req.body;
 
 
-    if (!(firstName && lastName && email && age && dob && gender && phone)) {
-		res.status(204);	// 204 No Content
-        res.json({
-            status: "FAILED",
-            message: "Empty input field(s)"
-        })
-        //console.log(req.body)
-    }
-    else {
+//     if (!(firstName && lastName && email && age && dob && gender && phone)) {
+// 		res.status(204);	// 204 No Content
+//         res.json({
+//             status: "FAILED",
+//             message: "Empty input field(s)"
+//         })
+//         //console.log(req.body)
+//     }
+//     else {
 
-        User.updateOne(
-            { _id: req.params.id },
-            { $set: req.body }, { runValidators: true },
-            function (err) {
-                if (err) {
-					res.status(500);
-                    res.json({ error_message: /:(.+)/.exec(err.message)[1], status: "Failed" });
+//         User.updateOne(
+//             { _id: req.params.id },
+//             { $set: req.body }, { runValidators: true },
+//             function (err) {
+//                 if (err) {
+// 					res.status(500);
+//                     res.json({ error_message: /:(.+)/.exec(err.message)[1], status: "Failed" });
 
-                } else {
-					res.status(200);
-                    res.json({
-                        status: "SUCCESS",
-                    });
-                }
-            });
-    }
+//                 } else {
+// 					res.status(200);
+//                     res.json({
+//                         status: "SUCCESS",
+//                     });
+//                 }
+//             });
+//     }
 
-});
+// });
 
 
 router.get('/application/:id', upload, function (req, res) {
@@ -393,21 +393,31 @@ router.patch('/application/:id', upload, async function (req, res) {
 
     //edit is clicked
     //adding url of photograph to body
-    if (req.files.imgPhotograph) {
-        console.log('img1 uploaded\n')
-        const file64 = formatBufferTo64(req.files.imgPhotograph[0]);
+    if (req.files.filePhotograph) {
+        const file64 = formatBufferTo64(req.files.filePhotograph[0]);
         const uploadResult = await cloudinaryUpload(file64.content);
-        req.body.imgPhotograph = uploadResult.secure_url;
+        req.body.filePhotograph = uploadResult.secure_url;
+        if(req.body.filePhotograph!=null)
+            console.log('Photograph uploaded\n');
     }
     //adding url of sign to body
-    if (req.files.imgSign) {
-        console.log('img2 uploaded\n')
-        const file64 = formatBufferTo64(req.files.imgSign[0]);
+    if (req.files.fileSign) {
+        const file64 = formatBufferTo64(req.files.fileSign[0]);
         const uploadResult = await cloudinaryUpload(file64.content);
-        req.body.imgSign = uploadResult.secure_url;
+        req.body.fileSign = uploadResult.secure_url;
+        if(req.body.fileSign!=null)
+            console.log('Signature uploaded\n');
+    }
+
+    if(req.files.fileTransactionID){
+        const file64 = formatBufferTo64(req.files.fileTransactionID[0]);
+        const uploadResult = await cloudinaryUpload(file64.content);
+        req.body.fileTransactionID = uploadResult.secure_url;
+        if(req.body.fileTransactionID!=null)
+            console.log('Transaction File uploaded\n')
     }
     // console.log(req.files)
-    User.findOne({ _id: req.params.id }, function (err, users) {
+    User.findOne({ applicationNo: req.params.id }, function (err, users) {
         if (!err) {
 
             if (req.body.c_p) {
@@ -420,27 +430,21 @@ router.patch('/application/:id', upload, async function (req, res) {
                     firstName: a.firstName || users.firstName || users.a,
                     middleName: a.middleName || users.middleName || users.a,
                     lastName: a.lastName || users.lastName || users.a,
-                    email: a.email || users.email || users.a,
-                    age: a.age || users.age || users.a,
                     aadhaar: a.aadhaar || users.aadhaar || users.a,
-                    phone: a.phone || users.phone || users.a,
                     aPhone: a.aPhone || users.aPhone || users.a,
-                    dob: a.dob || users.dob || users.a,
-                    gender: a.gender || users.gender || users.a,
-                    password: a.password || users.password || users.a,
                     nationality: a.nationality || users.nationality || users.a,
                     motherTongue: a.motherTongue || users.motherTongue || users.a,
                     bloodGroup: a.bloodGroup || users.bloodGroup || users.a,
                     contactAddress: {
                         addressL1: a.addressL1C || users.contactAddress.addressL1 || users.a,
-                        addressL2: a.addressL2C || users.contactAddress.addressL2 || users.a,
+                        district: a.districtC || users.contactAddress.district || users.a,
                         city: a.cityC || users.contactAddress.city || users.a,
                         state: a.stateC || users.contactAddress.state || users.a,
                         pincode: a.pincodeC || users.contactAddress.pincode || users.a
                     },
                     permanentAddress: {
                         addressL1: a.addressL1P || users.permanentAddress.addressL1 || users.a,
-                        addressL2: a.addressL2P || users.permanentAddress.addressL2 || users.a,
+                        district: a.districtP || users.permanentAddress.district || users.a,
                         city: a.cityP || users.permanentAddress.city || users.a,
                         state: a.stateP || users.permanentAddress.state || users.a,
                         pincode: a.pincodeP || users.permanentAddress.pincode || users.a
@@ -485,15 +489,17 @@ router.patch('/application/:id', upload, async function (req, res) {
                         mathsMarkObtained: a.mathsMarkObtained || users.mathsMarkObtained || users.a,
                         mathsMaxMarks: a.mathsMaxMarks || users.mathsMaxMarks || users.a
                     },
-                    imgPhotograph: a.imgPhotograph || users.imgPhotograph || users.a,
-                    imgSign: a.imgSign || users.imgSign || users.a
+                    filePhotograph: a.filePhotograph || users.filePhotograph || users.a,
+                    fileSign: a.fileSign || users.fileSign || users.a,
+                    transactionID:a.transactionID ||users.transactionID ||users.a,
+                    fileTransactionID:a.fileTransactionID || users.fileTransactionID || users.a
                 }
                 User.updateOne(
-                    { _id: req.params.id },
+                    { applicationNo : req.params.id },
                     { $set: update }, { runValidators: true },
                     function (err) {
                         if (err) {
-                            res.json({ error_message: /:(.+)/.exec(err.message)[1], status: "FAILED" });
+                            res.json({ error_message: err.message, status: "FAILED" });
                         } else {
                             res.json({
                                 status: "SUCCESS ",
