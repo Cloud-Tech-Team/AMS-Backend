@@ -102,7 +102,7 @@ const UserSchema = new Schema({
       },
       contactAddress:{
         addressL1:String,
-        addressL2:String,
+        district:String,
         city:String,
         state:String,
         pincode:{
@@ -116,7 +116,7 @@ const UserSchema = new Schema({
       },
       permanentAddress:{
         addressL1:String,
-        addressL2:String,
+        district:String,
         city:String,
         state:String,
         pincode:{
@@ -267,6 +267,9 @@ const UserSchema = new Schema({
         default: Date.now()
       },
       academicYear:{
+        type:String
+      },
+      transactionID:{
         type:String
       }
 
