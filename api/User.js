@@ -393,18 +393,28 @@ router.patch('/application/:id', upload, async function (req, res) {
 
     //edit is clicked
     //adding url of photograph to body
-    if (req.files.imgPhotograph) {
-        console.log('img1 uploaded\n')
-        const file64 = formatBufferTo64(req.files.imgPhotograph[0]);
+    if (req.files.filePhotograph) {
+        const file64 = formatBufferTo64(req.files.filePhotograph[0]);
         const uploadResult = await cloudinaryUpload(file64.content);
-        req.body.imgPhotograph = uploadResult.secure_url;
+        req.body.filePhotograph = uploadResult.secure_url;
+        if(req.body.filePhotograph!=null)
+            console.log('Photograph uploaded\n');
     }
     //adding url of sign to body
-    if (req.files.imgSign) {
-        console.log('img2 uploaded\n')
-        const file64 = formatBufferTo64(req.files.imgSign[0]);
+    if (req.files.fileSign) {
+        const file64 = formatBufferTo64(req.files.fileSign[0]);
         const uploadResult = await cloudinaryUpload(file64.content);
-        req.body.imgSign = uploadResult.secure_url;
+        req.body.fileSign = uploadResult.secure_url;
+        if(req.body.fileSign!=null)
+            console.log('Signature uploaded\n');
+    }
+
+    if(req.files.fileTransactionID){
+        const file64 = formatBufferTo64(req.files.fileTransactionID[0]);
+        const uploadResult = await cloudinaryUpload(file64.content);
+        req.body.fileTransactionID = uploadResult.secure_url;
+        if(req.body.fileTransactionID!=null)
+            console.log('Transaction File uploaded\n')
     }
     // console.log(req.files)
     User.findOne({ applicationNo: req.params.id }, function (err, users) {
@@ -479,9 +489,10 @@ router.patch('/application/:id', upload, async function (req, res) {
                         mathsMarkObtained: a.mathsMarkObtained || users.mathsMarkObtained || users.a,
                         mathsMaxMarks: a.mathsMaxMarks || users.mathsMaxMarks || users.a
                     },
-                    imgPhotograph: a.imgPhotograph || users.imgPhotograph || users.a,
-                    imgSign: a.imgSign || users.imgSign || users.a,
-                    transactionID:a.transactionID ||users.transactionID ||users.a
+                    filePhotograph: a.filePhotograph || users.filePhotograph || users.a,
+                    fileSign: a.fileSign || users.fileSign || users.a,
+                    transactionID:a.transactionID ||users.transactionID ||users.a,
+                    fileTransactionID:a.fileTransactionID || users.fileTransactionID || users.a
                 }
                 User.updateOne(
                     { applicationNo : req.params.id },

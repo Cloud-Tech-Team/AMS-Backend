@@ -245,10 +245,13 @@ const UserSchema = new Schema({
         mathsMarkObtained:Number,
         mathsMaxMarks:Number
       },
-      imgPhotograph:{
+      filePhotograph:{
         type:String
       },
       imgSign:{
+        type:String
+      },
+      fileTransactionID:{
         type:String
       },
 
