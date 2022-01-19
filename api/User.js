@@ -52,10 +52,6 @@ router.post('/login', upload, Auth.login);
 
 router.post('/recover', Password.recover);
 
-router.get('/reset/:token', Password.reset);
-
-router.post('/reset/:token', Password.resetPassword);
-
 router.patch('/password_change', function (req, res) {
     let { currentPassword, newPassword, token, id } = req.body;
 
@@ -184,60 +180,51 @@ router.post('/register', upload, function (req, res) {
 					console.log('AppNo: ' + user.applicationNo);
 					console.log('Password: ' + password);
 
-					hashedPassword = bcrypt.hash(password.toString(), 10).then(hashedPassword => {
-						console.log('Hashed password: ' + hashedPassword + password);
-						user.password = hashedPassword;
-						user.save(function (err) {
-							if (err) {
-								console.log('error saving user');
-								res.status(500);
-								res.json({status: "FAILED"});
-								console.log(err);
-							} else {
-								console.log('saved user successfully');
-								res.status(200);
-								res.json({status: "SUCCESS"});
-								if (user.phone) {
-									//merging country code and phone number
-									//phone=user.countryCode+user.phone;
-									phone = '+91' + user.phone;
-									client.messages.create({
-										from: process.env.TWILIO_PHONE_NUMBER,
-										to: phone,
-										body: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} 20${user.academicYear} at Muthoot Institute of Technology and Science\nYour application number: ${user.applicationNo}\nPassword: ${password}.\n\nPlease login and complete the application.\n\nTeam MITS
+					user.password = password;							// store plaintext password :/
+					user.save(function (err) {
+						if (err) {
+							console.log('error saving user');
+							res.status(500);
+							res.json({status: "FAILED"});
+							console.log(err);
+						} else {
+							console.log('saved user successfully');
+							res.status(200);
+							res.json({status: "SUCCESS"});
+							if (user.phone) {
+								//merging country code and phone number
+								//phone=user.countryCode+user.phone;
+								phone = '+91' + user.phone;
+								client.messages.create({
+									from: process.env.TWILIO_PHONE_NUMBER,
+									to: phone,
+									body: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} 20${user.academicYear} at Muthoot Institute of Technology and Science\nYour application number: ${user.applicationNo}\nPassword: ${password}.\n\nPlease login and complete the application.\n\nTeam MITS
 												\n`
-									}).then((message) => console.log(message.sid)).catch(err => {
-										console.log(err)
-									});
-								}
-								if (user.email) {
-									const msg = {
-										to: user.email, // Change to your recipient
-										from: 'ams.mits23@gmail.com', // Change to your verified sender
-										subject: 'Registration Successful',
-										text: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} 20${user.academicYear} at Muthoot Institute of Technology and Science\nYour Registration Number: ${user.applicationNo}\nPassword: ${password}.\n\nPlease login and complete the application.\n\nTeam MITS
-  \n`
-									}
-									sgMail.send(msg).then((response) => {
-										console.log(response[0].statusCode)
-										console.log(response[0].headers)
-									}) .catch((error) => {
-										console.error(error)
-									})
-								}
+								}).then((message) => console.log(message.sid)).catch(err => {
+									console.log(err)
+								});
 							}
-						});
-					}).catch(err => {
-						console.log('error hashing password');
-						res.status(500);
-						res.json({
-							status: "FAILED",
-							message: "An error occurred while saving the user info"
-						})
-						console.log(err);
+							if (user.email) {
+								const msg = {
+									to: user.email, // Change to your recipient
+									from: 'ams.mits23@gmail.com', // Change to your verified sender
+									subject: 'Registration Successful',
+									text: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} 20${user.academicYear} at Muthoot Institute of Technology and Science\nYour Registration Number: ${user.applicationNo}\nPassword: ${password}.\n\nPlease login and complete the application.\n\nTeam MITS
+  \n`
+								}
+								sgMail.send(msg).then((response) => {
+									console.log(response[0].statusCode)
+									console.log(response[0].headers)
+								}) .catch((error) => {
+									console.error(error)
+								})
+							}
+						}
 					});
 				}
 			});
+		}).catch(err => {
+			console.log('error searching for user in db');
 		});
 	}
 });

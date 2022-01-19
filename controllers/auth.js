@@ -120,7 +120,6 @@ exports.login = async (req, res) => {
                     status: "FAILED",
                     message: "Incorrect password or mail"
                 })
-                console.log(err.message)
             }
         }).catch(err => {
 			console.log('could not find user ' + applicationNo)
