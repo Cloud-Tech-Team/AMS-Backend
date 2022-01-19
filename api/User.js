@@ -44,7 +44,11 @@ const Password = require('../controllers/password')
 
 const bcrypt = require('bcrypt')
 
+<<<<<<< HEAD
 //verify jwt
+=======
+//verify jwt  
+>>>>>>> ba0fa5bcf29029702ddcc0e8a9fc4a026c7e9cc4
 const verifyToken = require('../middleware/verifyToken');
 // router.post('/signup', Auth.signup);
 
@@ -418,7 +422,11 @@ router.patch('/application/:id', verifyToken, upload, async function (req, res) 
             console.log('Transaction File uploaded\n')
     }
     // console.log(req.files)
+<<<<<<< HEAD
     User.findOne({ _id: req.params.id }, function (err, users) {
+=======
+    User.findOne({ applicationNo: req.params.id }, function (err, users) {
+>>>>>>> ba0fa5bcf29029702ddcc0e8a9fc4a026c7e9cc4
         if (!err) {
 
             if (req.body.c_p) {
@@ -496,7 +504,11 @@ router.patch('/application/:id', verifyToken, upload, async function (req, res) 
                     fileTransactionID:a.fileTransactionID || users.fileTransactionID || users.a
                 }
                 User.updateOne(
+<<<<<<< HEAD
                     { _id : req.params.id },
+=======
+                    { applicationNo : req.params.id },
+>>>>>>> ba0fa5bcf29029702ddcc0e8a9fc4a026c7e9cc4
                     { $set: update }, { runValidators: true },
                     function (err) {
                         if (err) {
