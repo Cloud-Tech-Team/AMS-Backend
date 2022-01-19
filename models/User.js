@@ -255,16 +255,6 @@ const UserSchema = new Schema({
         type:String
       },
 
-      // Password reset tokens
-      resetPasswordToken: {
-        type: String,
-        required: false
-      },
-
-      resetPasswordExpires: {
-        type: Date,
-        required: false
-      },
       registrationTimeStamp : {
         type:Date,
         default: Date.now()
@@ -301,11 +291,6 @@ UserSchema.methods.generatePassword = function(number) {
   password=date+month+applicationNo;
   return password;
 }
-
-UserSchema.methods.generatePasswordReset = function () {
-  this.resetPasswordToken = crypto.randomBytes(20).toString('hex');
-  this.resetPasswordExpires = Date.now() + 3600000; // expires in 1 hour
-};
 
 UserSchema.methods.comparePassword = function(password) {
 	return password == this.password;		// storing plaintext password. rip

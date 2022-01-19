@@ -52,10 +52,6 @@ router.post('/login', upload, Auth.login);
 
 router.post('/recover', Password.recover);
 
-router.get('/reset/:token', Password.reset);
-
-router.post('/reset/:token', Password.resetPassword);
-
 router.patch('/password_change', function (req, res) {
     let { currentPassword, newPassword, token, id } = req.body;
 
