@@ -44,7 +44,7 @@ const Password = require('../controllers/password')
 
 const bcrypt = require('bcrypt')
 
-//verify jwt  
+//verify jwt
 const verifyToken = require('../middleware/verifyToken');
 // router.post('/signup', Auth.signup);
 
@@ -278,7 +278,7 @@ router.post('/register', upload, function (req, res) {
 
 router.get('/application/:id', verifyToken, upload, function (req, res) {
     if (req.body.button == "", req.body.button == "save")
-        User.findOne({ _id: req.params.id }, function (err, user) {
+        User.findOne({ applicationNo: req.params.id }, function (err, user) {
             if (!err) {
 				res.status(200);
                 res.send(user);
@@ -288,7 +288,7 @@ router.get('/application/:id', verifyToken, upload, function (req, res) {
 
         });
     else if (req.body.button == "submit") {
-        User.findOne({ _id: req.params.id }, function (err, users) {
+        User.findOne({ applicationNo: req.params.id }, function (err, users) {
             if (!err) {
                 {
                     let {
@@ -496,7 +496,7 @@ router.patch('/application/:id', verifyToken, upload, async function (req, res) 
                     fileTransactionID:a.fileTransactionID || users.fileTransactionID || users.a
                 }
                 User.updateOne(
-                    { applicationNo : req.params.id },
+                    { applicationNo: req.params.id },
                     { $set: update }, { runValidators: true },
                     function (err) {
                         if (err) {
