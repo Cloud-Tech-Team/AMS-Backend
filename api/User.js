@@ -142,7 +142,7 @@ router.post('/register', upload, function (req, res) {
     else {
 		User.find({email}, function (err, result) {
 			for (var i = 0; i < result.length; ++i) {
-				if (result[i].quota == quota) {
+				if (result[i].quota == quota && result[i].course == req.body.course) {
 					console.log(result[i].email + ' ' + result[i].quota);
 					res.status(409);
 					return res.json({
