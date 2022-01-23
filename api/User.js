@@ -10,6 +10,9 @@ const path = require('path')
 // For JWT token
 const jwt = require('jsonwebtoken')
 
+// For validating date input
+const moment = require('moment')
+
 //uploading files
 const DatauriParser = require('datauri/parser');
 const parser = new DatauriParser();
@@ -150,6 +153,14 @@ router.post('/register', upload, function (req, res) {
 						message: 'User has already registered for ' + quota + ' quota'
 					});
 				}
+			}
+
+			if (moment(req.body.dob, 'YYYY-MM-DD', true).isValid() == false) {
+				res.status(400);
+				return res.json({
+					status: 'FAILED',
+					message: 'Invalid date of birth'
+				});
 			}
 
 			const user = new User({
