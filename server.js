@@ -8,8 +8,15 @@ const path = require('path');
 //cors policy
 const cors=require('cors');
 
-app.use(cors());
-app.options('*',cors());
+var options = {
+    "origin": "*",
+    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+    // "preflightContinue": false,
+    // "optionsSuccessStatus": 204
+  }
+
+app.use(cors(options));
+// app.options('*',cors());
 
 const bodyParser = require('body-parser')
 const UserRouter = require('./api/User')
