@@ -13,7 +13,7 @@
 |age		| Number	|
 |aadhar		| Number	|
 |phone		| Number	|
-|dob		| Date (YYMMDD)|
+|dob		| Date (YYYY-MM-DD)|
 |gender		| ['Male', 'Female', 'Others']|
 
 ### /user/application/:applicationNo (Accepts form-data)
