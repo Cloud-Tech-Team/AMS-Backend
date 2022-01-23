@@ -23,36 +23,36 @@
 |aPhone 	| Number	|
 |bloodGroup	| ['O+','O-','A+','A-','B+','B-','AB+','AB-']|
 |Contact Address        |
-|addressL1  | String    |
-|district   | String    |
-|city       | String    |
-|state      | String    |
-|pincode    | Number    |
+|addressL1c | String    |
+|districtc  | String    |
+|cityc      | String    |
+|statec     | String    |
+|pincodec   | Number    |
 |Permanant Address      |
-|addressL1  | String    |
-|district   | String    |
-|city       | String    |
-|state      | String    |
-|pincode    | Number    |
+|addressL1p | String    |
+|districtp  | String    |
+|cityp      | String    |
+|statep     | String    |
+|pincodep   | Number    |
 |Father Details         |
-|name       | String    |
-|occupation | String    |
-|mobile     | Number    |
-|email      | String    |
+|fatherName | String    |
+|fatherOccupation| String    |
+|fatherMobile| Number    |
+|fatherEmail| String    |
 |Mother Details         |
-|name       | String    |
-|occupation | String    |
-|mobile     | Number    |
-|email      | String    |
+|motherName | String    |
+|motherOccupation| String    |
+|motherMobile| Number    |
+|motherEmail| String    |
 |Guardian Details       |
-|name       | String    |
-|relation   | String    |
-|mobile     | Number    |
-|email      | String    |
+|guardianName| String    |
+|guardianRelation| String    |
+|guardianMobile| Number    |
+|guardianEmail| String    |
 |annualIncome| Number   |
 |NRI-Sponser Details    |
-|name       | String    |
-|relation   | String    |
+|NRIname    | String    |
+|NRIrelation   | String    |
 |bp1        | ['CSE', 'ECE','EEE','CE','ME']|
 |bp2        | ['CSE', 'ECE','EEE','CE','ME']|
 |bp3        | ['CSE', 'ECE','EEE','CE','ME']|
@@ -61,6 +61,13 @@
 |busFacility| Boolean   |
 |hostelFacility|Boolean |
 |Academic Details       |
+|qualifyingExam| String |
+|phyMarkObtained| Number|
+|phyMaxMarks| Number    |
+|chemMarkObtained| Number|
+|chemMaxMarks| Number   |
+|mathsMarkObtained| Number|
+|mathsMaxMarks| Number  |
 |filePhotograph| File   |
 |imgSign    | File      |
 |fileTransactionID| File|
