@@ -1,6 +1,9 @@
 const express = require('express')
 const router = express.Router()
 
+
+
+
 //for uploading to cloudinary
 const cloudinary = require('cloudinary')
 
@@ -522,6 +525,37 @@ router.patch('/application/:id', verifyToken, upload, async function (req, res) 
 
 })
 
+router.post('/application', upload, function (req, res){
+    if(req.body.token){
+        token=req.body.token;
+        const decoded = jwt.verify(token,process.env.JWT_SECRET_KEY);
+        console.log(decoded.email);
+        id=decoded.id;
+        User.findOne({_id:id},function(err,user){
+            if(!err){
+                res.status(200);
+                res.json({
+                    status:"SUCESS",
+                    message:"Application no is added",
+                    application:user.applicationNo,
+                    dob:user.dob,
+                    name:user.firstName,
+                    phone:user.phone
+                })
+            }
+            else{
+                res.status(400);
+                res.json({
+                    status:"FAILED",
+                    message:"Not registered"
+                })
+            }
+        })
+
+
+    }
+    
+})
 
 
 module.exports = router
