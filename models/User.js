@@ -6,6 +6,11 @@ const jwt = require('jsonwebtoken')
 const Schema = mongoose.Schema
 
 const UserSchema = new Schema({
+      role:{
+        type:String,
+        enum:['Admin','Student'],
+        default:'Student'
+      },
       applicationNo:{
         type:String
       },
