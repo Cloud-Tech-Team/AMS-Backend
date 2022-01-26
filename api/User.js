@@ -390,31 +390,34 @@ router.get('/application/:id', verifyToken, upload, function (req, res) {
 router.patch('/application/:id', verifyToken, upload, async function (req, res) {
 
 
-    //edit is clicked
-    //adding url of photograph to body
-    if (req.files.filePhotograph) {
-        const file64 = formatBufferTo64(req.files.filePhotograph[0]);
-        const uploadResult = await cloudinaryUpload(file64.content);
-        req.body.filePhotograph = uploadResult.secure_url;
-        if(req.body.filePhotograph!=null)
-            console.log('Photograph uploaded\n');
-    }
-    //adding url of sign to body
-    if (req.files.fileSign) {
-        const file64 = formatBufferTo64(req.files.fileSign[0]);
-        const uploadResult = await cloudinaryUpload(file64.content);
-        req.body.fileSign = uploadResult.secure_url;
-        if(req.body.fileSign!=null)
-            console.log('Signature uploaded\n');
+    if(req.files){
+        if (req.files.filePhotograph) {
+            const file64 = formatBufferTo64(req.files.filePhotograph[0]);
+            const uploadResult = await cloudinaryUpload(file64.content);
+            req.body.filePhotograph = uploadResult.secure_url;
+            if(req.body.filePhotograph!=null)
+                console.log('Photograph uploaded\n');
+        }
+        //adding url of sign to body
+        if (req.files.fileSign) {
+            const file64 = formatBufferTo64(req.files.fileSign[0]);
+            const uploadResult = await cloudinaryUpload(file64.content);
+            req.body.fileSign = uploadResult.secure_url;
+            if(req.body.fileSign!=null)
+                console.log('Signature uploaded\n');
+        }
+    
+        if(req.files.fileTransactionID){
+            const file64 = formatBufferTo64(req.files.fileTransactionID[0]);
+            const uploadResult = await cloudinaryUpload(file64.content);
+            req.body.fileTransactionID = uploadResult.secure_url;
+            if(req.body.fileTransactionID!=null)
+                console.log('Transaction File uploaded\n')
+        }
     }
 
-    if(req.files.fileTransactionID){
-        const file64 = formatBufferTo64(req.files.fileTransactionID[0]);
-        const uploadResult = await cloudinaryUpload(file64.content);
-        req.body.fileTransactionID = uploadResult.secure_url;
-        if(req.body.fileTransactionID!=null)
-            console.log('Transaction File uploaded\n')
-    }
+    //adding url of photograph to body
+    
     // console.log(req.files)
     User.findOne({ applicationNo: req.params.id }, function (err, users) {
         if (!err) {
@@ -518,5 +521,7 @@ router.patch('/application/:id', verifyToken, upload, async function (req, res) 
 
 
 })
+
+
 
 module.exports = router

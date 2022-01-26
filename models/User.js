@@ -25,8 +25,7 @@ const UserSchema = new Schema({
       },
       firstName:
         {
-          type: String,
-          required:['This field is required']
+          type: String
         },
       middleName: String,
       lastName:
