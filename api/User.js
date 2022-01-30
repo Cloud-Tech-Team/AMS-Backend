@@ -540,7 +540,8 @@ router.post('/application', upload, function (req, res){
                     application:user.applicationNo,
                     dob:user.dob,
                     name:user.firstName,
-                    phone:user.phone
+                    phone:user.phone,
+                    user:user
                 })
             }
             else{
