@@ -55,65 +55,6 @@ router.post('/login', upload, Auth.login);
 
 router.post('/recover', Password.recover);
 
-router.patch('/password_change', function (req, res) {
-    let { currentPassword, newPassword, token, id } = req.body;
-
-	// Verify the token
-	jwt.verify(token, process.env.JWT_SECRET_KEY, function (err, decoded) {
-		if (!err) {
-			console.log('token verified');
-			// Find user by id
-			User.findOne({ _id: id }).then(user => {
-				if (user) {
-					console.log('password_change: found user')
-					console.log(user);
-					// Check if currentPassword is correct
-					const hashedPassword = user.password;       // Password retrieved from db
-					console.log('user id: ', user._id);
-
-					bcrypt.compare(currentPassword, hashedPassword).then(result => {
-						if (result) {
-							// Current password is correct. Now update with new password
-							bcrypt.hash(newPassword, 10).then(newHashedPassword => {
-								const filter = { _id: id };
-								const update = { password: newHashedPassword };
-								console.log('finding and updating', id, newHashedPassword)
-								User.findOneAndUpdate(filter, update, function (err, doc) {
-									if (err) {
-										console.log('Error while updating password');
-										res.json({ status: 'FAILED' });
-									}
-								});
-							})
-
-							res.json({
-								status: 'SUCCESS',
-								message: 'Password has been updated successfully'
-							});
-						} else {
-							res.json({
-								status: 'FAILED',
-								message: 'Current password is incorrect'
-							})
-						}
-					})
-				} else {
-					res.json({
-						status: 'FAILED',
-						message: 'Invalid user id'
-					})
-				}
-			})
-        } else {
-            res.json({
-                status: 'FAILED',
-                message: 'Invalid token'
-            });
-        }
-    });
-})
-
-
 router.post('/register', upload, function (req, res) {
     let { quota, firstName, middleName, lastName, email, age, aadhaar, phone, dob, gender, password } = req.body;
 	console.log(req.body);
