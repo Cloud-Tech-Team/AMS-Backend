@@ -23,17 +23,17 @@
 |aPhone 	| Number	|
 |bloodGroup	| ['O+','O-','A+','A-','B+','B-','AB+','AB-']|
 |Contact Address        |
-|addressL1c | String    |
-|districtc  | String    |
-|cityc      | String    |
-|statec     | String    |
-|pincodec   | Number    |
+|addressL1C | String    |
+|districtC  | String    |
+|cityC      | String    |
+|stateC     | String    |
+|pincodeC   | Number    |
 |Permanant Address      |
-|addressL1p | String    |
-|districtp  | String    |
-|cityp      | String    |
-|statep     | String    |
-|pincodep   | Number    |
+|addressL1P | String    |
+|districtP  | String    |
+|cityP      | String    |
+|stateP     | String    |
+|pincodeP   | Number    |
 |Father Details         |
 |fatherName | String    |
 |fatherOccupation| String    |

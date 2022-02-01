@@ -1,6 +1,9 @@
 const express = require('express')
 const router = express.Router()
 
+
+
+
 //for uploading to cloudinary
 const cloudinary = require('cloudinary')
 
@@ -390,31 +393,34 @@ router.get('/application/:id', verifyToken, upload, function (req, res) {
 router.patch('/application/:id', verifyToken, upload, async function (req, res) {
 
 
-    //edit is clicked
-    //adding url of photograph to body
-    if (req.files.filePhotograph) {
-        const file64 = formatBufferTo64(req.files.filePhotograph[0]);
-        const uploadResult = await cloudinaryUpload(file64.content);
-        req.body.filePhotograph = uploadResult.secure_url;
-        if(req.body.filePhotograph!=null)
-            console.log('Photograph uploaded\n');
-    }
-    //adding url of sign to body
-    if (req.files.fileSign) {
-        const file64 = formatBufferTo64(req.files.fileSign[0]);
-        const uploadResult = await cloudinaryUpload(file64.content);
-        req.body.fileSign = uploadResult.secure_url;
-        if(req.body.fileSign!=null)
-            console.log('Signature uploaded\n');
+    if(req.files){
+        if (req.files.filePhotograph) {
+            const file64 = formatBufferTo64(req.files.filePhotograph[0]);
+            const uploadResult = await cloudinaryUpload(file64.content);
+            req.body.filePhotograph = uploadResult.secure_url;
+            if(req.body.filePhotograph!=null)
+                console.log('Photograph uploaded\n');
+        }
+        //adding url of sign to body
+        if (req.files.fileSign) {
+            const file64 = formatBufferTo64(req.files.fileSign[0]);
+            const uploadResult = await cloudinaryUpload(file64.content);
+            req.body.fileSign = uploadResult.secure_url;
+            if(req.body.fileSign!=null)
+                console.log('Signature uploaded\n');
+        }
+    
+        if(req.files.fileTransactionID){
+            const file64 = formatBufferTo64(req.files.fileTransactionID[0]);
+            const uploadResult = await cloudinaryUpload(file64.content);
+            req.body.fileTransactionID = uploadResult.secure_url;
+            if(req.body.fileTransactionID!=null)
+                console.log('Transaction File uploaded\n')
+        }
     }
 
-    if(req.files.fileTransactionID){
-        const file64 = formatBufferTo64(req.files.fileTransactionID[0]);
-        const uploadResult = await cloudinaryUpload(file64.content);
-        req.body.fileTransactionID = uploadResult.secure_url;
-        if(req.body.fileTransactionID!=null)
-            console.log('Transaction File uploaded\n')
-    }
+    //adding url of photograph to body
+    
     // console.log(req.files)
     User.findOne({ applicationNo: req.params.id }, function (err, users) {
         if (!err) {
@@ -444,7 +450,7 @@ router.patch('/application/:id', verifyToken, upload, async function (req, res) 
                     permanentAddress: {
                         addressL1: a.addressL1P || users.permanentAddress.addressL1 || users.a,
                         district: a.districtP || users.permanentAddress.district || users.a,
-                        city: a.cityP || users.permanentAddress.city || users.a,
+                        city: a.cityP|| users.permanentAddress.city || users.a,
                         state: a.stateP || users.permanentAddress.state || users.a,
                         pincode: a.pincodeP || users.permanentAddress.pincode || users.a
 
@@ -518,5 +524,39 @@ router.patch('/application/:id', verifyToken, upload, async function (req, res) 
 
 
 })
+
+router.post('/application', upload, function (req, res){
+    if(req.body.token){
+        token=req.body.token;
+        const decoded = jwt.verify(token,process.env.JWT_SECRET_KEY);
+        console.log(decoded.email);
+        id=decoded.id;
+        User.findOne({_id:id},function(err,user){
+            if(!err){
+                res.status(200);
+                res.json({
+                    status:"SUCESS",
+                    message:"Application no is added",
+                    application:user.applicationNo,
+                    dob:user.dob,
+                    name:user.firstName,
+                    phone:user.phone,
+                    user:user
+                })
+            }
+            else{
+                res.status(400);
+                res.json({
+                    status:"FAILED",
+                    message:"Not registered"
+                })
+            }
+        })
+
+
+    }
+    
+})
+
 
 module.exports = router
