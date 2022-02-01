@@ -8,8 +8,8 @@ const Schema = mongoose.Schema
 const UserSchema = new Schema({
       role:{
         type:String,
-        enum:['Admin','Student'],
-        default:'Student'
+        enum:['admin','student','coadmin'],
+        default:'student'
       },
       applicationNo:{
         type:String
