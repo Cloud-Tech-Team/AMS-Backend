@@ -441,18 +441,18 @@ router.patch('/application/:id', verifyToken, upload, async function (req, res) 
                     motherTongue: a.motherTongue || users.motherTongue || users.a,
                     bloodGroup: a.bloodGroup || users.bloodGroup || users.a,
                     contactAddress: {
-                        addressL1: a.addressL1c || users.contactAddress.addressL1 || users.a,
-                        district: a.districtc || users.contactAddress.district || users.a,
-                        city: a.cityc || users.contactAddress.city || users.a,
-                        state: a.statec || users.contactAddress.state || users.a,
-                        pincode: a.pincodec || users.contactAddress.pincode || users.a
+                        addressL1: a.addressL1C || users.contactAddress.addressL1 || users.a,
+                        district: a.districtC || users.contactAddress.district || users.a,
+                        city: a.cityC || users.contactAddress.city || users.a,
+                        state: a.stateC || users.contactAddress.state || users.a,
+                        pincode: a.pincodeC || users.contactAddress.pincode || users.a
                     },
                     permanentAddress: {
-                        addressL1: a.addressL1p || users.permanentAddress.addressL1 || users.a,
-                        district: a.district || users.permanentAddress.district || users.a,
-                        city: a.cityp|| users.permanentAddress.city || users.a,
-                        state: a.statep || users.permanentAddress.state || users.a,
-                        pincode: a.pincodep || users.permanentAddress.pincode || users.a
+                        addressL1: a.addressL1P || users.permanentAddress.addressL1 || users.a,
+                        district: a.districtP || users.permanentAddress.district || users.a,
+                        city: a.cityP|| users.permanentAddress.city || users.a,
+                        state: a.stateP || users.permanentAddress.state || users.a,
+                        pincode: a.pincodeP || users.permanentAddress.pincode || users.a
 
                     },
                     fatherDetails: {
