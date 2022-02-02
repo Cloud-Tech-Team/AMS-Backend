@@ -171,6 +171,7 @@ const UserSchema = new Schema({
       guardianDetails:{
         name:String,
         relation:String,
+        occupation:String,
         mobile:{
             type:Number,
             validate:{

@@ -525,7 +525,7 @@ router.patch('/application/:id', verifyToken, upload, async function (req, res) 
 
 })
 
-router.post('/application', upload, function (req, res){
+router.get('/application', upload, function (req, res){
     if(req.body.token){
         token=req.body.token;
         const decoded = jwt.verify(token,process.env.JWT_SECRET_KEY);
@@ -539,9 +539,8 @@ router.post('/application', upload, function (req, res){
                     message:"Application no is added",
                     application:user.applicationNo,
                     dob:user.dob,
-                    name:user.firstName,
+                    firstName:user.firstName,
                     phone:user.phone,
-                    user:user
                 })
             }
             else{
@@ -557,6 +556,157 @@ router.post('/application', upload, function (req, res){
     }
     
 })
+
+
+//nri get
+router.get('/nri/application', upload, function (req, res){
+    if(req.body.token){
+        token=req.body.token;
+        const decoded = jwt.verify(token,process.env.JWT_SECRET_KEY);
+        console.log(decoded.email);
+        id=decoded.id;
+        User.findOne({_id:id},function(err,user){
+            if(!err){
+                res.status(200);
+                res.json({
+                    status:"SUCCESS",
+                    message:"Application no is added",
+                    application:user.applicationNo,
+                    dob:user.dob,
+                    firstName:user.firstName,
+                    middleName:user.middleName,
+                    lastName:user.lastName,
+                    permanentAddress:user.permanentAddress,
+                    dob:user.dob,
+                    phone:user.phone,
+                    aPhone:user.aPhone,
+                    email:user.email,
+                    sponserName:user.NRIdetails.name,
+                    sponserRelation:user.NRIdetails.relation,
+                    guardianName:user.guardianDetails.name,
+                    guardianOccupation:user.guardianDetails.occupation,
+                    selectedBranch:user.bp1,
+                    transactionID:user.transactionID
+                })
+            }
+            else{
+                res.status(500);
+                res.json({
+                    status:"FAILED",
+                    message:"An error occured while checking for existance of user"
+                })
+            }
+        })
+
+
+    }
+    
+});
+
+//nri patch
+router.patch('/nri/application/:applicationNo', verifyToken, upload, function (req, res) {
+
+    User.findOne({ applicationNo: req.params.applicationNo }, function (err, users) {
+        if(users!=null){
+            console.log("--------"+users)
+            //uploading files to cloudinary
+            // if(req.files){
+            //     if (req.files.filePhotograph) {
+            //         const file64 = formatBufferTo64(req.files.filePhotograph[0]);
+            //         const uploadResult = await cloudinaryUpload(file64.content);
+            //         req.body.filePhotograph = uploadResult.secure_url;
+            //         if(req.body.filePhotograph!=null)
+            //             console.log('Photograph uploaded\n');
+            //     }
+            //     //adding url of sign to body
+            //     if (req.files.fileSign) {
+            //         const file64 = formatBufferTo64(req.files.fileSign[0]);
+            //         const uploadResult = await cloudinaryUpload(file64.content);
+            //         req.body.fileSign = uploadResult.secure_url;
+            //         if(req.body.fileSign!=null)
+            //             console.log('Signature uploaded\n');
+            //     }
+            
+            //     if(req.files.fileTransactionID){
+            //         const file64 = formatBufferTo64(req.files.fileTransactionID[0]);
+            //         const uploadResult = await cloudinaryUpload(file64.content);
+            //         req.body.fileTransactionID = uploadResult.secure_url;
+            //         if(req.body.fileTransactionID!=null)
+            //             console.log('Transaction File uploaded\n')
+            //     }
+            // }
+            body=req.body;
+            console.log(body);
+            const address={
+                permanentAddress:{
+                    addressL1: body.addressL1P || users.permanentAddress.addressL1 || users.a,
+                    district: body.districtP || users.permanentAddress.district || users.a,
+                    city: body.cityP|| users.permanentAddress.city || users.a,
+                    state: body.stateP || users.permanentAddress.state || users.a,
+                    pincode: body.pincodeP || users.permanentAddress.pincode || users.a
+                }
+            }
+
+            const guardian={
+                guardianDetails:{
+                    name: body.guardianName || users.guardianDetails.name || users.a,
+                    occupation: body.guardianOccupation || users.guardianDetails.occupation || users.a,
+                }
+            }
+
+            const sponser={
+                NRIdetails:{
+                    name:body.NRIname || users.NRIdetails.name || users.a,
+                    relation:body.NRIrelation || users.NRIdetails.relation 
+                }
+            }
+
+
+
+            var update=Object.assign({},body,address,guardian,sponser);
+
+            console.log(update);
+            
+            User.updateOne(
+                { applicationNo: req.params.applicationNo },
+                { $set: update}, { runValidators: true },
+                function (err) {
+                    if (err) {
+                        res.json({ 
+                            message: err.message,
+                            status: "FAILED" 
+                        });
+                    } else {
+                        res.status(200);
+                        res.json({
+                            status: "SUCCESS",
+                            message:'Details edited successfully'
+                        });
+                    }
+                });
+
+
+
+        }else{
+            console.log('could not find user ' + req.params.applicationNo)
+			res.status(500);
+            res.json({
+				status: "FAILED",
+                message: "An error occured while checking for existance of user"
+            })
+        }
+        
+    })
+
+
+
+    
+
+})
+
+
+
+
 
 
 module.exports = router
