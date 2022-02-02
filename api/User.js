@@ -560,8 +560,9 @@ router.get('/application', upload, function (req, res){
 
 //nri get
 router.get('/nri/application', upload, function (req, res){
-    if(req.body.token){
-        token=req.body.token;
+    if(req.headers.authorization){
+        // token=req.body.token;
+        const token = req.headers.authorization.split(" ")[1];
         const decoded = jwt.verify(token,process.env.JWT_SECRET_KEY);
         console.log(decoded.email);
         id=decoded.id;
@@ -600,41 +601,47 @@ router.get('/nri/application', upload, function (req, res){
 
 
     }
+    else{
+        res.json({
+            status:"FAILED",
+            message:"Access token error"
+        })
+    }
     
 });
 
 //nri patch
 router.patch('/nri/application/:applicationNo', verifyToken, upload, function (req, res) {
 
-    User.findOne({ applicationNo: req.params.applicationNo }, function (err, users) {
+    User.findOne({ applicationNo: req.params.applicationNo },async function (err, users) {
         if(users!=null){
             console.log("--------"+users)
-            //uploading files to cloudinary
-            // if(req.files){
-            //     if (req.files.filePhotograph) {
-            //         const file64 = formatBufferTo64(req.files.filePhotograph[0]);
-            //         const uploadResult = await cloudinaryUpload(file64.content);
-            //         req.body.filePhotograph = uploadResult.secure_url;
-            //         if(req.body.filePhotograph!=null)
-            //             console.log('Photograph uploaded\n');
-            //     }
-            //     //adding url of sign to body
-            //     if (req.files.fileSign) {
-            //         const file64 = formatBufferTo64(req.files.fileSign[0]);
-            //         const uploadResult = await cloudinaryUpload(file64.content);
-            //         req.body.fileSign = uploadResult.secure_url;
-            //         if(req.body.fileSign!=null)
-            //             console.log('Signature uploaded\n');
-            //     }
+            // uploading files to cloudinary
+            if(req.files){
+                if (req.files.filePhotograph) {
+                    const file64 = formatBufferTo64(req.files.filePhotograph[0]);
+                    const uploadResult = await cloudinaryUpload(file64.content);
+                    req.body.filePhotograph = uploadResult.secure_url;
+                    if(req.body.filePhotograph!=null)
+                        console.log('Photograph uploaded\n');
+                }
+                //adding url of sign to body
+                if (req.files.fileSign) {
+                    const file64 = formatBufferTo64(req.files.fileSign[0]);
+                    const uploadResult = await cloudinaryUpload(file64.content);
+                    req.body.fileSign = uploadResult.secure_url;
+                    if(req.body.fileSign!=null)
+                        console.log('Signature uploaded\n');
+                }
             
-            //     if(req.files.fileTransactionID){
-            //         const file64 = formatBufferTo64(req.files.fileTransactionID[0]);
-            //         const uploadResult = await cloudinaryUpload(file64.content);
-            //         req.body.fileTransactionID = uploadResult.secure_url;
-            //         if(req.body.fileTransactionID!=null)
-            //             console.log('Transaction File uploaded\n')
-            //     }
-            // }
+                if(req.files.fileTransactionID){
+                    const file64 = formatBufferTo64(req.files.fileTransactionID[0]);
+                    const uploadResult = await cloudinaryUpload(file64.content);
+                    req.body.fileTransactionID = uploadResult.secure_url;
+                    if(req.body.fileTransactionID!=null)
+                        console.log('Transaction File uploaded\n')
+                }
+            }
             body=req.body;
             console.log(body);
             const address={
