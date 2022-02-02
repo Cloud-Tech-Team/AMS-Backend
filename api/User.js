@@ -243,39 +243,6 @@ router.post('/register', upload, function (req, res) {
 	}
 });
 
-// router.patch('/register/:id', upload, function (req, res) {
-//     let { firstName, middleName, lastName, email, age, aadhaar, phone, dob, gender } = req.body;
-
-
-//     if (!(firstName && lastName && email && age && dob && gender && phone)) {
-// 		res.status(204);	// 204 No Content
-//         res.json({
-//             status: "FAILED",
-//             message: "Empty input field(s)"
-//         })
-//         //console.log(req.body)
-//     }
-//     else {
-
-//         User.updateOne(
-//             { _id: req.params.id },
-//             { $set: req.body }, { runValidators: true },
-//             function (err) {
-//                 if (err) {
-// 					res.status(500);
-//                     res.json({ error_message: /:(.+)/.exec(err.message)[1], status: "Failed" });
-
-//                 } else {
-// 					res.status(200);
-//                     res.json({
-//                         status: "SUCCESS",
-//                     });
-//                 }
-//             });
-//     }
-
-// });
-
 
 router.get('/application/:id', verifyToken, upload, function (req, res) {
     if (req.body.button == "", req.body.button == "save")
@@ -709,7 +676,9 @@ router.patch('/nri/application/:applicationNo', verifyToken, upload, function (r
 
     
 
-})
+});
+
+
 
 
 
@@ -717,3 +686,4 @@ router.patch('/nri/application/:applicationNo', verifyToken, upload, function (r
 
 
 module.exports = router
+
