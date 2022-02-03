@@ -496,6 +496,7 @@ router.get('/nri/application', function (req, res){
                     sponserRelation:user.NRIdetails.relation,
                     guardianName:user.guardianDetails.name,
                     guardianOccupation:user.guardianDetails.occupation,
+                    gruardianRelation:user.guardianDetails.relation,
                     selectedBranch:user.bp1,
                     transactionID:user.transactionID
                 })
@@ -590,6 +591,7 @@ router.patch('/nri/application/:applicationNo', verifyToken, upload, function (r
                 guardianDetails:{
                     name: body.guardianName || users.guardianDetails.name || users.a,
                     occupation: body.guardianOccupation || users.guardianDetails.occupation || users.a,
+                    relation:body.gruardianRelation || users.guardianDetails.relation || users.a,
                 }
             }
 
