@@ -42,8 +42,10 @@ const upload = require('./../handler/multer')
 
 
 
-
+//models
 const User = require('../models/User')
+const Branch = require('../models/Branches')
+
 const Auth = require('../controllers/auth')
 const Password = require('../controllers/password')
 
@@ -467,7 +469,7 @@ router.get('/application', upload, function (req, res){
 
 
 //nri get
-router.get('/nri/application', upload, function (req, res){
+router.get('/nri/application', function (req, res){
     if(req.headers.authorization){
         // token=req.body.token;
         const token = req.headers.authorization.split(" ")[1];
@@ -521,9 +523,10 @@ router.get('/nri/application', upload, function (req, res){
 //nri patch
 router.patch('/nri/application/:applicationNo', verifyToken, upload, function (req, res) {
 
+
     User.findOne({ applicationNo: req.params.applicationNo },async function (err, users) {
         if(users!=null){
-            console.log("--------"+users)
+            // console.log("--------"+users)
             // uploading files to cloudinary
             if(req.files){
                 if (req.files.filePhotograph) {
@@ -550,8 +553,29 @@ router.patch('/nri/application/:applicationNo', verifyToken, upload, function (r
                         console.log('Transaction File uploaded\n')
                 }
             }
+
+            if(req.body.bp1 && users.bp1==null){
+                console.log('-----')
+                Branch.findOne({branch:req.body.bp1},function(err,branch){
+                    if(branch)
+                    {
+                        if(!branch.checkFilled()){
+                            branch.occupySeat();
+                            printf("Seat Available");
+                        }
+                        else{
+                            console.log("Waiting list"+branch.waitingListNumber());
+                        }
+                        branch.save();
+                        // console.log(branch.totalSeats);
+                        // console.log(branch.occupiedSeats);
+                        // console.log(branch.checkFilled());
+                    }
+                })
+            }
+
             body=req.body;
-            console.log(body);
+            // console.log(body);
             const address={
                 permanentAddress:{
                     addressL1: body.addressL1P || users.permanentAddress.addressL1 || users.a,

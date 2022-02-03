@@ -20,6 +20,8 @@ app.use(cors(options));
 
 const bodyParser = require('body-parser')
 const UserRouter = require('./api/User')
+const BranchRouter = require('./api/Branch')
+
 
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
@@ -31,6 +33,7 @@ app.set('view engine', 'pug');
 // For accepting post form data
 
 app.use('/user', UserRouter)
+app.use('/branch', BranchRouter)
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`)
