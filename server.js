@@ -20,6 +20,7 @@ app.use(cors(options));
 
 const bodyParser = require('body-parser')
 const UserRouter = require('./api/User')
+const AdminRouter = require('./api/Admin')
 const BranchRouter = require('./api/Branch')
 
 
@@ -34,6 +35,7 @@ app.set('view engine', 'pug');
 
 app.use('/user', UserRouter)
 app.use('/branch', BranchRouter)
+app.use('/admin', AdminRouter)
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`)
