@@ -104,7 +104,7 @@ exports.login = async (req, res) => {
                         status: "SUCCESS",
                         message: "Sign-in successful",
                         token: token,
-                        user
+                        role:user.role
                     })
                 } else {
 					console.log(password);
@@ -112,14 +112,14 @@ exports.login = async (req, res) => {
 					res.status(400);
                     res.json({
                         status: "FAILED",
-                        message: "Incorrect password or application number"
+                        message: "Incorrect password"
                     })
                 }
             } else {	// invalid email
 				res.status(400);
                 res.json({
                     status: "FAILED",
-                    message: "Incorrect password or mail"
+                    message: "Incorrect password or application number"
                 })
             }
         }).catch(err => {

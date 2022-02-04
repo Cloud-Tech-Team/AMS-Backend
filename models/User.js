@@ -5,6 +5,8 @@ const jwt = require('jsonwebtoken')
 
 const Schema = mongoose.Schema
 
+const branches=['CSE', 'ECE','EEE','CE','ME'];
+
 const UserSchema = new Schema({
       role:{
         type:String,
@@ -171,6 +173,7 @@ const UserSchema = new Schema({
       guardianDetails:{
         name:String,
         relation:String,
+        occupation:String,
         mobile:{
             type:Number,
             validate:{
@@ -197,7 +200,7 @@ const UserSchema = new Schema({
       bp1:
       {
         enum: {
-            values: ['CSE', 'ECE','EEE','CE','ME',null],
+            values: branches,
             message:'Invalid Branch'
       },
       type:String
@@ -205,7 +208,7 @@ const UserSchema = new Schema({
       bp2:
       {
           enum: {
-              values: ['CSE', 'ECE','EEE','CE','ME'],
+              values: branches,
               message:'Invalid Branch'
         },
         type:String
@@ -213,7 +216,7 @@ const UserSchema = new Schema({
       bp3:
       {
           enum: {
-              values: ['CSE', 'ECE','EEE','CE','ME'],
+              values: branches,
               message:'Invalid Branch'
         },
         type:String
@@ -221,7 +224,7 @@ const UserSchema = new Schema({
       bp4:
       {
           enum: {
-              values: ['CSE', 'ECE','EEE','CE','ME'],
+              values: branches,
               message:'Invalid Branch'
         },
         type:String
@@ -229,7 +232,7 @@ const UserSchema = new Schema({
       bp5:
       {
           enum: {
-              values: ['CSE', 'ECE','EEE','CE','ME'],
+              values:branches,
               message:'Invalid Branch'
         },
         type:String
