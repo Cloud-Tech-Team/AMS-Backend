@@ -13,6 +13,14 @@ const UserSchema = new Schema({
         enum:['admin','student','coadmin'],
         default:'student'
       },
+	  verified: {
+		  type: Boolean,
+		  default: false
+	  },
+	  paymentCompleted: {
+		  type: Boolean,
+		  default: false
+	  },
       applicationNo:{
         type:String
       },
@@ -306,7 +314,8 @@ UserSchema.methods.comparePassword = function(password) {
 UserSchema.methods.generateJWT = function() {
 	let payload = {
 		id:	this._id,
-		email:	this.email
+		email:	this.email,
+		role:	this.role
 	};
 
 	return jwt.sign(payload, 'secret_key', {
