@@ -123,7 +123,7 @@ router.post('/register', upload, function (req, res) {
 				gender: req.body.gender,
 			});
 
-			User.find({}, function(err, result1) {	// Find total no of users to generate applicationNo
+			User.find({role: 'student'}, function(err, result1) {	// Find total no of students to generate applicationNo
 				if (err) {
 					console.log('error finding total no of users');
 					res.status(500);	// 500 Internal Server Error
