@@ -72,6 +72,25 @@
 |imgSign    | File      |
 |fileTransactionID| File|
 |transactionID| String  |
+
+### /admin/login (Accepts form-data)
+
+#### Request Body
+
+|Fields   | Data Type|
+|---------|----------|
+| password| String   |
+
+#### Response Body
+
+|Fields   | Data Type|
+|---------|----------|
+| status  | String   |
+| message | String   |
+| token   | String   |
+| role    | String   |
+status: 'SUCCESS' or 'FAILED'
+
 ## GET APIs
 ### /admin/count (Accepts form-data)
 #### Request Body
