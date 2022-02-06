@@ -13,6 +13,14 @@ const UserSchema = new Schema({
         enum:['admin','student','coadmin'],
         default:'student'
       },
+	  verified: {
+		  type: Boolean,
+		  default: false
+	  },
+	  paymentCompleted: {
+		  type: Boolean,
+		  default: false
+	  },
       applicationNo:{
         type:String
       },
