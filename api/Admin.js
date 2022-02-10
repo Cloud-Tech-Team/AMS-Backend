@@ -40,4 +40,60 @@ router.get('/count', upload, function (req, res) {
 		}
 	}
 })
+
+router.post('/login', upload, function (req, res) {
+	console.log('/admin/login');
+	console.log(req.body);
+    let { password } = req.body
+
+    if (password == "") {
+		res.status(204);
+        res.json({
+            status: "FAILED",
+            message: "Empty password entered"
+        })
+    } else {
+		User.findOne({ applicationNo: 'admin' }).then(user => {
+            if (user) {
+				console.log('password: ' + password);
+                if (user.comparePassword(password)) {
+                    // Correct password
+                    console.log('correct password');
+                    const token = user.generateJWT();
+
+					res.status(200);
+                    res.json({
+                        status: "SUCCESS",
+                        message: "Sign-in successful",
+                        token: token,
+                        role: user.role
+                    })
+                } else {
+					console.log(password);
+                    // Incorrect password
+					res.status(400);
+                    res.json({
+                        status: "FAILED",
+                        message: "Incorrect password"
+                    })
+                }
+            } else {
+				res.status(400);
+                res.json({
+                    status: "FAILED",
+                    message: "Admin account disabled"
+                })
+            }
+        }).catch(err => {
+            console.log(req.body)
+            console.log(err.message)
+			res.status(500);
+            res.json({
+				status: "FAILED",
+                message: "Internal server error"
+            })
+        })
+    }
+})
+
 module.exports = router

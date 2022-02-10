@@ -92,6 +92,14 @@ exports.login = async (req, res) => {
     } else {
         User.findOne({ applicationNo }).then(user => {
             if (user) {
+				if (user.role != 'student') {
+					console.log('user.role = ' + user.role);
+					res.status(400);
+					return res.json({
+						status: "FAILED",
+						message: "Incorrect password or application number"
+					});
+				}
                 console.log('user\n=====\n' + user.applicationNo)
 				console.log('password: ' + password);
                 if (user.comparePassword(password)) {
