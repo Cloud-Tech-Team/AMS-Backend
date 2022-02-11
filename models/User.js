@@ -301,7 +301,7 @@ UserSchema.methods.generatePassword = function(number) {
   date = dob.getDate().toString().padStart(2, '0');	// Pad with zeroes to make it atleast 2 digits
   month = (dob.getMonth()+1).toString().padStart(2, '0');
   year = dob.getFullYear().toString().slice(2,);
-  applicationNo = year[0] + (Number(year[1])*10000 + number)
+  applicationNo = this.applicationNo.match(/\d+/).toString()	// extract the number part from appNo
 
   password=date+month+applicationNo;
   return password;
