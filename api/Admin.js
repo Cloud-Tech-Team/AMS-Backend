@@ -3,42 +3,40 @@ const router = express.Router()
 const upload = require('../handler/multer')
 const jwt = require('jsonwebtoken')
 const User = require('../models/User')
+const verifyToken = require('../middleware/verifyToken');
 
-router.get('/count', upload, function (req, res) {
+router.get('/count', verifyToken, upload, function (req, res) {
+	/* Verify token belongs to an admin */
+	const token = req.headers.authorization.split(" ")[1];
+	const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+	if (decoded.role != 'admin') {
+		console.log('User is not admin!');
+		console.log('email: ' + decoded.email);
+		res.status(403);	// forbidden
+		res.json({
+			status: "FAILED",
+			message: "Access denied"
+		});
+	}
 	console.log('/count\n=======\n');
 	console.log(req.body);
-
-	if (req.body.token) {
-		token = req.body.token;
-		const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-		console.log('email: ' + decoded.email + ' role: ' + decoded.role);
-		if (decoded.role != 'admin') {
-			console.log('User is not admin!');
-			res.status(403);	// Forbidden
+	/* Perform query on db with the request body */
+	User.find(req.body, function (err, result) {
+		if (err) {
+			res.status(500);	// Internal server error
+			console.log('error message:\n' + err.message);
 			res.json({
 				status: "FAILED",
-				message: "Access denied"
+				message: "Internal server error"
 			});
 		} else {
-			delete req.body.token;
-			User.find(req.body, function (err, result) {
-				if (err) {
-					res.status(500);	// Internal server error
-					console.log('error message:\n' + err.message);
-					res.json({
-						status: "FAILED",
-						message: "Internal server error"
-					});
-				} else {
-					res.status(200);
-					res.json({
-						status: "SUCCESS",
-						count: result.length
-					});
-				}
+			res.status(200);
+			res.json({
+				status: "SUCCESS",
+				count: result.length
 			});
 		}
-	}
+	});
 })
 
 router.post('/login', upload, function (req, res) {
