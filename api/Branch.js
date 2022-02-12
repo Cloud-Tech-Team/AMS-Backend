@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 
 
 const Branch = require('../models/Branches')
-
+ 
 const Constants= require('./../constants/constant')
 
 router.post('/add',upload,function(req,res){

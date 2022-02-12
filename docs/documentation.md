@@ -19,7 +19,6 @@
 ### /user/application/:applicationNo (Accepts form-data)
 |Fields     |Data Type  |
 |-----------|-----------|
-|-----------|-----------|
 |aPhone 	| Number	|
 |bloodGroup	| ['O+','O-','A+','A-','B+','B-','AB+','AB-']|
 |Contact Address        |
