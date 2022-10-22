@@ -10,15 +10,26 @@ const BranchSchema=new Schema({
         enum:branches,
       },
     totalSeats:Number,
+    NRISeats:Number,
+    MSeats:Number,
+    GSeats:Number,
     occupiedSeats:{
         type:Number,
         default:0
     },
-    waitingList:{
+    filled:{
+        type:Boolean,
+        default:false
+    },
+    occupiedSeatsNRI:{
         type:Number,
         default:0
     },
-    filled:{
+    waitingListNRI:{
+        type:Number,
+        default:0
+    },
+    filledNRI:{
         type:Boolean,
         default:false
     }
@@ -29,14 +40,24 @@ BranchSchema.methods.occupySeat=function(){
     if(this.occupiedSeats==this.totalSeats)
         this.filled=true;
 };
-
 BranchSchema.methods.checkFilled=function(){
     return this.filled;
 }
 
-BranchSchema.methods.waitingListNumber=function(){
-    this.waitingList++;
-    return this.waitingList;
+
+BranchSchema.methods.occupySeatNRI=function(){
+    this.occupiedSeatsNRI++;
+    if(this.occupiedSeatsNRI==this.NRISeats)
+        this.filledNRI=true;
+};
+
+BranchSchema.methods.checkFilledNRI=function(){
+    return this.filledNRI;
+}
+
+BranchSchema.methods.waitingListNumberNRI=function(){
+    this.waitingListNRI++;
+    return this.waitingListNRI;
 }
 
 const Branch = mongoose.model('branch', BranchSchema)

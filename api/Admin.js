@@ -2,6 +2,8 @@ const express = require('express')
 const router = express.Router()
 const upload = require('../handler/multer')
 const jwt = require('jsonwebtoken')
+
+
 const User = require('../models/User')
 
 router.get('/count', upload, function (req, res) {
@@ -95,5 +97,52 @@ router.post('/login', upload, function (req, res) {
         })
     }
 })
+//quota:NRI,Management,Government
+router.get('/quota/:quota',upload, function(req,res){
+	if(req.headers.authorization){
+		const token = req.headers.authorization.split(" ")[1];
+		const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+		console.log("role:"+decoded.role);
+		if(decoded.role=='admin'){
+			_quota=req.params.quota;
+			User.find({quota:_quota},function(err,result){
+				if(err){
+					res.status(500);	// Internal server error
+					console.log('error message:\n' + err.message);
+					res.json({
+						status: "FAILED",
+						message: "Internal server error"
+					});
+				}
+				else{
+					res.status(200);
+					res.json({
+					status:"SUCCESS",
+					message:"list of "+_quota+" quota is retrived",
+					count:result.length,
+					list:result
+					})
 
-module.exports = router
+				}
+			})
+			
+		}
+		else{
+			res.status(403);
+			res.json({
+				status:"FAILED",
+				message:'Access denied'
+			})
+		}
+		
+	}
+	else{
+		res.json({
+			status:"FAILED",
+			message:'Access token error'
+		})
+	}
+	
+})	
+
+module.exports = router;
