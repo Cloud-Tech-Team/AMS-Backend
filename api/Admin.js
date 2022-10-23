@@ -4,14 +4,27 @@ const upload = require('../handler/multer')
 const jwt = require('jsonwebtoken')
 
 
+const AdminDB = require('../models/Admin')
 const User = require('../models/User')
 const verifyToken = require('../middleware/verifyToken');
 
-router.get('/count', verifyToken, upload, function (req, res) {
+router.get('/count', upload, function (req, res) {
 	/* Verify token belongs to an admin */
 	const token = req.headers.authorization.split(" ")[1];
-	const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-	if (decoded.role != 'admin') {
+	var decoded
+	try {
+		console.log(`token = ${token}`)
+		decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
+	} catch (ex) {
+		console.log(ex.message)
+		res.status(400)
+		res.json({
+			status: 'FAILED',
+			message: 'Invalid token'
+		})
+		return
+	}
+	if (decoded.role != 'admin' && decoded.role != 'co-admin') {
 		console.log('User is not admin!');
 		console.log('email: ' + decoded.email);
 		res.status(403);	// forbidden
@@ -19,6 +32,7 @@ router.get('/count', verifyToken, upload, function (req, res) {
 			status: "FAILED",
 			message: "Access denied"
 		});
+		return
 	}
 	console.log('/count\n=======\n');
 	console.log(req.body);
@@ -44,7 +58,7 @@ router.get('/count', verifyToken, upload, function (req, res) {
 router.post('/login', upload, function (req, res) {
 	console.log('/admin/login');
 	console.log(req.body);
-    let { password } = req.body
+    let { email, password } = req.body
 
     if (password == "") {
 		res.status(204);
@@ -53,9 +67,11 @@ router.post('/login', upload, function (req, res) {
             message: "Empty password entered"
         })
     } else {
-		User.findOne({ applicationNo: 'admin' }).then(user => {
+		AdminDB.findOne({ email: email}).then(user => {
             if (user) {
-				console.log('password: ' + password);
+				console.log('entered password: ' + password)
+				console.log(`email ${email} exists`)
+				console.log(user)
                 if (user.comparePassword(password)) {
                     // Correct password
                     console.log('correct password');
@@ -69,19 +85,19 @@ router.post('/login', upload, function (req, res) {
                         role: user.role
                     })
                 } else {
-					console.log(password);
+					console.log(`incorrect password ${password}`)
                     // Incorrect password
 					res.status(400);
                     res.json({
                         status: "FAILED",
-                        message: "Incorrect password"
+                        message: "Invalid email or password"
                     })
                 }
             } else {
 				res.status(400);
                 res.json({
                     status: "FAILED",
-                    message: "Admin account disabled"
+                    message: "Invalid email or password"
                 })
             }
         }).catch(err => {
