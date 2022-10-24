@@ -296,6 +296,12 @@ UserSchema.methods.generateApplicationNo = function(number) {
 
 }
 
+UserSchema.statics.studentCount = async function() {
+	console.log('in studentCount()')
+	const count = await this.countDocuments({role: 'student'})
+	return count
+}
+
 UserSchema.methods.generatePassword = function(number) {
   dob=this.dob;
   date = dob.getDate().toString().padStart(2, '0');	// Pad with zeroes to make it atleast 2 digits
