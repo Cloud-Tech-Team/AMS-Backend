@@ -22,6 +22,11 @@ const AdminSchema = new Schema({
 		type: String,
 		required: true
 	},
+	// number of students assigned to this co-admin
+	studentsAssigned: {
+		type: Number,
+		default: 0
+	},
 	email: {
 		type: String,
 		validate: {
@@ -33,6 +38,22 @@ const AdminSchema = new Schema({
 		required: true
 	}
 })
+
+/* getNextCoadmin:
+ * Find the next co-admin to assign the student to.
+ * We do this by finding the coadmin who has the least number of students assigned.
+ */
+AdminSchema.statics.getNextCoadmin = async function() {
+	console.log('getNextCoadmin()')
+	const data = await this.findOne({}).sort('studentsAssigned').limit(1)
+	if (data) {
+		console.log(`found coadmin ${data}`)
+		return data
+	} else {
+		console.log(`error ${data}`)
+		return null
+	}
+}
 
 AdminSchema.methods.comparePassword = function comparePassword(password) {
 	console.log(`entered password: '${password}'`)
