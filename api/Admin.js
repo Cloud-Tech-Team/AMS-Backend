@@ -10,6 +10,14 @@ const verifyToken = require('../middleware/verifyToken');
 
 router.get('/count', upload, function (req, res) {
 	/* Verify token belongs to an admin */
+	if ((typeof(req.headers.authorization) == 'undefined') || (req.headers.authorization == null)) {
+		console.log('req.headers.authorization undefined')
+		res.status(400);
+		return res.json({
+			status: 'FAILED',
+			message: 'Token not specified'
+		})
+	}
 	const token = req.headers.authorization.split(" ")[1];
 	var decoded
 	try {
@@ -113,7 +121,7 @@ router.post('/login', upload, function (req, res) {
 })
 //quota:NRI,Management,Government
 router.get('/quota/:quota',upload, function(req,res){
-	if(req.headers.authorization){
+	if(typeof(req.headers.authorization) != 'undefined' && req.headers.authorization){
 		const token = req.headers.authorization.split(" ")[1];
 		const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 		console.log("role:"+decoded.role);
@@ -163,6 +171,15 @@ router.get('/quota/:quota',upload, function(req,res){
 router.post('/add_coadmin', upload, function (req, res) {
 	console.log('/add_coadmin')
 	console.log('verifying admin token')
+
+	if ((typeof(req.headers.authorization) == 'undefined') || (req.headers.authorization == null)) {
+		console.log('req.headers.authorization undefined')
+		res.status(400);
+		return res.json({
+			status: 'FAILED',
+			message: 'Token not specified'
+		})
+	}
 	const token = req.headers.authorization.split(" ")[1];
 	var decoded
 	try {
