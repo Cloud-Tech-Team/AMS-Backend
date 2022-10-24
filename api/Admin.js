@@ -159,4 +159,70 @@ router.get('/quota/:quota',upload, function(req,res){
 	
 })	
 
+/* create co-admins */
+router.post('/add_coadmin', upload, function (req, res) {
+	console.log('/add_coadmin')
+	console.log('verifying admin token')
+	const token = req.headers.authorization.split(" ")[1];
+	var decoded
+	try {
+		console.log(`token = ${token}`)
+		decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
+	} catch (ex) {
+		console.log(ex.message)
+		res.status(400)
+		return res.json({
+			status: 'FAILED',
+			message: 'Invalid token'
+		})
+	}
+
+	if (decoded.role != 'admin') {
+		console.log('User is not admin!');
+		console.log('email: ' + decoded.email + ' role: ' + decoded.role);
+		res.status(403);	// forbidden
+		return res.json({
+			status: "FAILED",
+			message: "Access denied"
+		});
+	}
+
+	AdminDB.find({email: req.body.email}, (err, result) => {
+		if (result.length == 1) {
+			console.log(`co-admin with email ${req.body.email} exists`)
+			res.status(409)
+			return res.json({
+				status: 'FAILED',
+				message: 'co-admin with email already exists'
+			})
+		}
+		// else
+		console.log('creating new co-admin')
+		const admin = new AdminDB({
+			firstName: req.body.firstName,
+			middleName: req.body.middleName,
+			lastName: req.body.lastName,
+			email: req.body.email,
+			password: req.body.password
+		})
+		admin.save((err) => {
+			if (err) {
+				console.log('error saving co-admin')
+				res.status(500)
+				res.json({
+					status: 'FAILED',
+					message: 'Internal server error'
+				})
+			} else {
+				console.log('saved co-admin successfully')
+				res.status(200)
+				res.json({
+					status: 'SUCCESS',
+					message: 'Added co-admin successfully'
+				})
+			}
+		})
+	})
+})
+
 module.exports = router;
