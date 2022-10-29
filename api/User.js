@@ -139,6 +139,9 @@ router.post('/register', upload, async function (req, res) {
 		console.log('Password: ' + password);
 
 		user.password = password;							// store plaintext password :/
+		console.log('calling user.assignCoadmin()')
+		await user.assignCoadmin()	// check for error and make this atomic
+		console.log(`user after assigning ${user}`)
 		user.save(function (err) {
 			if (err) {
 				console.log('error saving user');

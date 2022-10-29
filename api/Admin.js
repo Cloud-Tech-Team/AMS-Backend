@@ -242,4 +242,13 @@ router.post('/add_coadmin', upload, function (req, res) {
 	})
 })
 
+/* this is just for testing
+router.get('/nextcoadmin', upload, async function (req, res) {
+	console.log('/nextcoadmin')
+	const coadmin = await AdminDB.getNextCoadmin()
+	console.log(`found next co-admin ${coadmin}`)
+	res.json(coadmin)
+})
+*/
+
 module.exports = router;

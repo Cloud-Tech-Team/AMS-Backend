@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt')
 const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
 
+const AdminDB = require('../models/Admin')
+
 const Schema = mongoose.Schema
 
 const branches=['CSE', 'ECE','EEE','CE','ME'];
@@ -13,6 +15,12 @@ const UserSchema = new Schema({
         enum:['admin','student','coadmin'],
         default:'student'
       },
+	// co-admin to whom this student is assigend
+	  coadminDetails: {
+		  id: mongoose.Types.ObjectId,	// _id field of co-admin in AdminDB
+		  name: String,
+		  email: String
+	  },
 	  verified: {
 		  type: Boolean,
 		  default: false
@@ -294,6 +302,24 @@ UserSchema.methods.generateApplicationNo = function(number) {
   applicationNo=(year*10000)+Number(number);
   this.applicationNo=quota+course+applicationNo;
 
+}
+
+UserSchema.methods.assignCoadmin = async function() {
+	console.log('assignCoadmin()')
+	console.log('calling AdminDB.getNextCoadmin()')
+	const coadmin = await AdminDB.getNextCoadmin()
+	console.log(`Next co-admin = ${coadmin}`)
+	// increment studentsAssigned count in co-admin
+	coadmin.studentsAssigned++
+	coadmin.save()
+	console.log(`updated coadmin: ${coadmin}`)
+	// assign coadminID field in user, i.e coadmin._id field
+	this.coadminDetails = {
+		id: coadmin._id,
+		name: coadmin.firstName,
+		email: coadmin.email
+	}
+	console.log(`coadmin details: ${this.coadminDetails}`)
 }
 
 UserSchema.statics.studentCount = async function() {
