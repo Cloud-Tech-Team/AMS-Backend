@@ -119,39 +119,77 @@ router.post('/login', upload, function (req, res) {
         })
     }
 })
-//quota:NRI,Management,Government
-router.get('/quota/:quota',upload, function(req,res){
+
+/*
+ * /admin/search:
+ *	Search user database with given filter, and return results.
+ *	Return @count results starting from @offset of the data returned by the query.
+ *	The filter for query is req.body minus @count and @offset parameters.
+ */
+router.get('/search', upload, function(req,res){
 	if(typeof(req.headers.authorization) != 'undefined' && req.headers.authorization){
 		const token = req.headers.authorization.split(" ")[1];
 		const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 		console.log("role:"+decoded.role);
+		console.log(req.body)
 		if(decoded.role=='admin'){
-			_quota=req.params.quota;
-			User.find({quota:_quota},function(err,result){
+			const count = req.body.count 		// no: of results to return
+			const offset = req.body.offset || 0	// offset from which to return count results
+			console.log(`count = ${count}\toffset = ${offset}`)
+			if (typeof(count) != 'undefined' && count <= 0) {
+				res.status(400)
+				return res.json({
+					status: 'FAILURE',
+					message: 'invalid count: negative value'
+				})
+			}
+			if (offset < 0) {
+				res.status(400)
+				return res.json({
+					status: 'FAILURE',
+					message: 'invalid offset: negative value'
+				})
+			}
+
+			// create filter by removing count and offset fields from req.body
+			var filter = req.body
+			delete filter.count
+			delete filter.offset
+			User.find(filter, function(err, data){
 				if(err){
 					res.status(500);	// Internal server error
 					console.log('error message:\n' + err.message);
-					res.json({
+					return res.json({
 						status: "FAILED",
 						message: "Internal server error"
 					});
 				}
 				else{
+					console.log(`data.length = ${data.length}`)
+					if (offset >= data.length) {
+						res.status(400);
+						return res.json({
+							status: 'FAILURE',
+							message: `offset ${offset} is past end of result`
+						})
+					}
+					var result
+					if (typeof(count) != 'undefined')
+						result = data.slice(offset, offset+count)
+					else
+						result = data.slice(offset)
 					res.status(200);
 					res.json({
 					status:"SUCCESS",
-					message:"list of "+_quota+" quota is retrived",
-					count:result.length,
-					list:result
+					message: 'Result retrieved successfully',
+					count: result.length,
+					list: result
 					})
-
 				}
 			})
-			
-		}
-		else{
+		} else {
 			res.status(403);
-			res.json({
+			return res.json({
 				status:"FAILED",
 				message:'Access denied'
 			})
@@ -159,7 +197,7 @@ router.get('/quota/:quota',upload, function(req,res){
 		
 	}
 	else{
-		res.json({
+		return res.json({
 			status:"FAILED",
 			message:'Access token error'
 		})
