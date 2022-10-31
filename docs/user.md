@@ -15,6 +15,12 @@
 |phone		| Number	|
 |dob		| Date (YYYY-MM-DD)|
 |gender		| ['Male', 'Female', 'Others']|
+#### Description
+* email, quota, and course must be unique for every user.  
+  If such a user already exists, it reports that the user has already registered
+* calls UserSchema method assignCoadmin() to assign co-admin in the coadmin_details field.  
+  See assignCoadmin() method for details
+* Sends email to given email using SendGrid
 
 ### /user/application/:applicationNo (Accepts form-data)
 |Fields     |Data Type  |
