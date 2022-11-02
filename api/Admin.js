@@ -8,7 +8,7 @@ const AdminDB = require('../models/Admin')
 const User = require('../models/User')
 const verifyToken = require('../middleware/verifyToken');
 
-router.get('/count', upload, function (req, res) {
+router.get('/count', upload, async function (req, res) {
 	/* Verify token belongs to an admin */
 	if ((typeof(req.headers.authorization) == 'undefined') || (req.headers.authorization == null)) {
 		console.log('req.headers.authorization undefined')
@@ -45,22 +45,31 @@ router.get('/count', upload, function (req, res) {
 	console.log('/count\n=======\n');
 	console.log(req.body);
 	/* Perform query on db with the request body */
-	User.find(req.body, function (err, result) {
-		if (err) {
-			res.status(500);	// Internal server error
-			console.log('error message:\n' + err.message);
-			res.json({
-				status: "FAILED",
-				message: "Internal server error"
-			});
-		} else {
-			res.status(200);
-			res.json({
-				status: "SUCCESS",
-				count: result.length
-			});
-		}
-	});
+	var queries = req.body.queries
+	var nqueries = queries.length
+	var counts = []
+	for (var i = 0; i < nqueries; ++i) {
+		await User.find(queries[i], function (err, result) {
+			if (err) {
+				res.status(500);	// Internal server error
+				console.log('error message:\n' + err.message);
+				res.json({
+					status: "FAILED",
+					message: err.message
+				});
+			} else {
+				console.log(`count(${queries[i]}) = ${result.length}`)
+				counts.push(result.length)
+				console.log(`${counts}`)
+			}
+		});
+	}
+	console.log(`counts = ${counts}`)
+	res.status(200)
+	res.json({
+		status: "SUCCESS",
+		result: counts
+	})
 })
 
 router.post('/login', upload, function (req, res) {
