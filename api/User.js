@@ -146,7 +146,7 @@ router.post('/register', upload, async function (req, res) {
 			if (err) {
 				console.log('error saving user');
 				res.status(500);
-				res.json({status: "FAILED"});
+				res.json({status: "FAILED", message: err.message});
 				console.log(err);
 			} else {
 				console.log('saved user successfully');
