@@ -46,6 +46,16 @@ router.get('/count', upload, async function (req, res) {
 	console.log(req.body);
 	/* Perform query on db with the request body */
 	var queries = req.body.queries
+	if (typeof(queries) == 'undefined' || typeof(queries.length) == 'undefined') {
+		console.log('queries undefined')
+		res.status(404)
+		return res.json({
+			status: "FAILED",
+			message: "'queries' field must be defined as an array"
+		})
+	}
+	console.log(`queries = ${queries}`)
+
 	var nqueries = queries.length
 	var counts = []
 	for (var i = 0; i < nqueries; ++i) {
