@@ -58,3 +58,21 @@
 * Response
 	* count - size of list (see below)
 	* list - the results from the database
+
+### /admin/count (Accepts form-data)
+#### Request Body
+|Fields           |Data Type        |
+|-----------------|-----------------|
+| queries         | Array of Objects|
+### Response Body
+|Fields           |Data Type        |
+|-----------------|-----------------|
+|status           | ['SUCCESS', 'FAILURE']|
+|result           | Array (of counts) |
+#### Description
+* Request
+	* queries - an array of query objects. Each will be used to query the database, and  
+	  the count is determined.  
+	  Eg: { queries: [{'quota': 'Management'}, {'firstName': 'John'}] }
+* Response
+	* The count of each query is returned in the result field as an array.
