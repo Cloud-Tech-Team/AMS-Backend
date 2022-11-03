@@ -10,6 +10,8 @@ const verifyToken = require('../middleware/verifyToken');
 
 router.get('/count', upload, async function (req, res) {
 	/* Verify token belongs to an admin */
+	console.log(req.headers)
+	console.log(req.body)
 	if ((typeof(req.headers.authorization) == 'undefined') || (req.headers.authorization == null)) {
 		console.log('req.headers.authorization undefined')
 		res.status(400);
@@ -45,35 +47,38 @@ router.get('/count', upload, async function (req, res) {
 	console.log('/count\n=======\n');
 	console.log(req.body);
 	/* Perform query on db with the request body */
-	var queries = req.body.queries
+	var queries = [{"quota":"Government"},{"quota":"Management"},{"quota":"Nri"},{"verified":false},{"verified":true}]
+	console.log(queries)
 	if (typeof(queries) == 'undefined' || typeof(queries.length) == 'undefined') {
-		console.log('queries undefined')
+		console.log(queries)
 		res.status(404)
 		return res.json({
 			status: "FAILED",
 			message: "'queries' field must be defined as an array"
 		})
 	}
-	console.log(`queries = ${queries}`)
+	console.log('queries\n========')
+	console.log(queries)
 
 	var nqueries = queries.length
 	var counts = []
 	for (var i = 0; i < nqueries; ++i) {
-		await User.find(queries[i], function (err, result) {
+		await User.find(queries[i], async function (err, result) {
 			if (err) {
 				res.status(500);	// Internal server error
 				console.log('error message:\n' + err.message);
-				res.json({
+				return res.json({
 					status: "FAILED",
 					message: err.message
 				});
-			} else {
+			}
 				console.log(`count(${queries[i]}) = ${result.length}`)
 				counts.push(result.length)
 				console.log(`${counts}`)
-			}
+			
 		});
 	}
+
 	console.log(`counts = ${counts}`)
 	res.status(200)
 	res.json({
