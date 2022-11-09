@@ -11,14 +11,7 @@ const AdminSchema = new Schema({
 		enum: ['admin', 'co-admin'],
 		default: 'co-admin'
 	},
-	firstName: {
-		type: String,
-		required: true
-	},
-	middleName: {
-		type: String
-	},
-	lastName: {
+	name: {
 		type: String,
 		required: true
 	},
