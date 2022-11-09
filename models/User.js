@@ -98,7 +98,7 @@ const UserSchema = new Schema({
             message:"Invalid Mobile Number"
         }
       },
-      dob:       Date,
+      dob: Date,
       gender:
       {
         enum: {
@@ -287,6 +287,9 @@ const UserSchema = new Schema({
       },
       transactionID:{
         type:String
+      },
+      eligible:{
+        
       }
 
 });
