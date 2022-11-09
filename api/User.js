@@ -481,23 +481,7 @@ router.get('/nri/application', function (req, res){
                 res.json({
                     status:"SUCCESS",
                     message:"Application no is added",
-                    application:user.applicationNo,
-                    dob:user.dob,
-                    firstName:user.firstName,
-                    middleName:user.middleName,
-                    lastName:user.lastName,
-                    permanentAddress:user.permanentAddress,
-                    dob:user.dob,
-                    phone:user.phone,
-                    aPhone:user.aPhone,
-                    email:user.email,
-                    sponserName:user.NRIdetails.name,
-                    sponserRelation:user.NRIdetails.relation,
-                    guardianName:user.guardianDetails.name,
-                    guardianOccupation:user.guardianDetails.occupation,
-                    gruardianRelation:user.guardianDetails.relation,
-                    selectedBranch:user.bp1,
-                    transactionID:user.transactionID
+                    user:user
                 })
             }
             else{
