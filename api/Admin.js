@@ -278,9 +278,7 @@ router.post('/add_coadmin', upload, function (req, res) {
 		// else
 		console.log('creating new co-admin')
 		const admin = new AdminDB({
-			firstName: req.body.firstName,
-			middleName: req.body.middleName,
-			lastName: req.body.lastName,
+			name: req.body.name,
 			email: req.body.email,
 			password: req.body.password
 		})

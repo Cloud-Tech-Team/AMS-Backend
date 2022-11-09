@@ -319,7 +319,7 @@ UserSchema.methods.assignCoadmin = async function() {
 	// assign coadminID field in user, i.e coadmin._id field
 	this.coadminDetails = {
 		id: coadmin._id,
-		name: coadmin.firstName,
+		name: coadmin.name,
 		email: coadmin.email
 	}
 	console.log(`coadmin details: ${this.coadminDetails}`)
