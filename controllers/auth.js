@@ -112,7 +112,8 @@ exports.login = async (req, res) => {
                         status: "SUCCESS",
                         message: "Sign-in successful",
                         token: token,
-                        role:user.role
+                        role:user.role,
+                        applicationNo:user.applicationNo
                     })
                 } else {
 					console.log(password);
