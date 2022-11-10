@@ -20,6 +20,10 @@ const AdminSchema = new Schema({
 		type: Number,
 		default: 0
 	},
+	department: {
+		type:String,
+		required:true	
+	},
 	email: {
 		type: String,
 		validate: {
