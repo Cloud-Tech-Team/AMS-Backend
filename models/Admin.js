@@ -42,7 +42,7 @@ const AdminSchema = new Schema({
  */
 AdminSchema.statics.getNextCoadmin = async function() {
 	console.log('getNextCoadmin()')
-	const data = await this.findOne({role: 'co-admin'}).sort('studentsAssigned').limit(1)
+	const data = await this.findOne({role: 'co-admin',disabled:false}).sort('studentsAssigned').limit(1)
 	if (data) {
 		console.log(`found coadmin ${data}`)
 		return data
