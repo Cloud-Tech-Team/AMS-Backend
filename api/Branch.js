@@ -108,6 +108,73 @@ router.post('/add',upload,function(req,res){
 
 });
 
+/*
+ * /branch/delete - delete a branch from branch database
+ * 	Branch to be deleted is given in request body which is passed directly to the
+ * 	Branch.delete method
+ */
+router.delete('/delete', upload, function (req, res) {
+	console.log(`headers\n${req.headers}`)
+	if (typeof(req.headers.authorization) == 'undefined') {
+		console.log('no token received')
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Token not specified'
+		})
+	}
+
+	const token = req.headers.authorization.split(" ")[1];
+	try {
+		console.log(`token = ${token}`)
+		decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
+	} catch (ex) {
+		console.log(ex.message)
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Invalid token'
+		})
+	}
+	console.log("role:"+decoded.role);
+
+	if (decoded.role != 'admin') {
+		console.log('not admin')
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Access denied'
+		})
+	}
+
+	console.log(req.body)
+	if (Object.keys(req.body).length == 0) {
+		console.log('empty body')
+		res.status(400)
+		return res.json({
+			status: 'FAILED',
+			message: 'Empty request body'
+		})
+	}
+
+	Branch.deleteOne(req.body, (err, result) => {
+		if (err) {
+			console.log(`error deleting branch: ${err.message}`)
+			res.status(500)
+			return res.json({
+				status: 'FAILED',
+				message: err.message
+			})
+		}
+		console.log('branch deleted successfully')
+		res.status(200)
+		return res.json({
+			status: 'SUCCESS',
+			message: 'Branch deleted successfully'
+		})
+	})
+})
+
 router.patch('/edit/:branch',upload,function(req,res){
     if(req.headers.authorization){
 		const token = req.headers.authorization.split(" ")[1];
