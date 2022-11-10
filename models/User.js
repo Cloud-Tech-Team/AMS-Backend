@@ -256,15 +256,44 @@ const UserSchema = new Schema({
       hostelFacility:{
         type:Boolean
       },
-      academicDetails:{
-        qualifyingExam:String,
-        phyMarkObtained:Number,
-        phyMaxMarks:Number,
-        chemMarkObtained:Number,
-        chemMaxMarks:Number,
-        mathsMarkObtained:Number,
-        mathsMaxMarks:Number
+      grade12:{
+        school:String,
+        board:String,
+        registerNumber:String,
+        year:Number,
+        attemptNumber:Number,
+        mark:Number,
+        maxMark:Number,
+        percentage:Number,
+        markEnglish:Number,
+        markMaths:Number,
+        markCS:Number,
+        markBio:Number,
+        markPhy:Number,
+        markChem:Number,
+        marksheet:String
       },
+      
+      grade10:{
+        school:String,
+        board:String,
+        markEnglish:Number,
+        markMaths:Number,
+        markCS:Number,
+        markPhy:Number,
+        markChem:Number,
+        markBio:Number,
+        marksheet:String
+      },
+      keam:{
+        rollNumber:String,
+        year:String,
+        markPaper1:Number,
+        markPaper2:Number,
+        totalMark:Number,
+        file:String
+      },
+      
       filePhotograph:{
         type:String
       },

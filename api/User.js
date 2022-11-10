@@ -73,7 +73,7 @@ router.post('/register', upload, async function (req, res) {
    // dob = dob.toString().trim();
     // gender = gender.toString().trim();
 
-    if (firstName == "" || lastName == "" || email == "" || dob == "" || gender == "" || quota == "") {
+    if (firstName == "" || lastName == "" || email == "" || dob == "" || gender == "" || quota == "" || aadhaar=="") {
 		res.status(204);	// 204 No content
         res.json({
             status: "FAILED",
@@ -522,13 +522,13 @@ router.patch('/nri/application/:applicationNo', verifyToken, upload, function (r
                             console.log('Photograph uploaded\n');
                     }
                     //adding url of sign to body
-                    // if (req.files.fileSign) {
-                    //     const file64 = formatBufferTo64(req.files.fileSign[0]);
-                    //     const uploadResult = await cloudinaryUpload(file64.content);
-                    //     req.body.fileSign = uploadResult.secure_url;
-                    //     if(req.body.fileSign!=null)
-                    //         console.log('Signature uploaded\n');
-                    // }
+                    if (req.files.fileSign) {
+                        const file64 = formatBufferTo64(req.files.fileSign[0]);
+                        const uploadResult = await cloudinaryUpload(file64.content);
+                        req.body.fileSign = uploadResult.secure_url;
+                        if(req.body.fileSign!=null)
+                            console.log('Signature uploaded\n');
+                    }
                 
                     // if(req.files.fileTransactionID){
                     //     const file64 = formatBufferTo64(req.files.fileTransactionID[0]);
@@ -677,7 +677,15 @@ router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, funct
                 body=req.body;
                 // console.log(body);
 
-                const aPhone=body.aPhone
+                const general={
+                    aPhone:body.aPhone || users.aPhone|| users.a,
+                    filePhotograph:body.filePhotograph || users.filePhotograph1 || users.a,
+                    firstName:body.firstName || users.firstName || users.a,
+                    middleName:body.middleName || users.middleName|| users.a,
+                    lastName:body.lastName || users.lastName || users.a
+
+
+                }
 
                 const contactAddress={
                     contactAddress: {
@@ -715,9 +723,140 @@ router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, funct
     
                 
     
-                var update=Object.assign(permanantAddress,contactAddress,guardian,sponser);
+                var update=Object.assign({},general,permanantAddress,contactAddress,guardian,sponser);
     
                 update.aPhone=body.aPhone
+                console.log(update);
+                
+                User.updateOne(
+                    { applicationNo: req.params.applicationNo },
+                    { $set: update}, { runValidators: true },
+                    function (err) {
+                        if (err) {
+                            res.json({ 
+                                message: err.message,
+                                status: "FAILED" 
+                            });
+                        } else {
+                            res.status(200);
+                            res.json({
+                                status: "SUCCESS",
+                                message:'Details edited successfully'
+                            });
+                        }
+                    });
+    
+    
+    
+            }
+        }
+        
+        
+        
+        
+        else{
+            console.log('could not find user ' + req.params.applicationNo)
+			res.status(500);
+            res.json({
+				status: "FAILED",
+                message: "An error occured while checking for existance of user"
+            })
+        }
+        
+    })
+
+
+
+    
+
+});
+
+
+router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, function (req, res) {
+
+
+    User.findOne({ applicationNo: req.params.applicationNo },async function (err, users) {
+        if(users!=null){
+            if(users.quota=='NRI'){
+                if(req.files){
+                    if (req.files.fileKeam) {
+                        const file64 = formatBufferTo64(req.files.fileKeam[0]);
+                        const uploadResult = await cloudinaryUpload(file64.content);
+                        req.body.fileKeam = uploadResult.secure_url;
+                        if(req.body.fileKeam!=null)
+                            console.log('Keam certificate uploaded --'+req.params.applicationNo);
+                    }
+                    if (req.files.file12th) {
+                        const file64 = formatBufferTo64(req.files.file12[0]);
+                        const uploadResult = await cloudinaryUpload(file64.content);
+                        req.body.file12 = uploadResult.secure_url;
+                        if(req.body.file12!=null)
+                            console.log('12th certificate uploaded --'+req.params.applicationNo);
+                    }
+                    if (req.files.file10th) {
+                        const file64 = formatBufferTo64(req.files.file10[0]);
+                        const uploadResult = await cloudinaryUpload(file64.content);
+                        req.body.file10th = uploadResult.secure_url;
+                        if(req.body.file10th!=null)
+                            console.log('10th certificate uploaded --'+req.params.applicationNo);
+                    }
+                   
+                }
+    
+    
+                body=req.body;
+                // console.log(body);
+
+                const grade12={
+                    grade12:{
+                        school:body.plustwoschool  || users.grade12.school|| users.a,
+                        board:body.plustwoboard || users.grade12.board|| users.a,
+                        registerNumber:body.plustworegno   || users.grade12.registerNumber|| users.a,
+                        year:body.plustwoyear    || users.grade12.year|| users.a,
+                        attemptNumber:body.plustwoAttempt || users.grade12.attemptNumber|| users.a,
+                        mark:body.plustwomark    || users.grade12.mark|| users.a,
+                        maxMark:body.plustwomaxmark || users.grade12.maxMark|| users.a,
+                        percentage:body.plustwoperc    || users.grade12.percentage|| users.a,
+                        markEnglish:body.plustwoengmark || users.grade12.markEnglish|| users.a,
+                        markMaths:body.plustwomtsmark || users.grade12.markMaths|| users.a,
+                        markCS:body.plustwocsmark  || users.grade12.markCS|| users.a,
+                        markPhy:body.plustwophymark  || users.grade12.markCS|| users.a,
+                        markBio:body.plustwobiomark  || users.grade12.markBio|| users.a,
+                        markChem:body.plutwochemark  || users.grade12.markChem|| users.a,
+                        marksheet:body.file12 || users.grade12.marksheet|| users.a,
+                      },
+                }
+                const grade10={
+                    grade10:{
+                        school:body.plustwoschool  || users.grade10.school|| users.a,
+                        board:body.plustwoboard || users.grade10.board|| users.a,
+                        markEnglish:body.plustwoengmark || users.grade10.markEnglish|| users.a,
+                        markMaths:body.plustwomtsmark || users.grade10.markMaths|| users.a,
+                        markCS:body.plustwocsmark  || users.grade10.markCS|| users.a,
+                        markPhy:body.plustwophymark  || users.grade10.markCS|| users.a,
+                        markBio:body.plustwobiomark  || users.grade10.markBio|| users.a,
+                        markChem:body.plutwochemark  || users.grade10.markChem|| users.a,
+                        marksheet:body.file12 || users.grade10.marksheet|| users.a,
+                      
+                      },
+                }
+
+                const keam={
+                    keam:{
+                        rollNumber:body.plustwoschool  || users.keam.rollNumber|| users.a,
+                        year:body.plustwoschool  || users.keam.year|| users.a,
+                        markPaper1:body.plustwoschool  || users.keam.markPaper1|| users.a,
+                        markPaper2:body.plustwoschool  || users.keam.markPaper2|| users.a,
+                        totalMark:body.plustwoschool  || users.keam.totalMark|| users.a,
+                        file:body.plustwoschool  || users.keam.file|| users.a
+                      },
+                }
+
+                
+                
+    
+                var update=Object.assign({},keam,grade10,grade12);
+    
                 console.log(update);
                 
                 User.updateOne(
