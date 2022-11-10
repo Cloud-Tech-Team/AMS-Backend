@@ -93,10 +93,7 @@ const UserSchema = new Schema({
       aPhone:
       {
         type:Number,
-        validate:{
-            validator:value=>/^[6-9]{1}[0-9]{9}$/.test(value),
-            message:"Invalid Mobile Number"
-        }
+       
       },
       dob: Date,
       gender:

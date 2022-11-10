@@ -112,7 +112,6 @@ exports.login = async (req, res) => {
                         status: "SUCCESS",
                         message: "Sign-in successful",
                         token: token,
-                        user:user
                     })
                 } else {
 					console.log(password);
