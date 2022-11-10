@@ -8,6 +8,12 @@ const AdminDB = require('../models/Admin')
 const User = require('../models/User')
 const verifyToken = require('../middleware/verifyToken');
 
+//Email
+const sgMail = require('@sendgrid/mail')
+require('dotenv').config();
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+
+
 async function addcount(query, counts) {
 	await User.countDocuments(query).then(function (count, err) {
 		if (err) {
@@ -293,6 +299,22 @@ router.post('/add_coadmin', upload, function (req, res) {
 				})
 			} else {
 				console.log('saved co-admin successfully')
+				if (admin.email) {
+					const msg = {
+						to: admin.email, // Change to your recipient
+						from: process.env.FROM_EMAIL, // Change to your verified sender
+						subject: 'Registration Successful',
+						text: `Hi ${admin.name},\n\nYou have been registered as co-admin of the Admission Management at Muthoot Institute of Technology and Science.
+Registered Email: ${admin.email}\nPassword: ${admin.password}\nYou can now login to the portal to check for your pending assignments.\nTeam MITS\n`
+					}
+					sgMail.send(msg).then((response) => {
+						console.log(response[0].statusCode)
+						console.log(response[0].headers)
+						console.log(response[0])
+					}) .catch((error) => {
+						console.error(error)
+					})
+				}
 				res.status(200)
 				res.json({
 					status: 'SUCCESS',
@@ -302,7 +324,7 @@ router.post('/add_coadmin', upload, function (req, res) {
 		})
 	})
 })
-
+/*Allow admin to enable or disable assigning to coadmin
 router.patch('/disable_coadmin',upload, async function (req, res) {
 	console.log(req.headers)
 	console.log(req.body)
