@@ -60,7 +60,7 @@ router.post('/add',upload,function(req,res){
                             res.status(500)
                             res.json({
                                 status: "FAILED",
-                                message: "An error occured while checking for existance of user"
+                                message: err.message
                             })
 
                         }
