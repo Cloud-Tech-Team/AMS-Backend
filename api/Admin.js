@@ -8,6 +8,18 @@ const AdminDB = require('../models/Admin')
 const User = require('../models/User')
 const verifyToken = require('../middleware/verifyToken');
 
+async function addcount(query, counts) {
+	await User.countDocuments(query).then(function (count, err) {
+		if (err) {
+			console.error(`error: ${err.message}`)
+			counts.push(undefined)
+		} else {
+			console.log(`returning ${count}`)
+			counts.push(count)
+		}
+	})
+}
+
 router.get('/count', upload, async function (req, res) {
 	/* Verify token belongs to an admin */
 	console.log(req.headers)
@@ -47,7 +59,10 @@ router.get('/count', upload, async function (req, res) {
 	console.log('/count\n=======\n');
 	console.log(req.body);
 	/* Perform query on db with the request body */
-	var queries = [{"quota":"Government"},{"quota":"Management"},{"quota":"Nri"},{"verified":false},{"verified":true}]
+	// queries = req.body.queries
+	var queries = [
+		{"quota":"Government"}, {"quota":"Management"}, {"quota":"NRI"}, {"verified":false}, {"verified":true}
+	]
 	console.log(queries)
 	if (typeof(queries) == 'undefined' || typeof(queries.length) == 'undefined') {
 		console.log(queries)
@@ -62,23 +77,8 @@ router.get('/count', upload, async function (req, res) {
 
 	var nqueries = queries.length
 	var counts = []
-	for (var i = 0; i < nqueries; ++i) {
-		await User.find(queries[i], async function (err, result) {
-			if (err) {
-				res.status(500);	// Internal server error
-				console.log('error message:\n' + err.message);
-				return res.json({
-					status: "FAILED",
-					message: err.message
-				});
-			}
-				console.log(`count(${queries[i]}) = ${result.length}`)
-				counts.push(result.length)
-				console.log(`${counts}`)
-			
-		});
-	}
-
+	for (const query of queries)
+		await addcount(query, counts)
 	console.log(`counts = ${counts}`)
 	res.status(200)
 	res.json({
@@ -278,9 +278,7 @@ router.post('/add_coadmin', upload, function (req, res) {
 		// else
 		console.log('creating new co-admin')
 		const admin = new AdminDB({
-			firstName: req.body.firstName,
-			middleName: req.body.middleName,
-			lastName: req.body.lastName,
+			name: req.body.name,
 			email: req.body.email,
 			password: req.body.password
 		})
