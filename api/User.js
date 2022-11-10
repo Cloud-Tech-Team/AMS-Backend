@@ -544,7 +544,7 @@ router.patch('/nri/application/:applicationNo', verifyToken, upload, function (r
                     Branch.findOne({branch:req.body.bp1},function(err,branch){
                         if(branch)
                         {
-                            if(!branch.checkFilled() && !branch.checkFilledNRI()){
+                            if(!branch.isFilled() && !branch.isNRIFilled()){
                                 branch.occupySeat();
                                 branch.occupySeatNRI();
                                 console.log("Seat Available");
@@ -555,7 +555,7 @@ router.patch('/nri/application/:applicationNo', verifyToken, upload, function (r
                             branch.save();
                             // console.log(branch.totalSeats);
                             // console.log(branch.occupiedSeats);
-                            // console.log(branch.checkFilled());
+							// console.log(branch.isFilled());
                         }
                     })
                 }

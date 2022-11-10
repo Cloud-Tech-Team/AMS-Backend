@@ -10,13 +10,10 @@ const BranchSchema=new Schema({
     NRISeats:Number,
     MSeats:Number,
     GSeats:Number,
+	
     occupiedSeats:{
         type:Number,
         default:0
-    },
-    filled:{
-        type:Boolean,
-        default:false
     },
     occupiedSeatsNRI:{
         type:Number,
@@ -32,24 +29,23 @@ const BranchSchema=new Schema({
     }
 });
 
-BranchSchema.methods.occupySeat=function(){
-    this.occupiedSeats++;
-    if(this.occupiedSeats==this.totalSeats)
-        this.filled=true;
+BranchSchema.methods.occupySeat = function() {
+	if (!this.isFilled())
+		this.occupiedSeats++;
 };
-BranchSchema.methods.checkFilled=function(){
-    return this.filled;
+
+BranchSchema.methods.isFilled = function() {
+	return this.occupiedSeats == this.totalSeats
 }
 
 
-BranchSchema.methods.occupySeatNRI=function(){
-    this.occupiedSeatsNRI++;
-    if(this.occupiedSeatsNRI==this.NRISeats)
-        this.filledNRI=true;
+BranchSchema.methods.occupySeatNRI = function() {
+	if (!this.isNRIFilled())
+		this.occupiedSeatsNRI++;
 };
 
-BranchSchema.methods.checkFilledNRI=function(){
-    return this.filledNRI;
+BranchSchema.methods.isNRIFilled = function() {
+    return this.occupiedSeatsNRI == this.NRISeats
 }
 
 BranchSchema.methods.waitingListNumberNRI=function(){
