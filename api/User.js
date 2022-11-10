@@ -677,6 +677,8 @@ router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, funct
                 body=req.body;
                 // console.log(body);
 
+                const aPhone=body.aPhone
+
                 const contactAddress={
                     contactAddress: {
                         addressL1: body.addressL1C || users.contactAddress.addressL1 || users.a,
@@ -711,10 +713,11 @@ router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, funct
                     }
                 }
     
+                
     
+                var update=Object.assign(permanantAddress,contactAddress,guardian,sponser);
     
-                var update=Object.assign({},body,permanantAddress,contactAddress,guardian,sponser);
-    
+                update.aPhone=body.aPhone
                 console.log(update);
                 
                 User.updateOne(
