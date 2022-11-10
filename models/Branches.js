@@ -9,8 +9,9 @@ const BranchSchema=new Schema({
 
     totalSeats:Number,
     NRISeats:Number,
-    MSeats:Number,
+    MgmtSeats:Number,
 	
+	/* total occupied seats - incremented when any seat is occupied */
     occupiedSeats:{
         type:Number,
         default:0
