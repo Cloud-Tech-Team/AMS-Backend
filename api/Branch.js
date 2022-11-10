@@ -12,7 +12,19 @@ router.post('/add',upload,function(req,res){
     
     if(req.headers.authorization){ 
         const token = req.headers.authorization.split(" ")[1];
-		const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+		var decoded;
+		try {
+			console.log(`token = ${token}`)
+			decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
+		} catch (ex) {
+			console.log(ex.message)
+			res.status(400)
+			res.json({
+				status: 'FAILED',
+				message: 'Invalid token'
+			})
+			return
+		}
 		console.log("role:"+decoded.role);
 		if(decoded.role=='admin'){
             console.log(req.body);
@@ -83,7 +95,19 @@ router.post('/add',upload,function(req,res){
 router.patch('/edit/:branch',upload,function(req,res){
     if(req.headers.authorization){
 		const token = req.headers.authorization.split(" ")[1];
-		const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+		var decoded
+		try {
+			console.log(`token = ${token}`)
+			decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
+		} catch (ex) {
+			console.log(ex.message)
+			res.status(400)
+			res.json({
+				status: 'FAILED',
+				message: 'Invalid token'
+			})
+			return
+		}
 		console.log("role:"+decoded.role);
 		if(decoded.role=='admin'){
 			_branch=req.params.branch;
@@ -139,7 +163,19 @@ router.get('/waitingList/:quota/:branch',function(req,res){
     
     if(req.headers.authorization){
         const token = req.headers.authorization.split(" ")[1];
-		const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+		var decoded
+		try {
+			console.log(`token = ${token}`)
+			decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
+		} catch (ex) {
+			console.log(ex.message)
+			res.status(400)
+			res.json({
+				status: 'FAILED',
+				message: 'Invalid token'
+			})
+			return
+		}
 		console.log("role:"+decoded.role);
         if(decoded.role=='admin'){
             _branch=req.params.branch;
