@@ -2,12 +2,9 @@ const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
-const branches=['CSE', 'ECE','EEE','CE','ME'];
-
 const BranchSchema=new Schema({
     branch:{
         type:String,
-        enum:branches,
       },
     totalSeats:Number,
     NRISeats:Number,

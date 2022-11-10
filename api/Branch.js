@@ -12,7 +12,19 @@ router.post('/add',upload,function(req,res){
     
     if(req.headers.authorization){ 
         const token = req.headers.authorization.split(" ")[1];
-		const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+		var decoded;
+		try {
+			console.log(`token = ${token}`)
+			decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
+		} catch (ex) {
+			console.log(ex.message)
+			res.status(400)
+			res.json({
+				status: 'FAILED',
+				message: 'Invalid token'
+			})
+			return
+		}
 		console.log("role:"+decoded.role);
 		if(decoded.role=='admin'){
             console.log(req.body);
@@ -35,6 +47,22 @@ router.post('/add',upload,function(req,res){
                     });
                 }
                 else{
+					/* what to do when we add more quotas? */
+					var total = req.body.totalSeats
+					var nri = req.body.NRISeats
+					var mgmt = req.body.MSeats
+					var gov = req.body.GSeats
+					nri = nri ? nri : 0
+					mgmt = mgmt ? mgmt : 0
+					gov = gov ? gov : 0
+					if ((nri + mgmt + gov) != total) {
+						console.log(`${nri} + ${mgmt} + ${gov} != ${total}`)
+						res.status(400)
+						return res.json({
+							status: "FAILED",
+							message: "nri + mgmt + gov != total"
+						})
+					}
                     const new_branch= new Branch({
                         branch:branch,
                         totalSeats:req.body.totalSeats,
@@ -48,7 +76,7 @@ router.post('/add',upload,function(req,res){
                             res.status(500)
                             res.json({
                                 status: "FAILED",
-                                message: "An error occured while checking for existance of user"
+                                message: err.message
                             })
 
                         }
@@ -80,10 +108,140 @@ router.post('/add',upload,function(req,res){
 
 });
 
+/*
+ * /branch/search - search all current branches
+ */
+router.get('/search', upload, function (req, res) {
+	console.log(req.headers)
+	if (typeof(req.headers.authorization) == 'undefined') {
+		console.log('no token received')
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Token not specified'
+		})
+	}
+	const token = req.headers.authorization.split(" ")[1];
+	try {
+		console.log(`token = ${token}`)
+		decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
+	} catch (ex) {
+		console.log(ex.message)
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Invalid token'
+		})
+	}
+	console.log(`role = ${decoded.role}`)
+	if (decoded.role != 'admin') {
+		console.log('not admin')
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Access denied'
+		})
+	}
+	Branch.find(req.body, 'branch -_id', (err, result) => {
+		if (err) {
+			console.log(`error: ${err.message}`)
+			res.status(500)
+			return res.json({
+				status: 'FAILED',
+				message: err.message
+			})
+		}
+		res.status(200)
+		res.json({
+			status: 'SUCCESS',
+			list: result.map(a => a.branch)
+		})
+	})
+})
+
+/*
+ * /branch/delete - delete a branch from branch database
+ * 	Branch to be deleted is given in request body which is passed directly to the
+ * 	Branch.delete method
+ */
+router.delete('/delete', upload, function (req, res) {
+	console.log(`headers\n${req.headers}`)
+	if (typeof(req.headers.authorization) == 'undefined') {
+		console.log('no token received')
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Token not specified'
+		})
+	}
+
+	const token = req.headers.authorization.split(" ")[1];
+	try {
+		console.log(`token = ${token}`)
+		decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
+	} catch (ex) {
+		console.log(ex.message)
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Invalid token'
+		})
+	}
+	console.log("role:"+decoded.role);
+
+	if (decoded.role != 'admin') {
+		console.log('not admin')
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Access denied'
+		})
+	}
+
+	console.log(req.body)
+	if (Object.keys(req.body).length == 0) {
+		console.log('empty body')
+		res.status(400)
+		return res.json({
+			status: 'FAILED',
+			message: 'Empty request body'
+		})
+	}
+
+	Branch.deleteOne(req.body, (err, result) => {
+		if (err) {
+			console.log(`error deleting branch: ${err.message}`)
+			res.status(500)
+			return res.json({
+				status: 'FAILED',
+				message: err.message
+			})
+		}
+		console.log('branch deleted successfully')
+		res.status(200)
+		return res.json({
+			status: 'SUCCESS',
+			message: 'Branch deleted successfully'
+		})
+	})
+})
+
 router.patch('/edit/:branch',upload,function(req,res){
     if(req.headers.authorization){
 		const token = req.headers.authorization.split(" ")[1];
-		const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+		var decoded
+		try {
+			console.log(`token = ${token}`)
+			decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
+		} catch (ex) {
+			console.log(ex.message)
+			res.status(400)
+			res.json({
+				status: 'FAILED',
+				message: 'Invalid token'
+			})
+			return
+		}
 		console.log("role:"+decoded.role);
 		if(decoded.role=='admin'){
 			_branch=req.params.branch;
@@ -156,7 +314,19 @@ router.get('/waitingList/:quota/:branch',function(req,res){
     
     if(req.headers.authorization){
         const token = req.headers.authorization.split(" ")[1];
-		const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+		var decoded
+		try {
+			console.log(`token = ${token}`)
+			decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
+		} catch (ex) {
+			console.log(ex.message)
+			res.status(400)
+			res.json({
+				status: 'FAILED',
+				message: 'Invalid token'
+			})
+			return
+		}
 		console.log("role:"+decoded.role);
         if(decoded.role=='admin'){
             _branch=req.params.branch;
