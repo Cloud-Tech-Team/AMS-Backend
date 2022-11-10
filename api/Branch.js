@@ -109,6 +109,57 @@ router.post('/add',upload,function(req,res){
 });
 
 /*
+ * /branch/search - search all current branches
+ */
+router.get('/search', upload, function (req, res) {
+	console.log(req.headers)
+	if (typeof(req.headers.authorization) == 'undefined') {
+		console.log('no token received')
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Token not specified'
+		})
+	}
+	const token = req.headers.authorization.split(" ")[1];
+	try {
+		console.log(`token = ${token}`)
+		decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
+	} catch (ex) {
+		console.log(ex.message)
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Invalid token'
+		})
+	}
+	console.log(`role = ${decoded.role}`)
+	if (decoded.role != 'admin') {
+		console.log('not admin')
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Access denied'
+		})
+	}
+	Branch.find(req.body, 'branch -_id', (err, result) => {
+		if (err) {
+			console.log(`error: ${err.message}`)
+			res.status(500)
+			return res.json({
+				status: 'FAILED',
+				message: err.message
+			})
+		}
+		res.status(200)
+		res.json({
+			status: 'SUCCESS',
+			list: result.map(a => a.branch)
+		})
+	})
+})
+
+/*
  * /branch/delete - delete a branch from branch database
  * 	Branch to be deleted is given in request body which is passed directly to the
  * 	Branch.delete method
