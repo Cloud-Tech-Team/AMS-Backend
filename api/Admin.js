@@ -302,6 +302,66 @@ router.post('/add_coadmin', upload, function (req, res) {
 	})
 })
 
+router.patch('/disable_coadmin',upload, async function (req, res) {
+	console.log(req.headers)
+	console.log(req.body)
+	if(req.headers.authorization){
+		const token = req.headers.authorization.split(" ")[1];
+		const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+		console.log("role:"+decoded.role);
+		if(decoded.role=='admin'){
+			var _email=req.body.email;
+			console.log("email "+_email)
+            ////
+			AdminDB.find({email:_email},function(err,result){
+				if(err){
+					res.status(500);	// Internal server error
+					console.log('error message:\n' + err.message);
+					res.json({
+						status: "FAILED",
+						message: "Internal server error"
+					});
+				}
+                
+				else{
+					console.log(result[0].disabled);
+                    AdminDB.updateOne({email:_email},{$set: {disabled: !result[0].disabled} }, { runValidators: true },function(err){
+                        if (err) {
+                            res.json({ 
+                                message: err.message,
+                                status: "FAILED"
+                            });
+                        } 
+                        res.status(200);
+                        res.json({
+                        status:"SUCCESS",
+                        message:"fields disabled is updated",
+                        }) 
+                    })
+					
+
+				}
+			})
+			
+		}
+		else{
+			res.status(403);
+			res.json({
+				status:"FAILED",
+				message:'Access denied'
+			})
+		}
+		
+	}
+	else{
+		res.json({
+			status:"FAILED",
+			message:'Access token error'
+		})
+	}
+})
+
+
 /* this is just for testing
 router.get('/nextcoadmin', upload, async function (req, res) {
 	console.log('/nextcoadmin')
