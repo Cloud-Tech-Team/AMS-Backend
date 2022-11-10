@@ -47,6 +47,22 @@ router.post('/add',upload,function(req,res){
                     });
                 }
                 else{
+					/* what to do when we add more quotas? */
+					var total = req.body.totalSeats
+					var nri = req.body.NRISeats
+					var mgmt = req.body.MSeats
+					var gov = req.body.GSeats
+					nri = nri ? nri : 0
+					mgmt = mgmt ? mgmt : 0
+					gov = gov ? gov : 0
+					if ((nri + mgmt + gov) != total) {
+						console.log(`${nri} + ${mgmt} + ${gov} != ${total}`)
+						res.status(400)
+						return res.json({
+							status: "FAILED",
+							message: "nri + mgmt + gov != total"
+						})
+					}
                     const new_branch= new Branch({
                         branch:branch,
                         totalSeats:req.body.totalSeats,
