@@ -280,7 +280,8 @@ router.post('/add_coadmin', upload, function (req, res) {
 		const admin = new AdminDB({
 			name: req.body.name,
 			email: req.body.email,
-			password: req.body.password
+			password: req.body.password,
+			department:req.body.department
 		})
 		admin.save((err) => {
 			if (err) {
