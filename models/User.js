@@ -288,6 +288,7 @@ const UserSchema = new Schema({
       keam:{
         rollNumber:String,
         year:String,
+        rank:Number,
         markPaper1:Number,
         markPaper2:Number,
         totalMark:Number,

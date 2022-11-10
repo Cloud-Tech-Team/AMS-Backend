@@ -828,27 +828,28 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
                 }
                 const grade10={
                     grade10:{
-                        school:body.plustwoschool  || users.grade10.school|| users.a,
-                        board:body.plustwoboard || users.grade10.board|| users.a,
-                        markEnglish:body.plustwoengmark || users.grade10.markEnglish|| users.a,
-                        markMaths:body.plustwomtsmark || users.grade10.markMaths|| users.a,
-                        markCS:body.plustwocsmark  || users.grade10.markCS|| users.a,
-                        markPhy:body.plustwophymark  || users.grade10.markCS|| users.a,
-                        markBio:body.plustwobiomark  || users.grade10.markBio|| users.a,
-                        markChem:body.plutwochemark  || users.grade10.markChem|| users.a,
-                        marksheet:body.file12 || users.grade10.marksheet|| users.a,
+                        school:body.sslcschool      || users.grade10.school|| users.a,
+                        board:body.sslcboard      || users.grade10.board|| users.a,
+                        markEnglish:body.sslcengmark    || users.grade10.markEnglish|| users.a,
+                        markMaths:body.sslcmtsmark    || users.grade10.markMaths|| users.a,
+                        markCS:body.sslccsmark     || users.grade10.markCS|| users.a,
+                        markPhy:body.sslcphymark      || users.grade10.markCS|| users.a,
+                        markBio:body.sslcbiomark     || users.grade10.markBio|| users.a,
+                        markChem:body.sslcchemmark    || users.grade10.markChem|| users.a,
+                        marksheet:body.sslcfile       || users.grade10.marksheet|| users.a,
                       
                       },
                 }
 
                 const keam={
                     keam:{
-                        rollNumber:body.plustwoschool  || users.keam.rollNumber|| users.a,
-                        year:body.plustwoschool  || users.keam.year|| users.a,
-                        markPaper1:body.plustwoschool  || users.keam.markPaper1|| users.a,
-                        markPaper2:body.plustwoschool  || users.keam.markPaper2|| users.a,
-                        totalMark:body.plustwoschool  || users.keam.totalMark|| users.a,
-                        file:body.plustwoschool  || users.keam.file|| users.a
+                        rollNumber:body.keamrollno   || users.keam.rollNumber|| users.a,
+                        year:body.keamyear      || users.keam.year|| users.a,
+                        rank:body.keamrank     || users.keam.rank|| users.a,
+                        markPaper1:body.keampaper1 || users.keam.markPaper1|| users.a,
+                        markPaper2:body.keampaper2           || users.keam.markPaper2|| users.a,
+                        totalMark:body.keamtotal       || users.keam.totalMark|| users.a,
+                        file:body.keamfile        || users.keam.file|| users.a
                       },
                 }
 
