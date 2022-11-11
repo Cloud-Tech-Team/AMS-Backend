@@ -140,7 +140,7 @@ router.get('/getall', upload, function (req, res) {
 			message: 'Access denied'
 		})
 	}
-	Branch.find(req.body, 'branch -_id', (err, result) => {
+	Branch.find(req.body, (err, result) => {
 		if (err) {
 			console.log(`error: ${err.message}`)
 			res.status(500)
@@ -152,11 +152,63 @@ router.get('/getall', upload, function (req, res) {
 		res.status(200)
 		res.json({
 			status: 'SUCCESS',
-			list: result.map(a => a.branch)
+			list: result
 		})
 	})
 })
 
+/*
+ * /branch/get - list all fields of current branches
+ */
+router.get('/get', upload, function (req, res) {
+	console.log(req.headers)
+	if (typeof(req.headers.authorization) == 'undefined') {
+		console.log('no token received')
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Token not specified'
+		})
+	}
+	const token = req.headers.authorization.split(" ")[1];
+	try {
+		console.log(`token = ${token}`)
+		decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
+	} catch (ex) {
+		console.log(ex.message)
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Invalid token'
+		})
+	}
+
+	Branch.find(req.body, (err, result) => {
+		if (err) {
+			console.log(`error: ${err.message}`)
+			res.status(500)
+			return res.json({
+				status: 'FAILED',
+				message: err.message
+			})
+		}
+		res.status(200)
+		res.json({
+			status: 'SUCCESS',
+			list: result.map(o => ({
+				name: o.branch,
+				totalSeats: o.totalSeats,
+				NRISeats: o.NRISeats,
+				MgmtSeats: o.MgmtSeats,
+				NRIOccupied: o.occupiedSeatsNRI,
+				MgmtOccupied: o.occupiedSeatsMgmt,
+				NRIWL: o.waitingListNRI.length,
+				MgmtWL: o.waitingListMgmt.length
+				// TODO: Add waiting limit field
+			}))
+		})
+	})
+})
 /*
  * /branch/delete - delete a branch from branch database
  * 	Branch to be deleted is given in request body which is passed directly to the
