@@ -34,16 +34,10 @@ const UserSchema = new Schema({
       },
       course:{
         type:String,
-        enum:{
-          values:['MTech','BTech'],
-          message:"Invalid course"
-        },
+        
       },
       quota:{
-        enum:{
-          values:['Management','Government','NRI'],//TODO
-          message:"Invalid quota"
-        },
+        
         type:String
       },
 	  waiting: {
@@ -216,43 +210,27 @@ const UserSchema = new Schema({
       },
       bp1:
       {
-        enum: {
-            values: branches,
-            message:'Invalid Branch'
-      },
+       
       type:String
       },
       bp2:
       {
-          enum: {
-              values: branches,
-              message:'Invalid Branch'
-        },
+          
         type:String
       },
       bp3:
       {
-          enum: {
-              values: branches,
-              message:'Invalid Branch'
-        },
+         
         type:String
       },
       bp4:
       {
-          enum: {
-              values: branches,
-              message:'Invalid Branch'
-        },
+          
         type:String
       },
       bp5:
       {
-          enum: {
-              values:branches,
-              message:'Invalid Branch'
-        },
-        type:String
+          type:String
       },
       busFacility:{
         type:Boolean
