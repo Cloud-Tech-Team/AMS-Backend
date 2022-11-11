@@ -50,25 +50,22 @@ router.post('/add',upload,function(req,res){
 					/* what to do when we add more quotas? */
 					var total = req.body.totalSeats
 					var nri = req.body.NRISeats
-					var mgmt = req.body.MSeats
-					var gov = req.body.GSeats
+					var mgmt = req.body.MgmtSeats
 					nri = nri ? nri : 0
 					mgmt = mgmt ? mgmt : 0
-					gov = gov ? gov : 0
-					if ((nri + mgmt + gov) != total) {
-						console.log(`${nri} + ${mgmt} + ${gov} != ${total}`)
+					if ((nri + mgmt) != total) {
+						console.log(`${nri} + ${mgmt} != ${total}`)
 						res.status(400)
 						return res.json({
 							status: "FAILED",
-							message: "nri + mgmt + gov != total"
+							message: "nri + mgmt != total"
 						})
 					}
                     const new_branch= new Branch({
                         branch:branch,
                         totalSeats:req.body.totalSeats,
                         NRISeats:req.body.NRISeats,
-                        MSeats:req.body.MSeats,
-                        GSeats:req.body.GSeats,
+                        MgmtSeats:req.body.MgmtSeats,
                     })
                     new_branch.save(function(err){
                         if(err){
