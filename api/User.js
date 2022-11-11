@@ -522,21 +522,21 @@ router.patch('/nri/application/:applicationNo', verifyToken, upload, function (r
                             console.log('Photograph uploaded\n');
                     }
                     //adding url of sign to body
-                    if (req.files.fileSign) {
-                        const file64 = formatBufferTo64(req.files.fileSign[0]);
-                        const uploadResult = await cloudinaryUpload(file64.content);
-                        req.body.fileSign = uploadResult.secure_url;
-                        if(req.body.fileSign!=null)
-                            console.log('Signature uploaded\n');
-                    }
+                    // if (req.files.fileSign) {
+                    //     const file64 = formatBufferTo64(req.files.fileSign[0]);
+                    //     const uploadResult = await cloudinaryUpload(file64.content);
+                    //     req.body.fileSign = uploadResult.secure_url;
+                    //     if(req.body.fileSign!=null)
+                    //         console.log('Signature uploaded\n');
+                    // }
                 
-                    if(req.files.fileTransactionID){
-                        const file64 = formatBufferTo64(req.files.fileTransactionID[0]);
-                        const uploadResult = await cloudinaryUpload(file64.content);
-                        req.body.fileTransactionID = uploadResult.secure_url;
-                        if(req.body.fileTransactionID!=null)
-                            console.log('Transaction File uploaded\n')
-                    }
+                    // if(req.files.fileTransactionID){
+                    //     const file64 = formatBufferTo64(req.files.fileTransactionID[0]);
+                    //     const uploadResult = await cloudinaryUpload(file64.content);
+                    //     req.body.fileTransactionID = uploadResult.secure_url;
+                    //     if(req.body.fileTransactionID!=null)
+                    //         console.log('Transaction File uploaded\n')
+                    // }
                 }
     
                 if(req.body.bp1 && users.bp1==null && users.quota==NRI){
@@ -562,7 +562,26 @@ router.patch('/nri/application/:applicationNo', verifyToken, upload, function (r
     
                 body=req.body;
                 // console.log(body);
-                const address={
+                    const fatherDetails={
+                        fatherDetails: {
+                        name: a.fatherName || users.fatherDetails.name || users.a,
+                        occupation: a.fatherOccupation || users.fatherDetails.occupation || users.a,
+                        mobile: a.fatherMobile || users.fatherDetails.mobile || users.a,
+                        email: a.fatherEmail || users.fatherDetails.email || users.a
+                        }
+                     }
+
+                const contactAddress={
+                    contactAddress: {
+                        addressL1: a.addressL1C || users.contactAddress.addressL1 || users.a,
+                        district: a.districtC || users.contactAddress.district || users.a,
+                        city: a.cityC || users.contactAddress.city || users.a,
+                        state: a.stateC || users.contactAddress.state || users.a,
+                        pincode: a.pincodeC || users.contactAddress.pincode || users.a
+                    }
+                }
+
+                const permanantAddress={
                     permanentAddress:{
                         addressL1: body.addressL1P || users.permanentAddress.addressL1 || users.a,
                         district: body.districtP || users.permanentAddress.district || users.a,
@@ -572,13 +591,13 @@ router.patch('/nri/application/:applicationNo', verifyToken, upload, function (r
                     }
                 }
     
-                const guardian={
-                    guardianDetails:{
-                        name: body.guardianName || users.guardianDetails.name || users.a,
-                        occupation: body.guardianOccupation || users.guardianDetails.occupation || users.a,
-                        relation:body.gruardianRelation || users.guardianDetails.relation || users.a,
-                    }
-                }
+                // const guardian={
+                //     guardianDetails:{
+                //         name: body.guardianName || users.guardianDetails.name || users.a,
+                //         occupation: body.guardianOccupation || users.guardianDetails.occupation || users.a,
+                //         relation:body.gruardianRelation || users.guardianDetails.relation || users.a,
+                //     }
+                // }
     
                 const sponser={
                     NRIdetails:{
@@ -589,7 +608,7 @@ router.patch('/nri/application/:applicationNo', verifyToken, upload, function (r
     
     
     
-                var update=Object.assign({},body,address,guardian,sponser);
+                var update=Object.assign({},body,permanantAddress,contactAddress,guardian,sponser,fatherDetails);
     
                 console.log(update);
                 
@@ -636,6 +655,113 @@ router.patch('/nri/application/:applicationNo', verifyToken, upload, function (r
 
 });
 
+
+router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, function (req, res) {
+
+
+    User.findOne({ applicationNo: req.params.applicationNo },async function (err, users) {
+        if(users!=null){
+            if(users.quota=='NRI'){
+                if(req.files){
+                    if (req.files.filePhotograph) {
+                        const file64 = formatBufferTo64(req.files.filePhotograph[0]);
+                        const uploadResult = await cloudinaryUpload(file64.content);
+                        req.body.filePhotograph = uploadResult.secure_url;
+                        if(req.body.filePhotograph!=null)
+                            console.log('Photograph uploaded\n');
+                    }
+                   
+                }
+    
+    
+                body=req.body;
+                // console.log(body);
+
+                const aPhone=body.aPhone
+
+                const contactAddress={
+                    contactAddress: {
+                        addressL1: body.addressL1C || users.contactAddress.addressL1 || users.a,
+                        district: body.districtC || users.contactAddress.district || users.a,
+                        city: body.cityC || users.contactAddress.city || users.a,
+                        state: body.stateC || users.contactAddress.state || users.a,
+                        pincode: body.pincodeC || users.contactAddress.pincode || users.a
+                    }
+                }
+
+                const permanantAddress={
+                    permanentAddress:{
+                        addressL1: body.addressL1P || users.permanentAddress.addressL1 || users.a,
+                        district: body.districtP || users.permanentAddress.district || users.a,
+                        city: body.cityP|| users.permanentAddress.city || users.a,
+                        state: body.stateP || users.permanentAddress.state || users.a,
+                        pincode: body.pincodeP || users.permanentAddress.pincode || users.a
+                    }
+                }
+
+                 const guardian={
+                        guardianDetails:{
+                            name: body.guardianName || users.guardianDetails.name || users.a,
+                            occupation: body.guardianOccupation || users.guardianDetails.occupation || users.a,
+                            relation:body.gruardianRelation || users.guardianDetails.relation || users.a,
+                        }
+                }
+                const sponser={
+                    NRIdetails:{
+                        name:body.NRIname || users.NRIdetails.name || users.a,
+                        relation:body.NRIrelation || users.NRIdetails.relation 
+                    }
+                }
+    
+                
+    
+                var update=Object.assign(permanantAddress,contactAddress,guardian,sponser);
+    
+                update.aPhone=body.aPhone
+                console.log(update);
+                
+                User.updateOne(
+                    { applicationNo: req.params.applicationNo },
+                    { $set: update}, { runValidators: true },
+                    function (err) {
+                        if (err) {
+                            res.json({ 
+                                message: err.message,
+                                status: "FAILED" 
+                            });
+                        } else {
+                            res.status(200);
+                            res.json({
+                                status: "SUCCESS",
+                                message:'Details edited successfully'
+                            });
+                        }
+                    });
+    
+    
+    
+            }
+        }
+        
+        
+        
+        
+        else{
+            console.log('could not find user ' + req.params.applicationNo)
+			res.status(500);
+            res.json({
+				status: "FAILED",
+                message: "An error occured while checking for existance of user"
+            })
+        }
+        
+    })
+
+
+
+    
+
+});
 
 
 

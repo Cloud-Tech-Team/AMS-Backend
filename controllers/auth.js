@@ -79,10 +79,19 @@ exports.signup = async (req, res) => {
 
 exports.login = async (req, res) => {
     let { applicationNo, password } = req.body
+	if (typeof(applicationNo) != 'string' || typeof(password) != 'string') {
+		console.log('invalid request body')
+		console.log(`applicationNo = ${applicationNo}, password = ${password}`)
+		res.status(400)
+		return res.json({
+			status: 'FAILED',
+			message: 'Request body missing fields'
+		})
+	}
+
 	console.log(req.body);
     applicationNo = applicationNo.trim();
     console.log(req.body)
-
     if (applicationNo == "" || password == "") {
 		res.status(204);
         res.json({
@@ -112,7 +121,6 @@ exports.login = async (req, res) => {
                         status: "SUCCESS",
                         message: "Sign-in successful",
                         token: token,
-                        user:user
                     })
                 } else {
 					console.log(password);

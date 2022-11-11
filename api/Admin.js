@@ -8,6 +8,12 @@ const AdminDB = require('../models/Admin')
 const User = require('../models/User')
 const verifyToken = require('../middleware/verifyToken');
 
+//Email
+const sgMail = require('@sendgrid/mail')
+require('dotenv').config();
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+
+
 async function addcount(query, counts) {
 	await User.countDocuments(query).then(function (count, err) {
 		if (err) {
@@ -280,7 +286,8 @@ router.post('/add_coadmin', upload, function (req, res) {
 		const admin = new AdminDB({
 			name: req.body.name,
 			email: req.body.email,
-			password: req.body.password
+			password: req.body.password,
+			department:req.body.department
 		})
 		admin.save((err) => {
 			if (err) {
@@ -292,6 +299,22 @@ router.post('/add_coadmin', upload, function (req, res) {
 				})
 			} else {
 				console.log('saved co-admin successfully')
+				if (admin.email) {
+					const msg = {
+						to: admin.email, // Change to your recipient
+						from: process.env.FROM_EMAIL, // Change to your verified sender
+						subject: 'Registration Successful',
+						text: `Hi ${admin.name},\n\nYou have been registered as co-admin of the Admission Management at Muthoot Institute of Technology and Science.
+Registered Email: ${admin.email}\nPassword: ${admin.password}\nYou can now login to the portal to check for your pending assignments.\nTeam MITS\n`
+					}
+					sgMail.send(msg).then((response) => {
+						console.log(response[0].statusCode)
+						console.log(response[0].headers)
+						console.log(response[0])
+					}) .catch((error) => {
+						console.error(error)
+					})
+				}
 				res.status(200)
 				res.json({
 					status: 'SUCCESS',
@@ -301,6 +324,66 @@ router.post('/add_coadmin', upload, function (req, res) {
 		})
 	})
 })
+/*Allow admin to enable or disable assigning to coadmin
+router.patch('/disable_coadmin',upload, async function (req, res) {
+	console.log(req.headers)
+	console.log(req.body)
+	if(req.headers.authorization){
+		const token = req.headers.authorization.split(" ")[1];
+		const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+		console.log("role:"+decoded.role);
+		if(decoded.role=='admin'){
+			var _email=req.body.email;
+			console.log("email "+_email)
+            ////
+			AdminDB.find({email:_email},function(err,result){
+				if(err){
+					res.status(500);	// Internal server error
+					console.log('error message:\n' + err.message);
+					res.json({
+						status: "FAILED",
+						message: "Internal server error"
+					});
+				}
+                
+				else{
+					console.log(result[0].disabled);
+                    AdminDB.updateOne({email:_email},{$set: {disabled: !result[0].disabled} }, { runValidators: true },function(err){
+                        if (err) {
+                            res.json({ 
+                                message: err.message,
+                                status: "FAILED"
+                            });
+                        } 
+                        res.status(200);
+                        res.json({
+                        status:"SUCCESS",
+                        message:"fields disabled is updated",
+                        }) 
+                    })
+					
+
+				}
+			})
+			
+		}
+		else{
+			res.status(403);
+			res.json({
+				status:"FAILED",
+				message:'Access denied'
+			})
+		}
+		
+	}
+	else{
+		res.json({
+			status:"FAILED",
+			message:'Access token error'
+		})
+	}
+})
+
 
 /* this is just for testing
 router.get('/nextcoadmin', upload, async function (req, res) {
