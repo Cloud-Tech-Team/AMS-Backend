@@ -63,6 +63,7 @@ BranchSchema.methods.isFilled = function() {
  * else return -1.
  * To get a user's waiting list number, check their 'waiting' field.
  * If true, find their index in waitingListXXX array using applicationNo.
+ * Return Infinity if waiting list limit reached Hehe.
  * NOTE: If user is already in waitingList, *PRETEND* to add and return index.
  * What if user who registered, but not in waiting list applies again?
  */
@@ -76,15 +77,22 @@ BranchSchema.methods.occupySeatNRI = async function(user) {
 		return 0
 	} else {
 		/* add user to waitingList if not already in it */
-		var index = this.waitinglistNRI.indexOf(user.applicationNo)
+		var index = this.waitingListNRI.indexOf(user.applicationNo)
 		if (index != -1) {
 			console.log(`${user.applicationNo} already in waiting list @ ${index}`)
 		} else {
+			// check if waiting list limit reached
+			if (this.waitingListNRI.length >= this.WLNRILimit) {
+				console.log('waiting list limit reached')
+				return Infinity
+			}
 			this.waitingListNRI.push(user.applicationNo)
 			index = this.waitingListNRI.length
 			await this.save(function (err) {
-				console.log(`error saving branch: ${err.message}`)
-				return -1
+				if (err) {
+					console.log(`error saving branch: ${err.message}`)
+					return -1
+				}
 			})
 		}
 		console.log('waiting list')
@@ -108,10 +116,17 @@ BranchSchema.methods.occupySeatMgmt = async function(user) {
 		if (index != -1) {
 			console.log(`${user.applicationNo} already in waiting list @ ${index}`)
 		} else {
+			// check if waiting list limit reached
+			if (this.waitingListMgmt.length >= this.WLMgmtLimit) {
+				console.log('waiting list limit reached')
+				return Infinity
+			}
 			this.waitingListMgmt.push(user.applicationNo)
 			await this.save(function (err) {
-				console.log(`error saving branch: ${err.message}`)
-				return -1
+				if (err) {
+					console.log(`error saving branch: ${err.message}`)
+					return -1
+				}
 			})
 			index = this.waitingListMgmt.length
 		}
