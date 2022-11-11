@@ -40,6 +40,10 @@ const UserSchema = new Schema({
         
         type:String
       },
+	  waiting: {
+		  type: Boolean,	// is in waiting list?
+		  default: false
+	  },
       firstName:
         {
           type: String
