@@ -139,9 +139,6 @@ router.post('/register', upload, async function (req, res) {
 		console.log('Password: ' + password);
 
 		user.password = password;							// store plaintext password :/
-		console.log('calling user.assignCoadmin()')
-		await user.assignCoadmin()	// check for error and make this atomic
-		console.log(`user after assigning ${user}`)
 		user.save(function (err) {
 			if (err) {
 				console.log('error saving user');
@@ -796,7 +793,7 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
                         markPhy:body.plustwophymark  || users.grade12.markCS|| users.a,
                         markBio:body.plustwobiomark  || users.grade12.markBio|| users.a,
                         markChem:body.plutwochemark  || users.grade12.markChem|| users.a,
-                        marksheet:body.file12 || users.grade12.marksheet|| users.a,
+                        marksheet:body.file12th || users.grade12.marksheet|| users.a,
                       },
                 }
                 const grade10={
@@ -809,7 +806,7 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
                         markPhy:body.sslcphymark      || users.grade10.markCS|| users.a,
                         markBio:body.sslcbiomark     || users.grade10.markBio|| users.a,
                         markChem:body.sslcchemmark    || users.grade10.markChem|| users.a,
-                        marksheet:body.sslcfile       || users.grade10.marksheet|| users.a,
+                        marksheet:body.file10th       || users.grade10.marksheet|| users.a,
                       
                       },
                 }
@@ -822,7 +819,7 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
                         markPaper1:body.keampaper1 || users.keam.markPaper1|| users.a,
                         markPaper2:body.keampaper2           || users.keam.markPaper2|| users.a,
                         totalMark:body.keamtotal       || users.keam.totalMark|| users.a,
-                        file:body.keamfile        || users.keam.file|| users.a
+                        file:body.fileKeam    || users.keam.file|| users.a
                       },
                 }
                 var update=Object.assign({},keam,grade10,grade12);
@@ -899,7 +896,7 @@ router.patch('/nri/application-page3/:id',verifyToken,upload,async function(req,
                     imgSign: a.imgSign || users.imgSign || users.a,
                     
                  }
-                User.updateOne(
+                 User.updateOne(
                     { applicationNo: req.params.id },
                     { $set: update }, { runValidators: true },
                     function (err) {
@@ -910,28 +907,78 @@ router.patch('/nri/application-page3/:id',verifyToken,upload,async function(req,
                                 status: "SUCCESS ",
                             });
                         }
-                    });
-                }
+                });
+            }
         } else {
             res.json({
                 status: 'FAILED',
                 message: 'Not registered'
             })
         }
-    
+  
+
+    });
+})
+
+router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,res){
+
+    if(req.files){
+        if (req.files.fileTransactionID) {
+            const file64 = formatBufferTo64(req.files.fileTransactionID[0]);
+            const uploadResult = await cloudinaryUpload(file64.content);
+            req.body.fileTransactionID = uploadResult.secure_url;
+            if(req.body.fileTransactionID!=null)
+                console.log('Signature uploaded\n');
+        }
+    }
+    User.findOne({ applicationNo: req.params.id }, function (err, users) {
+        if (!err) {
+
+                a = req.body
+                if (!(a.fileTransactionID)) {
+                    res.json({
+                        status: "FAILED",
+                        message: "Uploads are Missing"
+
+                    });
+                }
+                else{
+                    
+                const update = {
+
+                    
+                    bp1: a.bp1 || users.bp1 || users.a,
+                    bp2: a.bp2 || users.bp2 || users.a,
+                    bp3: a.bp3 || users.bp3 || users.a,
+                    bp4: a.bp4 || users.bp4 || users.a,
+                    bp5: a.bp5 || users.bp5 || users.a,
+                    imgSign: a.imgSign || users.imgSign || users.a,
+                    
+                 }
+                 User.updateOne(
+                    { applicationNo: req.params.id },
+                    { $set: update }, { runValidators: true },
+                    function (err) {
+                        if (err) {
+                            res.json({ error_message: err.message, status: "FAILED" });
+                        } else {
+                            res.json({
+                                status: "SUCCESS ",
+                            });
+                        }
+                });
+            }
+        } else {
+            res.json({
+                status: 'FAILED',
+                message: 'Not registered'
+            })
+        }
+  
 
     });
 
 
 })
-
-
-
-
-
-
-
-
-
 module.exports = router
 
