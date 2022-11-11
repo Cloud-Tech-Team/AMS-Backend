@@ -106,9 +106,10 @@ router.post('/add',upload,function(req,res){
 });
 
 /*
- * /branch/search - search all current branches
+ * /branch/getall - list all fields of current branches
+ * Only admin
  */
-router.get('/search', upload, function (req, res) {
+router.get('/getall', upload, function (req, res) {
 	console.log(req.headers)
 	if (typeof(req.headers.authorization) == 'undefined') {
 		console.log('no token received')
