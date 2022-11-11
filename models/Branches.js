@@ -113,7 +113,7 @@ BranchSchema.methods.occupySeatMgmt = async function(user) {
 				console.log(`error saving branch: ${err.message}`)
 				return -1
 			})
-			index = this.waitingListNRI.length
+			index = this.waitingListMgmt.length
 		}
 		console.log('waiting list')
 		console.log(this.waitingListMgmt)
