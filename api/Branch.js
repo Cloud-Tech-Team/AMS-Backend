@@ -278,7 +278,7 @@ router.delete('/delete', upload, function (req, res) {
 	})
 })
 
-router.patch('/edit/:branch',upload,function(req,res){
+router.patch('/edit/:branch',upload, async function(req,res){
     if(req.headers.authorization){
 		const token = req.headers.authorization.split(" ")[1];
 		var decoded
@@ -297,44 +297,33 @@ router.patch('/edit/:branch',upload,function(req,res){
 		console.log("role:"+decoded.role);
 		if(decoded.role=='admin'){
 			_branch=req.params.branch;
-            ////
-			Branch.find({branch:_branch},function(err,result){
+			console.log(req.params)
+			////
+			console.log(`updating ${_branch}`)
+			console.log(req.body)
+			await Branch.updateOne({branch: _branch},{ $set: req.body}, { runValidators: true },function(err){
 				if(err){
 					res.status(500);	// Internal server error
 					console.log('error message:\n' + err.message);
-					res.json({
+					return res.json({
 						status: "FAILED",
 						message: "Internal server error"
 					});
 				}
-                
-				else{
-                    Branch.updateOne({branch:_branch},{ $set: req.body}, { runValidators: true },function(err){
-                        if (err) {
-                            res.json({ 
-                                message: err.message,
-                                status: "FAILED" 
-                            });
-                        } 
-                        res.status(200);
-                        res.json({
-                        status:"SUCCESS",
-                        message:"fields "+_branch+" quota is updated",
-                        }) 
-                    })
-					
-
-				}
+				res.json({
+					status:"SUCCESS",
+					message:"fields "+_branch+" quota is updated",
+				}) 
+				console.log('success')
 			})
-			
-		}
-		else{
+		} else {
 			res.status(403);
 			res.json({
 				status:"FAILED",
 				message:'Access denied'
 			})
 		}
+		console.log('hellooo')
 		
 	}
 	else{
