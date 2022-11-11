@@ -66,6 +66,8 @@ router.post('/add',upload,function(req,res){
                         totalSeats:req.body.totalSeats,
                         NRISeats:req.body.NRISeats,
                         MgmtSeats:req.body.MgmtSeats,
+						WLNRILimit: req.body.WLNRILimit,
+						WLMgmtLimit: req.body.WLMgmtLimit
                     })
                     new_branch.save(function(err){
                         if(err){

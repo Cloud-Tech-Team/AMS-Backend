@@ -37,6 +37,16 @@ const BranchSchema=new Schema({
         type: [String],
         default: []
     },
+	/* Waiting list limits.
+	 * Can be set by admin */
+	WLNRILimit: {
+		type: Number,
+		default: 3
+	},
+	WLMgmtLimit: {
+		type: Number,
+		default: 3
+	},
     filledNRI:{
         type:Boolean,
         default:false
