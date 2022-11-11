@@ -787,14 +787,14 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
                             console.log('Keam certificate uploaded --'+req.params.applicationNo);
                     }
                     if (req.files.file12th) {
-                        const file64 = formatBufferTo64(req.files.file12[0]);
+                        const file64 = formatBufferTo64(req.files.file12th[0]);
                         const uploadResult = await cloudinaryUpload(file64.content);
                         req.body.file12 = uploadResult.secure_url;
                         if(req.body.file12!=null)
                             console.log('12th certificate uploaded --'+req.params.applicationNo);
                     }
                     if (req.files.file10th) {
-                        const file64 = formatBufferTo64(req.files.file10[0]);
+                        const file64 = formatBufferTo64(req.files.file10th[0]);
                         const uploadResult = await cloudinaryUpload(file64.content);
                         req.body.file10th = uploadResult.secure_url;
                         if(req.body.file10th!=null)
