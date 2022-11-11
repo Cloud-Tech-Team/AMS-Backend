@@ -788,21 +788,20 @@ router.post('/test_waiting_list/', verifyToken, upload, async function (req, res
 				message: `error finding user with applicationNo ${appNo}\n${err.message}`
 			})
 		}
-		if (result == null) {
-			console.log(`invalid user: ${appNo}`)
-			res.status(400)
-			return res.json({
-				status: 'FAILED',
-				message: 'invalid user'
-			})
-		}
 		user = result
-		console.log('found user')
-		console.log(user)
 	})
+	console.log(user)
+	if (user == null) {
+		console.log(`invalid user: ${appNo}`)
+		res.status(400)
+		return res.json({
+			status: 'FAILED',
+			message: 'invalid user'
+		})
+	}
 
 	console.log(`finding branch ${branch_}`)
-	Branch.findOne({branch: branch_}, (err, branch) => {
+	await Branch.findOne({branch: branch_}, async (err, branch) => {
 		if (err) {
 			console.log(`error finding branch: ${err.message}`)
 			res.status(500)
@@ -828,7 +827,6 @@ router.post('/test_waiting_list/', verifyToken, upload, async function (req, res
 				console.log('invalid quota')
 				waitingNo = -1
 		}
-
 		if (waitingNo == -1) {
 			res.status(400)
 			return res.json({
@@ -838,19 +836,18 @@ router.post('/test_waiting_list/', verifyToken, upload, async function (req, res
 		}
 		/* set user's waiting status */
 		user.waiting = waitingNo > 0 ? true : false
-		user.save(function (err) {
-			if (err) {
-				console.log(`error saving user: ${err.message}`)
-				res.status(500)
-				res.json({
-					status: 'FAILED',
-					message: `error saving user\n${err.message}`
-				})
-			}
-			console.log('saved user successfully')
-		})
+		try {
+			await user.save()
+		} catch (err) {
+			console.log(`error saving user: ${err.message}`)
+			res.status(500)
+			return res.json({
+				status: 'FAILED',
+				message: `error saving user\n${err.message}`
+			})
+		}
 		res.status(200)
-		res.json({
+		return res.json({
 			status: 'SUCCESS',
 			message: `${appNo} occupied ${quota_}.\n`,
 			waitingListNo: waitingNo
