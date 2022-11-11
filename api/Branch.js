@@ -50,25 +50,24 @@ router.post('/add',upload,function(req,res){
 					/* what to do when we add more quotas? */
 					var total = req.body.totalSeats
 					var nri = req.body.NRISeats
-					var mgmt = req.body.MSeats
-					var gov = req.body.GSeats
+					var mgmt = req.body.MgmtSeats
 					nri = nri ? nri : 0
 					mgmt = mgmt ? mgmt : 0
-					gov = gov ? gov : 0
-					if ((nri + mgmt + gov) != total) {
-						console.log(`${nri} + ${mgmt} + ${gov} != ${total}`)
+					if ((nri + mgmt) != total) {
+						console.log(`${nri} + ${mgmt} != ${total}`)
 						res.status(400)
 						return res.json({
 							status: "FAILED",
-							message: "nri + mgmt + gov != total"
+							message: "nri + mgmt != total"
 						})
 					}
                     const new_branch= new Branch({
                         branch:branch,
                         totalSeats:req.body.totalSeats,
                         NRISeats:req.body.NRISeats,
-                        MSeats:req.body.MSeats,
-                        GSeats:req.body.GSeats,
+                        MgmtSeats:req.body.MgmtSeats,
+						WLNRILimit: req.body.WLNRILimit,
+						WLMgmtLimit: req.body.WLMgmtLimit
                     })
                     new_branch.save(function(err){
                         if(err){
@@ -109,9 +108,10 @@ router.post('/add',upload,function(req,res){
 });
 
 /*
- * /branch/search - search all current branches
+ * /branch/getall - list all fields of current branches
+ * Only admin
  */
-router.get('/search', upload, function (req, res) {
+router.get('/getall', upload, function (req, res) {
 	console.log(req.headers)
 	if (typeof(req.headers.authorization) == 'undefined') {
 		console.log('no token received')
@@ -142,7 +142,7 @@ router.get('/search', upload, function (req, res) {
 			message: 'Access denied'
 		})
 	}
-	Branch.find(req.body, 'branch -_id', (err, result) => {
+	Branch.find(req.body, (err, result) => {
 		if (err) {
 			console.log(`error: ${err.message}`)
 			res.status(500)
@@ -154,11 +154,63 @@ router.get('/search', upload, function (req, res) {
 		res.status(200)
 		res.json({
 			status: 'SUCCESS',
-			list: result.map(a => a.branch)
+			list: result
 		})
 	})
 })
 
+/*
+ * /branch/get - list all fields of current branches
+ */
+router.get('/get', upload, function (req, res) {
+	console.log(req.headers)
+	if (typeof(req.headers.authorization) == 'undefined') {
+		console.log('no token received')
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Token not specified'
+		})
+	}
+	const token = req.headers.authorization.split(" ")[1];
+	try {
+		console.log(`token = ${token}`)
+		decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
+	} catch (ex) {
+		console.log(ex.message)
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Invalid token'
+		})
+	}
+
+	Branch.find(req.body, (err, result) => {
+		if (err) {
+			console.log(`error: ${err.message}`)
+			res.status(500)
+			return res.json({
+				status: 'FAILED',
+				message: err.message
+			})
+		}
+		res.status(200)
+		res.json({
+			status: 'SUCCESS',
+			list: result.map(o => ({
+				name: o.branch,
+				totalSeats: o.totalSeats,
+				NRISeats: o.NRISeats,
+				MgmtSeats: o.MgmtSeats,
+				NRIOccupied: o.occupiedSeatsNRI,
+				MgmtOccupied: o.occupiedSeatsMgmt,
+				NRIWL: o.waitingListNRI.length,
+				MgmtWL: o.waitingListMgmt.length
+				// TODO: Add waiting limit field
+			}))
+		})
+	})
+})
 /*
  * /branch/delete - delete a branch from branch database
  * 	Branch to be deleted is given in request body which is passed directly to the
@@ -226,7 +278,7 @@ router.delete('/delete', upload, function (req, res) {
 	})
 })
 
-router.patch('/edit/:branch',upload,function(req,res){
+router.patch('/edit/:branch',upload, async function(req,res){
     if(req.headers.authorization){
 		const token = req.headers.authorization.split(" ")[1];
 		var decoded
@@ -245,44 +297,33 @@ router.patch('/edit/:branch',upload,function(req,res){
 		console.log("role:"+decoded.role);
 		if(decoded.role=='admin'){
 			_branch=req.params.branch;
-            ////
-			Branch.find({branch:_branch},function(err,result){
+			console.log(req.params)
+			////
+			console.log(`updating ${_branch}`)
+			console.log(req.body)
+			await Branch.updateOne({branch: _branch},{ $set: req.body}, { runValidators: true },function(err){
 				if(err){
 					res.status(500);	// Internal server error
 					console.log('error message:\n' + err.message);
-					res.json({
+					return res.json({
 						status: "FAILED",
 						message: "Internal server error"
 					});
 				}
-                
-				else{
-                    Branch.updateOne({branch:_branch},{ $set: req.body}, { runValidators: true },function(err){
-                        if (err) {
-                            res.json({ 
-                                message: err.message,
-                                status: "FAILED" 
-                            });
-                        } 
-                        res.status(200);
-                        res.json({
-                        status:"SUCCESS",
-                        message:"fields "+_branch+" quota is updated",
-                        }) 
-                    })
-					
-
-				}
+				res.json({
+					status:"SUCCESS",
+					message:"fields "+_branch+" quota is updated",
+				}) 
+				console.log('success')
 			})
-			
-		}
-		else{
+		} else {
 			res.status(403);
 			res.json({
 				status:"FAILED",
 				message:'Access denied'
 			})
 		}
+		console.log('hellooo')
 		
 	}
 	else{
