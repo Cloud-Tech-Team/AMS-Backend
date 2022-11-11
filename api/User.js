@@ -764,9 +764,99 @@ router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, funct
 });
 
 
+/* Get applicationNo, branch, and quota from request.
+ * Have the user occupy the branch's quota.
+ * Return waiting list number (0 if not in waiting list)
+ */
+router.post('/test_waiting_list/', verifyToken, upload, async function (req, res) {
+	const branch_ = req.body.branch
+	const quota_  = req.body.quota
+	const appNo   = req.body.applicationNo
 
+	console.log(req.body)
 
+	console.log(`finding user ${appNo}`)
+	var user = null
+	var query = {applicationNo: appNo}
+	console.log(query)
+	await User.findOne({applicationNo: appNo}, (err, result) => {
+		if (err) {
+			console.log(`error finding user: ${err}`)
+			res.status(500)
+			return res.json({
+				status: 'FAILED',
+				message: `error finding user with applicationNo ${appNo}\n${err.message}`
+			})
+		}
+		if (result == null) {
+			console.log(`invalid user: ${appNo}`)
+			res.status(400)
+			return res.json({
+				status: 'FAILED',
+				message: 'invalid user'
+			})
+		}
+		user = result
+		console.log('found user')
+		console.log(user)
+	})
 
+	console.log(`finding branch ${branch_}`)
+	Branch.findOne({branch: branch_}, (err, branch) => {
+		if (err) {
+			console.log(`error finding branch: ${err.message}`)
+			res.status(500)
+			return res.json({
+				status: 'FAILED',
+				message: err.message
+			})
+		}
+		/* found branch; now occupy quota's seat */
+		var waitingNo = 0
+		switch (quota_) {
+			case 'NRI':
+				console.log('NRI')
+				console.log(user)
+				waitingNo = branch.occupySeatNRI(user)
+				break
+			case 'Management':
+				console.log('Management')
+				console.log(user)
+				waitingNo = branch.occupySeatMgmt(user)
+				break
+			default:
+				console.log('invalid quota')
+				waitingNo = -1
+		}
+
+		if (waitingNo == -1) {
+			res.status(400)
+			return res.json({
+				status: 'FAILED',
+				message: 'Invalid quota'
+			})
+		}
+		/* set user's waiting status */
+		user.waiting = waitingNo > 0 ? true : false
+		user.save(function (err) {
+			if (err) {
+				console.log(`error saving user: ${err.message}`)
+				res.status(500)
+				res.json({
+					status: 'FAILED',
+					message: `error saving user\n${err.message}`
+				})
+			}
+			console.log('saved user successfully')
+		})
+		res.status(200)
+		res.json({
+			status: 'SUCCESS',
+			message: `${appNo} occupied ${quota_}.\n`,
+			waitingListNo: waitingNo
+		})
+	})
+})
 
 
 module.exports = router
