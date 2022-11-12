@@ -29,10 +29,6 @@ const BranchSchema=new Schema({
 	 * array of application numbers in waiting list in order
 	 * remove when user is deleted
 	 */
-    waitingListNRI: {
-        type: [String],
-		default: []
-    },
     waitingListMgmt: {
         type: [String],
         default: []
@@ -57,15 +53,9 @@ BranchSchema.methods.isFilled = function() {
 	return this.occupiedSeats == this.totalSeats
 }
 
-/*
- * Occupy seat for each quota.
- * Add to waiting list if all seats filled and return waitingList number if successful,
- * else return -1.
- * To get a user's waiting list number, check their 'waiting' field.
- * If true, find their index in waitingListXXX array using applicationNo.
- * Return Infinity if waiting list limit reached Hehe.
- * NOTE: If user is already in waitingList, *PRETEND* to add and return index.
- * What if user who registered, but not in waiting list applies again?
+/* occupySeatNRI
+ * 	No waiting list for NRI.
+ *	Return 0 if success, -1 if filled.
  */
 BranchSchema.methods.occupySeatNRI = async function(user) {
 	console.log(`occupySeatNRI: ${user.applicationNo}`)
@@ -76,31 +66,21 @@ BranchSchema.methods.occupySeatNRI = async function(user) {
 		this.save()
 		return 0
 	} else {
-		/* add user to waitingList if not already in it */
-		var index = this.waitingListNRI.indexOf(user.applicationNo)
-		if (index != -1) {
-			console.log(`${user.applicationNo} already in waiting list @ ${index}`)
-		} else {
-			// check if waiting list limit reached
-			if (this.waitingListNRI.length >= this.WLNRILimit) {
-				console.log('waiting list limit reached')
-				return Infinity
-			}
-			this.waitingListNRI.push(user.applicationNo)
-			index = this.waitingListNRI.length
-			await this.save(function (err) {
-				if (err) {
-					console.log(`error saving branch: ${err.message}`)
-					return -1
-				}
-			})
-		}
-		console.log('waiting list')
-		console.log(this.waitingListNRI)
-		return index
+		console.log('NRI filled')
+		return -1;
 	}
 };
 
+/*
+ * Occupy seat for Management quota.
+ * Add to waiting list if all seats filled and return waitingList number if successful,
+ * else return -1.
+ * To get a user's waiting list number, check their 'waiting' field.
+ * If true, find their index in waitingListMgmt array using applicationNo.
+ * Return Infinity if waiting list limit reached Hehe.
+ * NOTE: If user is already in waitingList, *PRETEND* to add and return index.
+ * What if user who registered, but not in waiting list applies again?
+ */
 BranchSchema.methods.occupySeatMgmt = async function(user) {
 	console.log(`occupySeatMgmt: ${user.applicationNo}`)
 	console.log(`occupied: ${this.occupiedSeatsMgmt}, total: ${this.MgmtSeats}`)
