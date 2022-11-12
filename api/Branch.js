@@ -333,21 +333,4 @@ router.patch('/edit/:branch',upload, async function(req,res){
 	}
 })
 
-
-router.get('/names',function(req,res){
-    branchList=[]
-    Branch.find({},{branch:1},function(err,b){
-     
-        b.forEach(function(item){
-            branchList.push(item.branch)
-
-        })
-        res.status(200)
-        res.json({
-            status:"SUCCESS",
-            message:branchList
-        })
-    })
-})
-
 module.exports = router
