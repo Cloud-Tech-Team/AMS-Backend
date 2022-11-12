@@ -204,7 +204,6 @@ router.get('/get', upload, function (req, res) {
 				MgmtSeats: o.MgmtSeats,
 				NRIOccupied: o.occupiedSeatsNRI,
 				MgmtOccupied: o.occupiedSeatsMgmt,
-				NRIWL: o.waitingListNRI.length,
 				MgmtWL: o.waitingListMgmt.length
 				// TODO: Add waiting limit field
 			}))
@@ -375,16 +374,10 @@ router.get('/waitingList/:quota/:branch',function(req,res){
             if(_quota in Constants.quotas){
                 Branch.findOne({branch:_branch},function(err,branch){
                     if(branch){
-                        if(_quota=='NRI')
-                            waitingList=branch.filledNRI?branch.waitingListNRI:0;
-                        else{
-                            waitingList=-1
-                        }
                         res.status(200)
                         res.json({
                             status:"SUCCESS",
                             message:"Branch "+_branch,
-                            waitingList:waitingList
                         })
                     }
                     else{
