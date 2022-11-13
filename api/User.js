@@ -139,9 +139,6 @@ router.post('/register', upload, async function (req, res) {
 		console.log('Password: ' + password);
 
 		user.password = password;							// store plaintext password :/
-		console.log('calling user.assignCoadmin()')
-		await user.assignCoadmin()	// check for error and make this atomic
-		console.log(`user after assigning ${user}`)
 		user.save(function (err) {
 			if (err) {
 				console.log('error saving user');
@@ -507,7 +504,6 @@ router.get('/nri/application', function (req, res){
 //nri patch
 router.patch('/nri/application/:applicationNo', verifyToken, upload, function (req, res) {
 
-
     User.findOne({ applicationNo: req.params.applicationNo },async function (err, users) {
         if(users!=null){
             if(users.quota=='NRI'){
@@ -544,7 +540,7 @@ router.patch('/nri/application/:applicationNo', verifyToken, upload, function (r
                     Branch.findOne({branch:req.body.bp1},function(err,branch){
                         if(branch)
                         {
-                            if(!branch.checkFilled() && !branch.checkFilledNRI()){
+                            if(!branch.isFilled() && !branch.isNRIFilled()){
                                 branch.occupySeat();
                                 branch.occupySeatNRI();
                                 console.log("Seat Available");
@@ -555,7 +551,7 @@ router.patch('/nri/application/:applicationNo', verifyToken, upload, function (r
                             branch.save();
                             // console.log(branch.totalSeats);
                             // console.log(branch.occupiedSeats);
-                            // console.log(branch.checkFilled());
+							// console.log(branch.isFilled());
                         }
                     })
                 }
@@ -606,8 +602,6 @@ router.patch('/nri/application/:applicationNo', verifyToken, upload, function (r
                     }
                 }
     
-    
-    
                 var update=Object.assign({},body,permanantAddress,contactAddress,guardian,sponser,fatherDetails);
     
                 console.log(update);
@@ -629,14 +623,9 @@ router.patch('/nri/application/:applicationNo', verifyToken, upload, function (r
                             });
                         }
                     });
-    
-    
-    
+       
             }
         }
-        
-        
-        
         
         else{
             console.log('could not find user ' + req.params.applicationNo)
@@ -648,10 +637,6 @@ router.patch('/nri/application/:applicationNo', verifyToken, upload, function (r
         }
         
     })
-
-
-
-    
 
 });
 
@@ -672,7 +657,6 @@ router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, funct
                     }
                    
                 }
-    
     
                 body=req.body;
                 // console.log(body);
@@ -745,15 +729,8 @@ router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, funct
                             });
                         }
                     });
-    
-    
-    
             }
         }
-        
-        
-        
-        
         else{
             console.log('could not find user ' + req.params.applicationNo)
 			res.status(500);
@@ -764,10 +741,6 @@ router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, funct
         }
         
     })
-
-
-
-    
 
 });
 
@@ -787,14 +760,14 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
                             console.log('Keam certificate uploaded --'+req.params.applicationNo);
                     }
                     if (req.files.file12th) {
-                        const file64 = formatBufferTo64(req.files.file12[0]);
+                        const file64 = formatBufferTo64(req.files.file12th[0]);
                         const uploadResult = await cloudinaryUpload(file64.content);
                         req.body.file12 = uploadResult.secure_url;
                         if(req.body.file12!=null)
                             console.log('12th certificate uploaded --'+req.params.applicationNo);
                     }
                     if (req.files.file10th) {
-                        const file64 = formatBufferTo64(req.files.file10[0]);
+                        const file64 = formatBufferTo64(req.files.file10th[0]);
                         const uploadResult = await cloudinaryUpload(file64.content);
                         req.body.file10th = uploadResult.secure_url;
                         if(req.body.file10th!=null)
@@ -802,11 +775,8 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
                     }
                    
                 }
-    
-    
                 body=req.body;
                 // console.log(body);
-
                 const grade12={
                     grade12:{
                         school:body.plustwoschool  || users.grade12.school|| users.a,
@@ -836,7 +806,7 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
                         markPhy:body.sslcphymark      || users.grade10.markCS|| users.a,
                         markBio:body.sslcbiomark     || users.grade10.markBio|| users.a,
                         markChem:body.sslcchemmark    || users.grade10.markChem|| users.a,
-                        marksheet:body.sslcfile       || users.grade10.marksheet|| users.a,
+                        marksheet:body.file10th       || users.grade10.marksheet|| users.a,
                       
                       },
                 }
@@ -849,13 +819,9 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
                         markPaper1:body.keampaper1 || users.keam.markPaper1|| users.a,
                         markPaper2:body.keampaper2           || users.keam.markPaper2|| users.a,
                         totalMark:body.keamtotal       || users.keam.totalMark|| users.a,
-                        file:body.keamfile        || users.keam.file|| users.a
+                        file:body.fileKeam    || users.keam.file|| users.a
                       },
                 }
-
-                
-                
-    
                 var update=Object.assign({},keam,grade10,grade12);
     
                 console.log(update);
@@ -883,9 +849,6 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
             }
         }
         
-        
-        
-        
         else{
             console.log('could not find user ' + req.params.applicationNo)
 			res.status(500);
@@ -896,18 +859,219 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
         }
         
     })
-
-
-
-    
-
 });
 
+router.patch('/nri/application-page3/:id',verifyToken,upload,async function(req,res){
+
+    if(req.files){
+        if (req.files.imgSign) {
+            const file64 = formatBufferTo64(req.files.imgSign[0]);
+            const uploadResult = await cloudinaryUpload(file64.content);
+            req.body.imgSign = uploadResult.secure_url;
+            if(req.body.imgSign!=null)
+                console.log('Signature uploaded\n');
+        }
+    }
+    User.findOne({ applicationNo: req.params.id }, function (err, users) {
+        if (!err) {
+
+                a = req.body
+                if (!(a.imgSign)) {
+                    res.json({
+                        status: "FAILED",
+                        message: "Uploads are Missing"
+
+                    });
+                }
+                else{
+                    
+                const update = {
+
+                    
+                    bp1: a.bp1 || users.bp1 || users.a,
+                    bp2: a.bp2 || users.bp2 || users.a,
+                    bp3: a.bp3 || users.bp3 || users.a,
+                    bp4: a.bp4 || users.bp4 || users.a,
+                    bp5: a.bp5 || users.bp5 || users.a,
+                    imgSign: a.imgSign || users.imgSign || users.a,
+                    
+                 }
+                 User.updateOne(
+                    { applicationNo: req.params.id },
+                    { $set: update }, { runValidators: true },
+                    function (err) {
+                        if (err) {
+                            res.json({ error_message: err.message, status: "FAILED" });
+                        } else {
+                            res.json({
+                                status: "SUCCESS ",
+                            });
+                        }
+                });
+            }
+        } else {
+            res.json({
+                status: 'FAILED',
+                message: 'Not registered'
+            })
+        }
+  
+
+    });
+})
+
+router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,res){
+
+    if(req.files){
+        if (req.files.fileTransactionID) {
+            const file64 = formatBufferTo64(req.files.fileTransactionID[0]);
+            const uploadResult = await cloudinaryUpload(file64.content);
+            req.body.fileTransactionID = uploadResult.secure_url;
+            if(req.body.fileTransactionID!=null)
+                console.log('Transaction proof uploaded\n');
+        }
+    }
+    User.findOne({ applicationNo: req.params.id }, function (err, user) {
+        if (!err) {
+
+                a = req.body
+                if (!(a.fileTransactionID)) {
+                    res.json({
+                        status: "FAILED",
+                        message: "Uploads are Missing"
 
 
+                    });
+                }
+                else{
+                    
+                    
+                const update = {
+
+                    transactionID:a.transactionID ||users.transactionID ||users.a,
+                    fileTransactionID:a.fileTransactionID || users.fileTransactionID || users.a
+                  
+                    
+                 }
+                 User.updateOne(
+                    { applicationNo: req.params.id },
+                    { $set: update }, { runValidators: true },
+                    async function (err) {
+                        if (err) {
+                            res.json({ error_message: err.message, status: "FAILED" });
+                        } else {
+                            console.log('calling user.assignCoadmin()')
+                            await user.assignCoadmin()	// check for error and make this atomic
+                            console.log(`user after assigning ${user}`)
+                            res.json({
+                                status: "SUCCESS ",
+                            });
+                        }
+                });
+                
+            }
+        } else {
+            res.json({
+                status: 'FAILED',
+                message: 'Not registered'
+            })
+        }
+  
+
+    });
+
+/* Get applicationNo, branch, and quota from request.
+ * Have the user occupy the branch's quota.
+ * Return waiting list number (0 if not in waiting list)
+ */
+router.post('/test_waiting_list/', verifyToken, upload, async function (req, res) {
+	const branch_ = req.body.branch
+	const quota_  = req.body.quota
+	const appNo   = req.body.applicationNo
+
+	console.log(req.body)
+
+	console.log(`finding user ${appNo}`)
+	var user = null
+	var query = {applicationNo: appNo}
+	console.log(query)
+	await User.findOne({applicationNo: appNo}, (err, result) => {
+		if (err) {
+			console.log(`error finding user: ${err}`)
+			res.status(500)
+			return res.json({
+				status: 'FAILED',
+				message: `error finding user with applicationNo ${appNo}\n${err.message}`
+			})
+		}
+		user = result
+	})
+	console.log(user)
+	if (user == null) {
+		console.log(`invalid user: ${appNo}`)
+		res.status(400)
+		return res.json({
+			status: 'FAILED',
+			message: 'invalid user'
+		})
+	}
 
 
+	console.log(`finding branch ${branch_}`)
+	await Branch.findOne({branch: branch_}, async (err, branch) => {
+		if (err) {
+			console.log(`error finding branch: ${err.message}`)
+			res.status(500)
+			return res.json({
+				status: 'FAILED',
+				message: err.message
+			})
+		}
+		/* found branch; now occupy quota's seat */
+		var waitingNo = 0
+		switch (quota_) {
+			case 'NRI':
+				console.log('NRI')
+				console.log(user)
+				waitingNo = branch.occupySeatNRI(user)
+				break
+			case 'Management':
+				console.log('Management')
+				console.log(user)
+				waitingNo = branch.occupySeatMgmt(user)
+				break
+			default:
+				console.log('invalid quota')
+				waitingNo = -1
+		}
+		if (waitingNo == -1) {
+			res.status(400)
+			return res.json({
+				status: 'FAILED',
+				message: 'Invalid quota'
+			})
+		}
+		/* set user's waiting status */
+		user.waiting = waitingNo > 0 ? true : false
+		try {
+			await user.save()
+		} catch (err) {
+			console.log(`error saving user: ${err.message}`)
+			res.status(500)
+			return res.json({
+				status: 'FAILED',
+				message: `error saving user\n${err.message}`
+			})
+		}
+		res.status(200)
+		return res.json({
+			status: 'SUCCESS',
+			message: `${appNo} occupied ${quota_}.\n`,
+			waitingListNo: waitingNo
+		})
+	})
+})
 
-
+})
 module.exports = router
 
