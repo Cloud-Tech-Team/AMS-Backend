@@ -823,7 +823,7 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
                         markPhy:body.plustwophymark  || users.grade12.markCS|| users.a,
                         markBio:body.plustwobiomark  || users.grade12.markBio|| users.a,
                         markChem:body.plutwochemark  || users.grade12.markChem|| users.a,
-                        marksheet:body.file12 || users.grade12.marksheet|| users.a,
+                        marksheet:body.file12th || users.grade12.marksheet|| users.a,
                       },
                 }
                 const grade10={
