@@ -928,7 +928,7 @@ router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,
             const uploadResult = await cloudinaryUpload(file64.content);
             req.body.fileTransactionID = uploadResult.secure_url;
             if(req.body.fileTransactionID!=null)
-                console.log('Signature uploaded\n');
+                console.log('Transaction proof uploaded\n');
         }
     }
     User.findOne({ applicationNo: req.params.id }, function (err, users) {
@@ -945,15 +945,12 @@ router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,
                 }
                 else{
                     
+                    
                 const update = {
 
-                    
-                    bp1: a.bp1 || users.bp1 || users.a,
-                    bp2: a.bp2 || users.bp2 || users.a,
-                    bp3: a.bp3 || users.bp3 || users.a,
-                    bp4: a.bp4 || users.bp4 || users.a,
-                    bp5: a.bp5 || users.bp5 || users.a,
-                    imgSign: a.imgSign || users.imgSign || users.a,
+                    transactionID:a.transactionID ||users.transactionID ||users.a,
+                    fileTransactionID:a.fileTransactionID || users.fileTransactionID || users.a
+                  
                     
                  }
                  User.updateOne(
