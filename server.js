@@ -15,7 +15,7 @@ var options = {
     // "optionsSuccessStatus": 204
   }
 
-app.use(cors(options));
+app.use(cors());
 // app.options('*',cors());
 
 const bodyParser = require('body-parser')
