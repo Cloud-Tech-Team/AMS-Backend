@@ -3,8 +3,13 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const BranchSchema=new Schema({
+	year: {
+		type: Number,
+		required: true
+	},
     branch:{
         type:String,
+		required: true,
     },
 	/* total seats must be sum of seats for all quotas */
     totalSeats:Number,
