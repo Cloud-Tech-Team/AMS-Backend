@@ -931,7 +931,7 @@ router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,
                 console.log('Transaction proof uploaded\n');
         }
     }
-    User.findOne({ applicationNo: req.params.id }, function (err, users) {
+    User.findOne({ applicationNo: req.params.id }, function (err, user) {
         if (!err) {
 
                 a = req.body
@@ -956,15 +956,19 @@ router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,
                  User.updateOne(
                     { applicationNo: req.params.id },
                     { $set: update }, { runValidators: true },
-                    function (err) {
+                    async function (err) {
                         if (err) {
                             res.json({ error_message: err.message, status: "FAILED" });
                         } else {
+                            console.log('calling user.assignCoadmin()')
+                            await user.assignCoadmin()	// check for error and make this atomic
+                            console.log(`user after assigning ${user}`)
                             res.json({
                                 status: "SUCCESS ",
                             });
                         }
                 });
+                
             }
         } else {
             res.json({
