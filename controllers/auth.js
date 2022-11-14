@@ -115,12 +115,14 @@ exports.login = async (req, res) => {
                     // Correct password
                     console.log('correct password');
                     const token = user.generateJWT();
-
+                    
 					res.status(200);
                     res.json({
                         status: "SUCCESS",
                         message: "Sign-in successful",
                         token: token,
+                        quota: user.quota,
+                        applicationComplete: user.applicationComplete
                     })
                 } else {
 					console.log(password);

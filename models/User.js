@@ -29,6 +29,10 @@ const UserSchema = new Schema({
 		  type: Boolean,
 		  default: false
 	  },
+    applicationCompleted: {
+      type: Boolean,
+		  default: false,
+    },
       applicationNo:{
         type:String
       },
