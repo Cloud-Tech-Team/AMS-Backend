@@ -372,7 +372,6 @@ UserSchema.methods.comparePassword = function(password) {
 UserSchema.methods.generateJWT = function() {
 	let payload = {
 		id:	this._id,
-		appNo: this.applicationNo,
 		email:	this.email,
 		role:	this.role
 	};
