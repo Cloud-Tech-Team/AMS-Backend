@@ -863,61 +863,116 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
 
 router.patch('/nri/application-page3/:id',verifyToken,upload,async function(req,res){
 
-    if(req.files){
-        if (req.files.imgSign) {
-            const file64 = formatBufferTo64(req.files.imgSign[0]);
-            const uploadResult = await cloudinaryUpload(file64.content);
-            req.body.imgSign = uploadResult.secure_url;
-            if(req.body.imgSign!=null)
-                console.log('Signature uploaded\n');
-        }
-    }
-    User.findOne({ applicationNo: req.params.id }, function (err, users) {
-        if (!err) {
+    a = req.body
+    if (a.button == "upload") {
+        if(req.files){
+            if (req.files.imgSign) {
+                const file64 = formatBufferTo64(req.files.imgSign[0]);
+                const uploadResult = await cloudinaryUpload(file64.content);
+                req.body.imgSign = uploadResult.secure_url;
+                if(req.body.imgSign!=null)
+                    console.log('Signature uploaded\n');
+            
 
-                a = req.body
-                if (!(a.imgSign)) {
-                    res.json({
-                        status: "FAILED",
-                        message: "Uploads are Missing"
-
-                    });
-                }
-                else{
-                    
-                const update = {
-
-                    
-                    bp1: a.bp1 || users.bp1 || users.a,
-                    bp2: a.bp2 || users.bp2 || users.a,
-                    bp3: a.bp3 || users.bp3 || users.a,
-                    bp4: a.bp4 || users.bp4 || users.a,
-                    bp5: a.bp5 || users.bp5 || users.a,
-                    imgSign: a.imgSign || users.imgSign || users.a,
-                    
-                 }
-                 User.updateOne(
-                    { applicationNo: req.params.id },
-                    { $set: update }, { runValidators: true },
-                    function (err) {
-                        if (err) {
-                            res.json({ error_message: err.message, status: "FAILED" });
+                    User.findOne({ applicationNo: req.params.id }, function (err, users) {
+                        if (!err) {
+                
+                                
+                                if (!(a.imgSign)) {
+                                    res.json({
+                                        status: "FAILED",
+                                        message: "Uploads are Missing"
+                
+                                    });
+                                }
+                                else{
+                                    
+                                const update = {
+                
+                                    
+                                    //bp1: a.bp1 || users.bp1 || users.a,
+                                    // bp2: a.bp2 || users.bp2 || users.a,
+                                    // bp3: a.bp3 || users.bp3 || users.a,
+                                    // bp4: a.bp4 || users.bp4 || users.a,
+                                    // bp5: a.bp5 || users.bp5 || users.a,
+                                    imgSign: a.imgSign || users.imgSign || users.a,
+                                    
+                                 }
+                                 User.updateOne(
+                                    { applicationNo: req.params.id },
+                                    { $set: update }, { runValidators: true },
+                                    function (err) {
+                                        if (err) {
+                                            res.json({ error_message: err.message, status: "FAILED" });
+                                        } else {
+                                            res.json({
+                                                status: "SUCCESS ",
+                                            });
+                                        }
+                                });
+                            }
                         } else {
                             res.json({
-                                status: "SUCCESS ",
-                            });
+                                status: 'FAILED',
+                                message: 'Not registered'
+                            })
                         }
-                });
+                  
+                
+                    });    
             }
-        } else {
-            res.json({
-                status: 'FAILED',
-                message: 'Not registered'
-            })
         }
-  
+    }
+    else if(a.button == 'proceed'){
+        
+        User.findOne({ applicationNo: req.params.id }, function (err, users) {
+            if (!err) {
 
-    });
+                    
+                    if (!(a.imgSign)) {
+                        res.json({
+                            status: "FAILED",
+                            message: "Uploads are Missing"
+
+                        });
+                    }
+                    else{
+                        
+                    const update = {
+
+                        
+                        bp1: a.bp1 || users.bp1 || users.a,
+                        // bp2: a.bp2 || users.bp2 || users.a,
+                        // bp3: a.bp3 || users.bp3 || users.a,
+                        // bp4: a.bp4 || users.bp4 || users.a,
+                        // bp5: a.bp5 || users.bp5 || users.a,
+                        //imgSign: a.imgSign || users.imgSign || users.a,
+                        
+                    }
+                    User.updateOne(
+                        { applicationNo: req.params.id },
+                        { $set: update }, { runValidators: true },
+                        function (err) {
+                            if (err) {
+                                res.json({ error_message: err.message, status: "FAILED" });
+                            } else {
+                                res.json({
+                                    status: "SUCCESS ",
+                                });
+                            }
+                    });
+                }
+            } else {
+                res.json({
+                    status: 'FAILED',
+                    message: 'Not registered'
+                })
+            }
+    
+
+        });
+    }
+   
 })
 
 router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,res){
