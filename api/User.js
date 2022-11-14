@@ -80,15 +80,7 @@ router.post('/register', upload, async function (req, res) {
             message: "Empty input field(s)"
         })
         console.log(req.body)
-    }
-    else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
-		res.status(400);
-        res.json({
-            status: "FAILED",
-            message: "Invalid email"
-        })
-    }
-    else {
+    } else {
 		var query = {email: email, quota: quota, course: req.body.course}
 		const stu = await User.findOne(query)
 		if (stu) {

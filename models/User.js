@@ -56,11 +56,13 @@ const UserSchema = new Schema({
         },
       email:
         {
-          type: String,
-          validate:{
-            validator: value=> /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value)
-          },
-        },
+			type: String,
+			required: true,
+			validate:{
+				validator: value=> /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value),
+				message: "Invalid email id"
+			},
+		},
       age :
       {
         type:Number,
