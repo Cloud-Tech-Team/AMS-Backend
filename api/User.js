@@ -1,4 +1,5 @@
 const express = require('express')
+
 const router = express.Router()
 
 
@@ -19,6 +20,10 @@ const moment = require('moment')
 //uploading files
 const DatauriParser = require('datauri/parser');
 const parser = new DatauriParser();
+const multer = require('multer');
+const app = express();
+
+app.use(express.static(__dirname + '/public'));
 
 const formatBufferTo64 = file =>
     parser.format(path.extname(file.originalname).toString(), file.buffer)
@@ -81,14 +86,14 @@ router.post('/register', upload, async function (req, res) {
         })
         console.log(req.body)
     } else {
-		var query = {email: email, quota: quota, course: req.body.course}
+		var query = {email: email, quota: quota, course: req.body.course,academicYear:req.body.academicYear}
 		const stu = await User.findOne(query)
 		if (stu) {
 			console.log(`error: student exists ${stu}`)
 			res.status(409)
 			return res.json({
 				status: 'FAILED',
-				message: `User has already registered for ${quota} and ${req.body.course}`
+				message: `User has already registered for ${quota} ${academicYear}and ${req.body.course}`
 			})
 		}
 		console.log('student does not exist')
@@ -103,6 +108,7 @@ router.post('/register', upload, async function (req, res) {
 		const user = new User({
 			quota:req.body.quota,
 			course:req.body.course,
+            academicYear:req.body.academicYear,
 			firstName: req.body.firstName,
 			middleName: req.body.middleName,
 			lastName: req.body.lastName,
@@ -1064,8 +1070,8 @@ router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,
       
     
         });
-    })
-    
+    });
+
 /* Get applicationNo, branch, and quota from request.
  * Have the user occupy the branch's quota.
  * Return waiting list number (0 if not in waiting list)
