@@ -186,7 +186,7 @@ const UserSchema = new Schema({
         relation:String,
         occupation:String,
         mobile:{
-            type:Number,
+            type:String,
             validate:{
                 validator:value=>/^[6-9]{1}[0-9]{9}$/.test(value),
                 message:"Invalid Mobile Number"
