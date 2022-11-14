@@ -921,7 +921,7 @@ router.patch('/nri/application-page3/:id',verifyToken,upload,async function(req,
             if (!err) {
 
                     
-                    if (!(a.imgSign)) {
+                    if (!(users.imgSign)) {
                         res.json({
                             status: "FAILED",
                             message: "Uploads are Missing"
@@ -1026,7 +1026,61 @@ router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,
   
 
     });
+})
 
+    router.patch('/nri/preview/:id',verifyToken,upload, async function(req,res){
+
+        if(req.files){
+            if (req.files.filePreview) {
+                const file64 = formatBufferTo64(req.files.filePreview[0]);
+                const uploadResult = await cloudinaryUpload(file64.content);
+                req.body.filePreview = uploadResult.secure_url;
+                if(req.body.filePreview!=null)
+                    console.log('Application preview received\n');
+            }
+        }
+         User.findOne({ applicationNo: req.params.id }, function (err, user) {
+            if (!err) {
+    
+                    a = req.body
+                    if (!(a.filePreview)) {
+                        res.json({
+                            status: "FAILED",
+                            message: "Uploads are Missing"
+                        });
+                    }
+                    else{
+                        
+                        
+                    const update = {
+                        
+                        filePreview:a.filePreview || user.filePreview || user.a
+                        
+                     }
+                      User.updateOne(
+                        { applicationNo: req.params.id },
+                        { $set: update }, { runValidators: true },
+                        function (err) {
+                            if (err) {
+                                res.json({ error_message: err.message, status: "FAILED" });
+                            } else {
+                                    res.json({
+                                    status: "SUCCESS ",
+                                });
+                            }
+                    })
+                }
+            } else {
+                res.json({
+                    status: 'FAILED',
+                    message: 'Not registered'
+                })
+            }
+      
+    
+        });
+    })
+    
 /* Get applicationNo, branch, and quota from request.
  * Have the user occupy the branch's quota.
  * Return waiting list number (0 if not in waiting list)
@@ -1119,6 +1173,5 @@ router.post('/test_waiting_list/', verifyToken, upload, async function (req, res
 	})
 })
 
-})
 module.exports = router
 

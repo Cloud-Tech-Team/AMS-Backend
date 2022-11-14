@@ -292,7 +292,9 @@ const UserSchema = new Schema({
       fileTransactionID:{
         type:String
       },
-
+      filePreview: {
+        type:String,
+      },
       registrationTimeStamp : {
         type:Date,
         default: Date.now()
