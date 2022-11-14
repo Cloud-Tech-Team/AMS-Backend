@@ -74,7 +74,7 @@ router.post('/register', upload, async function (req, res) {
     // gender = gender.toString().trim();
 
     if (firstName == "" || lastName == "" || email == "" || dob == "" || gender == "" || quota == "" || aadhaar=="") {
-		res.status(204);	// 204 No content
+		res.status(400);
         res.json({
             status: "FAILED",
             message: "Empty input field(s)"
@@ -195,7 +195,7 @@ router.get('/application/:id', verifyToken, upload, function (req, res) {
                     a = users;
                     console.log(users)
                     if (!(nationality && motherTongue && bloodGroup && aPhone && annualIncome)) {
-						res.status(204);	// 204 No Content
+						res.status(400);
                         res.json({
                             status: "FAILED",
                             message: "All fields are required"
