@@ -3,8 +3,13 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const BranchSchema=new Schema({
+	year: {
+		type: Number,
+		required: true
+	},
     branch:{
         type:String,
+		required: true,
     },
 	/* total seats must be sum of seats for all quotas */
     totalSeats:Number,
@@ -35,10 +40,6 @@ const BranchSchema=new Schema({
     },
 	/* Waiting list limits.
 	 * Can be set by admin */
-	WLNRILimit: {
-		type: Number,
-		default: 3
-	},
 	WLMgmtLimit: {
 		type: Number,
 		default: 3
@@ -119,15 +120,19 @@ BranchSchema.methods.occupySeatMgmt = async function(user) {
 /*
  * Get waiting list number for given user
  */
-BranchSchema.methods.getNRIWaitingListNo = function(user) {
-	// if not in array, indexOf returns -1, so we return 0.
-	console.log(`getNRIWaitingListNo ${user.applicationNo}`)
-	return this.waitingListNRI.indexOf(user.applicationNo) + 1
-}
-
 BranchSchema.methods.getMgmtWaitingListNo = function(user) {
 	console.log(`getMgmtWaitingListNo ${user.applicationNo}`)
 	return this.waitingListMgmt.indexOf(user.applicationNo) + 1
+}
+
+BranchSchema.methods.freeSeatNRI = function(user) {
+	console.log('freeSeatNRI')
+	if (this.occupiedSeatsNRI > 0) {
+		this.occupiedSeatsNRI--;
+		this.occupiedSeats--;
+	}
+	console.log(`occupiedSeatsNRI: ${this.occupiedSeatsNRI}`)
+	console.log(`occupiedSeats: ${this.occupiedSeats}`)
 }
 
 /*
@@ -143,21 +148,6 @@ BranchSchema.methods.getMgmtWaitingListNo = function(user) {
  * 		We return this user's application number from this function so whoever
  * 		called us can set the user's waiting status to false.
  */
-BranchSchema.methods.freeSeatNRI = function(user) {
-	console.log('freeSeatNRI')
-	if (user.waiting) {
-		console.log('user being removed from waiting list')
-		index = this.waitingListNRI.indexOf(user.applicationNo)
-		this.waitingListNRI.splice(index, 1)	// remove
-		return null
-	} else {
-		// move first person in waiting list out of it
-		var u = this.waitingListNRI.shift()
-		console.log(`user ${u} moved out of waiting list`)
-		return u
-	}
-}
-
 BranchSchema.methods.freeSeatMgmt = function(user) {
 	console.log('freeSeatMgmt')
 	if (user.waiting) {
@@ -183,10 +173,6 @@ BranchSchema.methods.isMgmtFilled = function() {
 }
 
 /* Get waiting list number for each quota by returning number of people in waitingList + 1 */
-BranchSchema.methods.NRIWaitingListSize = function() {
-	return this.waitingListNRI.length + 1
-}
-
 BranchSchema.methods.MgmtWaitingListSize = function() {
 	return this.waitingListMgmt.length + 1
 }

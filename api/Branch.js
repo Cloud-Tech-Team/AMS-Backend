@@ -28,8 +28,10 @@ router.post('/add',upload,function(req,res){
 		console.log("role:"+decoded.role);
 		if(decoded.role=='admin'){
             console.log(req.body);
-            const branch=req.body.branch;
-            Branch.find({branch},function(err,result){
+            const branch = req.body.branch;
+			const year = req.body.year;
+			/* check if branch exists */
+			Branch.find({branch: branch, year: year},function(err,result){
                 if(err){
                     console.log("Error in finding branch")
                     res.status(500)
@@ -48,6 +50,7 @@ router.post('/add',upload,function(req,res){
                 }
                 else{
 					/* what to do when we add more quotas? */
+					/* verify totalSeats = sum of seats for quotas */
 					var total = req.body.totalSeats
 					var nri = req.body.NRISeats
 					var mgmt = req.body.MgmtSeats
@@ -63,6 +66,7 @@ router.post('/add',upload,function(req,res){
 					}
                     const new_branch= new Branch({
                         branch:branch,
+						year: year,
                         totalSeats:req.body.totalSeats,
                         NRISeats:req.body.NRISeats,
                         MgmtSeats:req.body.MgmtSeats,
@@ -199,12 +203,12 @@ router.get('/get', upload, function (req, res) {
 			status: 'SUCCESS',
 			list: result.map(o => ({
 				name: o.branch,
+				year: o.year,
 				totalSeats: o.totalSeats,
 				NRISeats: o.NRISeats,
 				MgmtSeats: o.MgmtSeats,
 				NRIOccupied: o.occupiedSeatsNRI,
 				MgmtOccupied: o.occupiedSeatsMgmt,
-				NRIWL: o.waitingListNRI.length,
 				MgmtWL: o.waitingListMgmt.length
 				// TODO: Add waiting limit field
 			}))
@@ -278,7 +282,10 @@ router.delete('/delete', upload, function (req, res) {
 	})
 })
 
-router.patch('/edit/:branch',upload, async function(req,res){
+/*
+ * Edit branch db document given branch name and year
+ */
+router.patch('/edit/:branch/:year',upload, async function(req,res){
     if(req.headers.authorization){
 		const token = req.headers.authorization.split(" ")[1];
 		var decoded
@@ -296,12 +303,14 @@ router.patch('/edit/:branch',upload, async function(req,res){
 		}
 		console.log("role:"+decoded.role);
 		if(decoded.role=='admin'){
-			_branch=req.params.branch;
+			branch=req.params.branch;
+			year = req.params.year;
 			console.log(req.params)
 			////
-			console.log(`updating ${_branch}`)
+			console.log(`updating branch=${branch}, year=${year}`)
 			console.log(req.body)
-			await Branch.updateOne({branch: _branch},{ $set: req.body}, { runValidators: true },function(err){
+			await Branch.findOneAndUpdate({branch: branch, year: year}, { $set: req.body},
+												{ runValidators: true }, function(err, result) {
 				if(err){
 					res.status(500);	// Internal server error
 					console.log('error message:\n' + err.message);
@@ -310,11 +319,21 @@ router.patch('/edit/:branch',upload, async function(req,res){
 						message: "Internal server error"
 					});
 				}
-				res.json({
-					status:"SUCCESS",
-					message:"fields "+_branch+" quota is updated",
-				}) 
-				console.log('success')
+				console.log(result)
+				if (result ==null) {
+					console.log('modified 0')
+					res.status(400)
+					return res.json({
+						status: 'FAILED',
+						message: 'no document matched query'
+					})
+				} else {
+					console.log(`modified ${result.n}`)
+					res.json({
+						status:"SUCCESS",
+						message:"fields "+branch+" quota is updated",
+					}) 
+				}
 			})
 		} else {
 			res.status(403);
@@ -333,91 +352,5 @@ router.patch('/edit/:branch',upload, async function(req,res){
 		})
 	}
 })
-
-
-router.get('/names',function(req,res){
-    branchList=[]
-    Branch.find({},{branch:1},function(err,b){
-     
-        b.forEach(function(item){
-            branchList.push(item.branch)
-
-        })
-        res.status(200)
-        res.json({
-            status:"SUCCESS",
-            message:branchList
-        })
-    })
-})
-
-router.get('/waitingList/:quota/:branch',function(req,res){
-    
-    if(req.headers.authorization){
-        const token = req.headers.authorization.split(" ")[1];
-		var decoded
-		try {
-			console.log(`token = ${token}`)
-			decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
-		} catch (ex) {
-			console.log(ex.message)
-			res.status(400)
-			res.json({
-				status: 'FAILED',
-				message: 'Invalid token'
-			})
-			return
-		}
-		console.log("role:"+decoded.role);
-        if(decoded.role=='admin'){
-            _branch=req.params.branch;
-            _quota=req.params.quota;
-            if(_quota in Constants.quotas){
-                Branch.findOne({branch:_branch},function(err,branch){
-                    if(branch){
-                        if(_quota=='NRI')
-                            waitingList=branch.filledNRI?branch.waitingListNRI:0;
-                        else{
-                            waitingList=-1
-                        }
-                        res.status(200)
-                        res.json({
-                            status:"SUCCESS",
-                            message:"Branch "+_branch,
-                            waitingList:waitingList
-                        })
-                    }
-                    else{
-                        res.json({
-                            status:"FAILED",
-                            message:"Branch "+_branch+ " NOT available"
-                        }) 
-                    }
-                });
-            }
-            else{
-                res.json({
-                    status:"FAILED",
-                    message:"Quota "+_quota+ " NOT available"
-                })
-            }
-        }
-        else{
-			res.status(403);
-			res.json({
-				status:"FAILED",
-				message:'Access denied'
-			})
-		}
-        
-    }
-    else{
-		res.json({
-			status:"FAILED",
-			message:'Access token error'
-		})
-	}
-    
-});
 
 module.exports = router
