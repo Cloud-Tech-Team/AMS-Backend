@@ -1021,8 +1021,7 @@ router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,
 })
 
 router.post("/send_pdf/:id", verifyToken,upload2.single("filePreview"), (req, res) => {
-    // Stuff to be added later
-
+   
     User.findOne({ applicationNo: req.params.id }, function (err, user) {
         if (!err) {
 
@@ -1033,7 +1032,7 @@ router.post("/send_pdf/:id", verifyToken,upload2.single("filePreview"), (req, re
             const msg = {
                 to: [
                     {
-                        "email": "hamda.fzl@gmail.com"
+                        "email": "19cs022@mgits.ac.in"
                     },
                     {
                         "email":"19cs208@mgits.ac.in",
