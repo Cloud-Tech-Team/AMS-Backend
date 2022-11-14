@@ -122,7 +122,7 @@ exports.login = async (req, res) => {
                         message: "Sign-in successful",
                         token: token,
                         quota: user.quota,
-                        applicationComplete: user.applicationComplete
+                        applicationCompleted: user.applicationCompleted
                     })
                 } else {
 					console.log(password);
