@@ -79,7 +79,7 @@ router.post('/register', upload, async function (req, res) {
     // gender = gender.toString().trim();
 
     if (firstName == "" || lastName == "" || email == "" || dob == "" || gender == "" || quota == "" || aadhaar=="") {
-		res.status(204);	// 204 No content
+		res.status(400);
         res.json({
             status: "FAILED",
             message: "Empty input field(s)"
@@ -201,7 +201,7 @@ router.get('/application/:id', verifyToken, upload, function (req, res) {
                     a = users;
                     console.log(users)
                     if (!(nationality && motherTongue && bloodGroup && aPhone && annualIncome)) {
-						res.status(204);	// 204 No Content
+						res.status(400);
                         res.json({
                             status: "FAILED",
                             message: "All fields are required"
@@ -293,6 +293,53 @@ router.get('/application/:id', verifyToken, upload, function (req, res) {
 
 
 });
+
+/* update only the NRI relations details.
+ * Requested by Abijith Biju (MUT19CS005)
+ */
+router.patch('/quota_edit/', upload, async function (req, res) {
+	const token = req.headers.authorization.split(" ")[1];
+	var decoded;
+	try {
+		console.log(`token = ${token}`)
+		decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
+	} catch (ex) {
+		console.log(ex.message)
+		res.status(400)
+		res.json({
+			status: 'FAILED',
+			message: 'Invalid token'
+		})
+		return
+	}
+	console.log("role:"+decoded.role);
+	console.log('request body')
+	console.log(req.body)
+	User.findOneAndUpdate({applicationNo: decoded.appNo},
+		{$set: {
+			quota: req.body.quota,
+			NRIdetails: req.body.NRIdetails	// name and relation
+		}}, // add options here
+		function (err, user) {
+			console.log(`appNo: ${decoded.appNo}`)
+			if (err) {
+				console.log(`error updating: ${err.message}`)
+				res.status(500)
+				return res.json({
+					status: 'FAILED',
+					message: err.message
+				})
+			}
+			console.log('updated successfully')
+			console.log(user)
+			res.status(200)
+			res.json({
+				status: 'SUCCESS',
+				message: 'Updated quota and relation details successfully'
+			})
+		}
+	)
+})
 
 router.patch('/application/:id', verifyToken, upload, async function (req, res) {
 

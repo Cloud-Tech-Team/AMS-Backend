@@ -99,7 +99,7 @@ router.post('/login', upload, function (req, res) {
     let { email, password } = req.body
 
     if (password == "") {
-		res.status(204);
+		res.status(400);
         res.json({
             status: "FAILED",
             message: "Empty password entered"
