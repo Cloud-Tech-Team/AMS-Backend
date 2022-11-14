@@ -60,11 +60,13 @@ const UserSchema = new Schema({
         },
       email:
         {
-          type: String,
-          validate:{
-            validator: value=> /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value)
-          },
-        },
+			type: String,
+			required: true,
+			validate:{
+				validator: value=> /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value),
+				message: "Invalid email id"
+			},
+		},
       age :
       {
         type:Number,
@@ -308,15 +310,20 @@ const UserSchema = new Schema({
 });
 
 UserSchema.methods.generateApplicationNo = function(number) {
-  quota=this.quota.toString().toUpperCase()[0];
-  course=this.course.toString().toUpperCase().slice(0,2);
-  month=this.registrationTimeStamp.getMonth();
-  year = this.registrationTimeStamp.getFullYear().toString().slice(2,);
-  if(month > 9)
-    year++;
-  this.academicYear=year;
-  applicationNo=(year*10000)+Number(number);
-  this.applicationNo=quota+course+applicationNo;
+	// If quota is OTHERS (PIO/CWIG/OCI), we use SBT in application number
+	if (this.quota.toString().toUpperCase() === 'OTHERS')
+		quota = 'S'
+	// else, simply use the first letter (N for NRI, M for Mgmt, etc.)
+	else
+		quota=this.quota.toString().toUpperCase()[0];
+	course=this.course.toString().toUpperCase().slice(0,2);
+	month=this.registrationTimeStamp.getMonth();
+	year = this.registrationTimeStamp.getFullYear().toString().slice(2,);
+	if(month > 9)
+		year++;
+	this.academicYear=year;
+	applicationNo=(year*10000)+Number(number);
+	this.applicationNo=quota+course+applicationNo;
 
 }
 
