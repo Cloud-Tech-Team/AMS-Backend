@@ -1,4 +1,5 @@
 const express = require('express')
+
 const router = express.Router()
 
 
@@ -19,6 +20,10 @@ const moment = require('moment')
 //uploading files
 const DatauriParser = require('datauri/parser');
 const parser = new DatauriParser();
+const multer = require('multer');
+const app = express();
+
+app.use(express.static(__dirname + '/public'));
 
 const formatBufferTo64 = file =>
     parser.format(path.extname(file.originalname).toString(), file.buffer)
@@ -74,21 +79,21 @@ router.post('/register', upload, async function (req, res) {
     // gender = gender.toString().trim();
 
     if (firstName == "" || lastName == "" || email == "" || dob == "" || gender == "" || quota == "" || aadhaar=="") {
-		res.status(204);	// 204 No content
+		res.status(400);
         res.json({
             status: "FAILED",
             message: "Empty input field(s)"
         })
         console.log(req.body)
     } else {
-		var query = {email: email, quota: quota, course: req.body.course}
+		var query = {email: email, quota: quota, course: req.body.course,academicYear:req.body.academicYear}
 		const stu = await User.findOne(query)
 		if (stu) {
 			console.log(`error: student exists ${stu}`)
 			res.status(409)
 			return res.json({
 				status: 'FAILED',
-				message: `User has already registered for ${quota} and ${req.body.course}`
+				message: `User has already registered for ${quota} ${academicYear}and ${req.body.course}`
 			})
 		}
 		console.log('student does not exist')
@@ -103,6 +108,7 @@ router.post('/register', upload, async function (req, res) {
 		const user = new User({
 			quota:req.body.quota,
 			course:req.body.course,
+            academicYear:req.body.academicYear,
 			firstName: req.body.firstName,
 			middleName: req.body.middleName,
 			lastName: req.body.lastName,
@@ -205,7 +211,7 @@ router.get('/application/:id', verifyToken, upload, function (req, res) {
                     a = users;
                     console.log(users)
                     if (!(nationality && motherTongue && bloodGroup && aPhone && annualIncome)) {
-						res.status(204);	// 204 No Content
+						res.status(400);
                         res.json({
                             status: "FAILED",
                             message: "All fields are required"
@@ -962,7 +968,6 @@ router.patch('/nri/preview/:id',verifyToken,upload, async function(req,res){
 			}
 			else{
 
-
 				const update = {
 
 					filePreview:a.filePreview || user.filePreview || user.a
@@ -991,7 +996,7 @@ router.patch('/nri/preview/:id',verifyToken,upload, async function(req,res){
 
 	});
 })
-    
+
 /* Get applicationNo, branch, and quota from request.
  * Have the user occupy the branch's quota.
  * Return waiting list number (0 if not in waiting list)

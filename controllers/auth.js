@@ -9,13 +9,13 @@ exports.signup = async (req, res) => {
     // email = email;
 
     if (firstName == "" || email == "" || password == "") {
-		res.status(204);	// 204 No Content
+		res.status(400);
         res.json({
             status: "FAILED",
             message: "Empty input field(s)"
         })
     } else if (password.length < 8) {
-		res.status(204);
+		res.status(400);
         res.json({
             status: "FAILED",
             message: "Password is too short"
@@ -93,7 +93,7 @@ exports.login = async (req, res) => {
     applicationNo = applicationNo.trim();
     console.log(req.body)
     if (applicationNo == "" || password == "") {
-		res.status(204);
+		res.status(400);
         res.json({
             status: "FAILED",
             message: "Empty credentials entered"

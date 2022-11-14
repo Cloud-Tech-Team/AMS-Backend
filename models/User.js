@@ -323,8 +323,9 @@ UserSchema.methods.generateApplicationNo = function(number) {
 	year = this.registrationTimeStamp.getFullYear().toString().slice(2,);
 	if(month > 9)
 		year++;
-	this.academicYear=year;
-	applicationNo=(year*10000)+Number(number);
+	//this.academicYear=year;
+	applicationNo=(this.academicYear.slice(2,)*10000)+Number(number);
+  console.log(applicationNo);
 	this.applicationNo=quota+course+applicationNo;
 
 }
