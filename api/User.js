@@ -291,25 +291,12 @@ router.get('/application/:id', verifyToken, upload, function (req, res) {
 /* update only the NRI relations details.
  * Requested by Abijith Biju (MUT19CS005)
  */
-router.patch('/quota_edit/', upload, async function (req, res) {
-	const token = req.headers.authorization.split(" ")[1];
-	var decoded;
-	try {
-		console.log(`token = ${token}`)
-		decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
-	} catch (ex) {
-		console.log(ex.message)
-		res.status(400)
-		res.json({
-			status: 'FAILED',
-			message: 'Invalid token'
-		})
-		return
-	}
-	console.log("role:"+decoded.role);
+router.patch('/quota_edit/', verifyToken, upload, async function (req, res) {
+	console.log('token')
+	console.log(req.tokenData)
 	console.log('request body')
 	console.log(req.body)
-	User.findOneAndUpdate({applicationNo: decoded.appNo},
+	User.findOneAndUpdate({applicationNo: req.tokenData.appNo},
 		{$set: {
 			quota: req.body.quota,
 			NRIdetails: req.body.NRIdetails	// name and relation
