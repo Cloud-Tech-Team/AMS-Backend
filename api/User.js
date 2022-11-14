@@ -176,6 +176,16 @@ router.post('/register', upload, async function (req, res) {
 
 
 router.get('/application/:id', verifyToken, upload, function (req, res) {
+	if (req.params.id != req.tokenData.appNo) {
+		console.log('application number in token and parameter does not match')
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Invalid token: applicationNo does not match token'
+		})
+	}
+	console.log('valid token')
+
     if (req.body.button == "", req.body.button == "save")
         User.findOne({ applicationNo: req.params.id }, function (err, user) {
             if (!err) {
