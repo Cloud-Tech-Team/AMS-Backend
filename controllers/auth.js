@@ -122,6 +122,7 @@ exports.login = async (req, res) => {
                         message: "Sign-in successful",
                         token: token,
                         quota: user.quota,
+                        academicYear:user.academicYear,
                         applicationCompleted: user.applicationCompleted
                     })
                 } else {
