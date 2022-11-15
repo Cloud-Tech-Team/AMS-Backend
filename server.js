@@ -16,7 +16,7 @@ var options = {
   }
 
 app.use(cors());
-// app.options('*',cors());
+app.options('*',cors());
 
 const bodyParser = require('body-parser')
 const UserRouter = require('./api/User')
