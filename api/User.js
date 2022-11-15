@@ -1024,9 +1024,7 @@ router.post("/send_pdf/:id", verifyToken,upload2.single("filePreview"), (req, re
    
     User.findOne({ applicationNo: req.params.id }, function (err, user) {
         if (!err) {
-
-        
-            var pathToAttachment = `${__dirname.slice(0,-4)}\\` +req.file.path ;
+            var pathToAttachment = path.join(process.cwd(), req.file.path);
             console.log(pathToAttachment);
             var attachment = fs.readFileSync(pathToAttachment).toString("base64");
             const msg = {
