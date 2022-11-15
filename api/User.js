@@ -22,7 +22,7 @@ const DatauriParser = require('datauri/parser');
 const parser = new DatauriParser();
 const multer = require('multer');
 const fs = require("fs");
-const upload2 = multer({ dest: "public/files" });
+const upload2 = multer({ dest: "./public/files" });
 const findRemoveSync = require('find-remove');
 
 express().use(express.static(__dirname + '/public'));
@@ -1021,12 +1021,15 @@ router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,
     });
 })
 
-router.post("/send_pdf/:id", verifyToken,upload2.single("filePreview"), (req, res) => {
+/*router.post("/send_pdf/:id", verifyToken,upload2.single("filePreview"), (req, res) => {
    
     User.findOne({ applicationNo: req.params.id }, function (err, user) {
         if (!err) {
+            console.log(`cwd = ${process.cwd()}, req.file.path = ${req.file.path}`)
             var pathToAttachment = path.join(process.cwd(), req.file.path);
+            //var pathToAttachment = 'https://drive.google.com/file/d/1ekHNlkBpfYTW9DgWVYVZI-FI4tNw7Yil/view?usp=share_link';
             console.log(pathToAttachment);
+            
             var attachment = fs.readFileSync(pathToAttachment).toString("base64");
             const msg = {
                 to: [
@@ -1076,6 +1079,7 @@ router.post("/send_pdf/:id", verifyToken,upload2.single("filePreview"), (req, re
         }
     });
   });
+  */
 /* Get applicationNo, branch, and quota from request.
  * Have the user occupy the branch's quota.
  * Return waiting list number (0 if not in waiting list)
