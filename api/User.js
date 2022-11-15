@@ -184,6 +184,16 @@ router.post('/register', upload, async function (req, res) {
 
 
 router.get('/application/:id', verifyToken, upload, function (req, res) {
+	if (req.params.id != req.tokenData.appNo) {
+		console.log('application number in token and parameter does not match')
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Invalid token: applicationNo does not match token'
+		})
+	}
+	console.log('valid token')
+
     if (req.body.button == "", req.body.button == "save")
         User.findOne({ applicationNo: req.params.id }, function (err, user) {
             if (!err) {
@@ -299,25 +309,12 @@ router.get('/application/:id', verifyToken, upload, function (req, res) {
 /* update only the NRI relations details.
  * Requested by Abijith Biju (MUT19CS005)
  */
-router.patch('/quota_edit/', upload, async function (req, res) {
-	const token = req.headers.authorization.split(" ")[1];
-	var decoded;
-	try {
-		console.log(`token = ${token}`)
-		decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
-	} catch (ex) {
-		console.log(ex.message)
-		res.status(400)
-		res.json({
-			status: 'FAILED',
-			message: 'Invalid token'
-		})
-		return
-	}
-	console.log("role:"+decoded.role);
+router.patch('/quota_edit/', verifyToken, upload, async function (req, res) {
+	console.log('token')
+	console.log(req.tokenData)
 	console.log('request body')
 	console.log(req.body)
-	User.findOneAndUpdate({applicationNo: decoded.appNo},
+	User.findOneAndUpdate({applicationNo: req.tokenData.appNo},
 		{$set: {
 			quota: req.body.quota,
 			NRIdetails: req.body.NRIdetails	// name and relation
@@ -344,7 +341,14 @@ router.patch('/quota_edit/', upload, async function (req, res) {
 })
 
 router.patch('/application/:id', verifyToken, upload, async function (req, res) {
-
+	if (req.params.id != req.tokenData.appNo) {
+		console.log('application number in token and parameter does not match')
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Invalid token: applicationNo does not match token'
+		})
+	}
 
     if(req.files){
         if (req.files.filePhotograph) {
@@ -548,155 +552,27 @@ router.get('/nri/application', function (req, res){
     
 });
 
-//nri patch
-router.patch('/nri/application/:applicationNo', verifyToken, upload, function (req, res) {
-
-    User.findOne({ applicationNo: req.params.applicationNo },async function (err, users) {
-        if(users!=null){
-            if(users.quota=='NRI'){
-                // console.log("--------"+users)
-                // uploading files to cloudinary
-                if(req.files){
-                    if (req.files.filePhotograph) {
-                        const file64 = formatBufferTo64(req.files.filePhotograph[0]);
-                        const uploadResult = await cloudinaryUpload(file64.content);
-                        req.body.filePhotograph = uploadResult.secure_url;
-                        if(req.body.filePhotograph!=null)
-                            console.log('Photograph uploaded\n');
-                    }
-                    //adding url of sign to body
-                    if (req.files.fileSign) {
-                        const file64 = formatBufferTo64(req.files.fileSign[0]);
-                        const uploadResult = await cloudinaryUpload(file64.content);
-                        req.body.fileSign = uploadResult.secure_url;
-                        if(req.body.fileSign!=null)
-                            console.log('Signature uploaded\n');
-                    }
-                
-                    // if(req.files.fileTransactionID){
-                    //     const file64 = formatBufferTo64(req.files.fileTransactionID[0]);
-                    //     const uploadResult = await cloudinaryUpload(file64.content);
-                    //     req.body.fileTransactionID = uploadResult.secure_url;
-                    //     if(req.body.fileTransactionID!=null)
-                    //         console.log('Transaction File uploaded\n')
-                    // }
-                }
-    
-                if(req.body.bp1 && users.bp1==null && users.quota==NRI){
-                    console.log('-----')
-                    Branch.findOne({branch:req.body.bp1},function(err,branch){
-                        if(branch)
-                        {
-                            if(!branch.isFilled() && !branch.isNRIFilled()){
-                                branch.occupySeat();
-                                branch.occupySeatNRI();
-                                console.log("Seat Available");
-                            }
-                            else{
-                                console.log("Waiting list"+branch.waitingListNumberNRI());
-                            }
-                            branch.save();
-                            // console.log(branch.totalSeats);
-                            // console.log(branch.occupiedSeats);
-							// console.log(branch.isFilled());
-                        }
-                    })
-                }
-    
-                body=req.body;
-                // console.log(body);
-                    const fatherDetails={
-                        fatherDetails: {
-                        name: a.fatherName || users.fatherDetails.name || users.a,
-                        occupation: a.fatherOccupation || users.fatherDetails.occupation || users.a,
-                        mobile: a.fatherMobile || users.fatherDetails.mobile || users.a,
-                        email: a.fatherEmail || users.fatherDetails.email || users.a
-                        }
-                     }
-
-                const contactAddress={
-                    contactAddress: {
-                        addressL1: a.addressL1C || users.contactAddress.addressL1 || users.a,
-                        district: a.districtC || users.contactAddress.district || users.a,
-                        city: a.cityC || users.contactAddress.city || users.a,
-                        state: a.stateC || users.contactAddress.state || users.a,
-                        pincode: a.pincodeC || users.contactAddress.pincode || users.a
-                    }
-                }
-
-                const permanantAddress={
-                    permanentAddress:{
-                        addressL1: body.addressL1P || users.permanentAddress.addressL1 || users.a,
-                        district: body.districtP || users.permanentAddress.district || users.a,
-                        city: body.cityP|| users.permanentAddress.city || users.a,
-                        state: body.stateP || users.permanentAddress.state || users.a,
-                        pincode: body.pincodeP || users.permanentAddress.pincode || users.a
-                    }
-                }
-    
-                // const guardian={
-                //     guardianDetails:{
-                //         name: body.guardianName || users.guardianDetails.name || users.a,
-                //         occupation: body.guardianOccupation || users.guardianDetails.occupation || users.a,
-                //         relation:body.gruardianRelation || users.guardianDetails.relation || users.a,
-                //     }
-                // }
-    
-                const sponser={
-                    NRIdetails:{
-                        name:body.NRIname || users.NRIdetails.name || users.a,
-                        relation:body.NRIrelation || users.NRIdetails.relation 
-                    }
-                }
-    
-                var update=Object.assign({},body,permanantAddress,contactAddress,guardian,sponser,fatherDetails);
-    
-                console.log(update);
-                
-                User.updateOne(
-                    { applicationNo: req.params.applicationNo },
-                    { $set: update}, { runValidators: true },
-                    function (err) {
-                        if (err) {
-                            res.json({ 
-                                message: err.message,
-                                status: "FAILED" 
-                            });
-                        } else {
-                            res.status(200);
-                            res.json({
-                                status: "SUCCESS",
-                                message:'Details edited successfully'
-                            });
-                        }
-                    });
-       
-            }
-        }
-        
-        else{
-            console.log('could not find user ' + req.params.applicationNo)
-			res.status(500);
-            res.json({
-				status: "FAILED",
-                message: "An error occured while checking for existance of user"
-            })
-        }
-        
-    })
-
-});
-
-
 router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, function (req, res) {
-
+	console.log(req.params)
+	console.log(req.tokenData)
+	if (req.params.applicationNo != req.tokenData.appNo) {
+		console.log(`${req.params.applicationNo} != ${req.tokenData.appNo}`)
+		console.log('application number in token and parameter does not match')
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Invalid token: applicationNo does not match token'
+		})
+	}
+	console.log('token verified')
 
     User.findOne({ applicationNo: req.params.applicationNo },async function (err, users) {
+		console.log(users)
         if(users!=null){
-            if(users.quota=='NRI'){
                 if(req.files){
                     if (req.files.filePhotograph) {
                         const file64 = formatBufferTo64(req.files.filePhotograph[0]);
+						console.log('uploading')
                         const uploadResult = await cloudinaryUpload(file64.content);
                         req.body.filePhotograph = uploadResult.secure_url;
                         if(req.body.filePhotograph!=null)
@@ -752,8 +628,6 @@ router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, funct
                     }
                 }
     
-                
-    
                 var update=Object.assign({},general,permanantAddress,contactAddress,guardian,sponser);
     
                 update.aPhone=body.aPhone
@@ -776,7 +650,8 @@ router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, funct
                             });
                         }
                     });
-            }
+           
+			console.log('users.quota != NRI')
         }
         else{
             console.log('could not find user ' + req.params.applicationNo)
@@ -793,11 +668,23 @@ router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, funct
 
 
 router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, function (req, res) {
+	console.log(req.params)
+	console.log(req.tokenData)
+	if (req.params.applicationNo != req.tokenData.appNo) {
+		console.log(`${req.params.applicationNo} != ${req.tokenData.appNo}`)
+		console.log('application number in token and parameter does not match')
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Invalid token: applicationNo does not match token'
+		})
+	}
+	console.log('token verified')
 
 
     User.findOne({ applicationNo: req.params.applicationNo },async function (err, users) {
         if(users!=null){
-            if(users.quota=='NRI'){
+           
                 if(req.files){
                     if (req.files.fileKeam) {
                         const file64 = formatBufferTo64(req.files.fileKeam[0]);
@@ -893,7 +780,7 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
     
     
     
-            }
+           
         }
         
         else{
@@ -909,116 +796,140 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
 });
 
 router.patch('/nri/application-page3/:id',verifyToken,upload,async function(req,res){
+	console.log(req.params)
+	console.log(req.tokenData)
+	if (req.params.applicationNo != req.tokenData.appNo) {
+		console.log(`${req.params.applicationNo} != ${req.tokenData.appNo}`)
+		console.log('application number in token and parameter does not match')
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Invalid token: applicationNo does not match token'
+		})
+	}
+	console.log('token verified')
 
-   
-        if(req.files){
-            if (req.files.imgSign) {
-                const file64 = formatBufferTo64(req.files.imgSign[0]);
-                const uploadResult = await cloudinaryUpload(file64.content);
-                req.body.imgSign = uploadResult.secure_url;
-                if(req.body.imgSign!=null)
-                    console.log('Signature uploaded\n');
-            }
-        }
-        User.findOne({ applicationNo: req.params.id }, function (err, users) {
-            if (!err) {
-    
-                    a = req.body
-                    const update = {
-    
-                        
-                        bp1: a.bp1 || users.bp1 || users.a,
-                        // bp2: a.bp2 || users.bp2 || users.a,
-                        // bp3: a.bp3 || users.bp3 || users.a,
-                        // bp4: a.bp4 || users.bp4 || users.a,
-                        // bp5: a.bp5 || users.bp5 || users.a,
-                        imgSign: a.imgSign || users.imgSign || users.a,
-                        
-                     }
-                    User.updateOne(
-                        { applicationNo: req.params.id },
-                        { $set: update }, { runValidators: true },
-                        function (err) {
-                            if (err) {
-                                res.json({ error_message: err.message, status: "FAILED" });
-                            } else {
-                                res.json({
-                                    status: "SUCCESS ",
-                                });
-                            }
-                        });
-                    }else {
-                res.json({
-                    status: 'FAILED',
-                    message: 'Not registered'
-                })
-            }
-        
-    
-        });
+
+	if(req.files){
+		if (req.files.imgSign) {
+			const file64 = formatBufferTo64(req.files.imgSign[0]);
+			const uploadResult = await cloudinaryUpload(file64.content);
+			req.body.imgSign = uploadResult.secure_url;
+			if(req.body.imgSign!=null)
+				console.log('Signature uploaded\n');
+		}
+	}
+	User.findOne({ applicationNo: req.params.id }, function (err, users) {
+		if (!err) {
+
+			a = req.body
+			const update = {
+
+
+				bp1: a.bp1 || users.bp1 || users.a,
+				// bp2: a.bp2 || users.bp2 || users.a,
+				// bp3: a.bp3 || users.bp3 || users.a,
+				// bp4: a.bp4 || users.bp4 || users.a,
+				// bp5: a.bp5 || users.bp5 || users.a,
+				imgSign: a.imgSign || users.imgSign || users.a,
+
+			}
+			User.updateOne(
+				{ applicationNo: req.params.id },
+				{ $set: update }, { runValidators: true },
+				function (err) {
+					if (err) {
+						res.json({ error_message: err.message, status: "FAILED" });
+					} else {
+						res.json({
+							status: "SUCCESS ",
+						});
+					}
+				});
+		}else {
+			res.json({
+				status: 'FAILED',
+				message: 'Not registered'
+			})
+		}
+
+
+	});
     
 })
 
 
 router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,res){
+	console.log(req.params)
+	console.log(req.tokenData)
+	if (req.params.applicationNo != req.tokenData.appNo) {
+		console.log(`${req.params.applicationNo} != ${req.tokenData.appNo}`)
+		console.log('application number in token and parameter does not match')
+		res.status(403)
+		return res.json({
+			status: 'FAILED',
+			message: 'Invalid token: applicationNo does not match token'
+		})
+	}
+	console.log('token verified')
 
-    if(req.files){
-        if (req.files.fileTransactionID) {
-            const file64 = formatBufferTo64(req.files.fileTransactionID[0]);
-            const uploadResult = await cloudinaryUpload(file64.content);
-            req.body.fileTransactionID = uploadResult.secure_url;
-            if(req.body.fileTransactionID!=null)
-                console.log('Transaction proof uploaded\n');
-        }
-    }
-    User.findOne({ applicationNo: req.params.id }, function (err, user) {
-        if (!err) {
+	if(req.files){
+		if (req.files.fileTransactionID) {
+			const file64 = formatBufferTo64(req.files.fileTransactionID[0]);
+			const uploadResult = await cloudinaryUpload(file64.content);
+			req.body.fileTransactionID = uploadResult.secure_url;
+			if(req.body.fileTransactionID!=null)
+				console.log('Transaction proof uploaded\n');
+		}
+	}
+	User.findOne({ applicationNo: req.params.id }, function (err, user) {
+		if (!err) {
 
-                a = req.body
-                if (!(a.fileTransactionID)) {
-                    res.json({
-                        status: "FAILED",
-                        message: "Uploads are Missing"
+			a = req.body
+			if (!(a.fileTransactionID)) {
+				res.json({
+					status: "FAILED",
+					message: "Uploads are Missing"
 
 
-                    });
-                }
-                else{
-                    
-                    
-                const update = {
+				});
+			}
+			else{
 
-                    transactionID:a.transactionID ||users.transactionID ||users.a,
-                    fileTransactionID:a.fileTransactionID || users.fileTransactionID || users.a
-                  
-                    
-                 }
-                 User.updateOne(
-                    { applicationNo: req.params.id },
-                    { $set: update }, { runValidators: true },
-                    async function (err) {
-                        if (err) {
-                            res.json({ error_message: err.message, status: "FAILED" });
-                        } else {
-                            console.log('calling user.assignCoadmin()')
-                            await user.assignCoadmin()	// check for error and make this atomic
-                            console.log(`user after assigning ${user}`)
-                            res.json({
-                                status: "SUCCESS ",
-                            });
-                        }
-                });
-                
-            }
-        } else {
-            res.json({
-                status: 'FAILED',
-                message: 'Not registered'
-            })
-        }
-  
 
-    });
+				const update = {
+
+					transactionID:a.transactionID ||users.transactionID ||users.a,
+					fileTransactionID:a.fileTransactionID || users.fileTransactionID || users.a,
+                    applicationCompleted:true
+
+				}
+				User.updateOne(
+					{ applicationNo: req.params.id },
+					{ $set: update }, { runValidators: true },
+					async function (err) {
+						if (err) {
+							res.json({ error_message: err.message, status: "FAILED" });
+						} else {
+							console.log('calling user.assignCoadmin()')
+							await user.assignCoadmin()	// check for error and make this atomic
+							console.log(`user after assigning ${user}`)
+							res.json({
+								status: "SUCCESS ",
+							});
+						}
+					});
+
+			}
+		} else {
+			res.json({
+				status: 'FAILED',
+				message: 'Not registered'
+			})
+		}
+
+
+	});
 })
 
 /*router.post("/send_pdf/:id", verifyToken,upload2.single("filePreview"), (req, res) => {
