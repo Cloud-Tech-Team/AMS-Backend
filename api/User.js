@@ -569,7 +569,6 @@ router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, funct
     User.findOne({ applicationNo: req.params.applicationNo },async function (err, users) {
 		console.log(users)
         if(users!=null){
-            if(users.quota=='NRI'){	// remove this?
                 if(req.files){
                     if (req.files.filePhotograph) {
                         const file64 = formatBufferTo64(req.files.filePhotograph[0]);
@@ -629,8 +628,6 @@ router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, funct
                     }
                 }
     
-                
-    
                 var update=Object.assign({},general,permanantAddress,contactAddress,guardian,sponser);
     
                 update.aPhone=body.aPhone
@@ -653,7 +650,7 @@ router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, funct
                             });
                         }
                     });
-            }
+           
 			console.log('users.quota != NRI')
         }
         else{
