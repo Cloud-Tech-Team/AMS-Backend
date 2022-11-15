@@ -795,7 +795,7 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
     })
 });
 
-router.patch('/nri/application-page3/:id',verifyToken,upload,async function(req,res){
+router.patch('/nri/application-page3/:applicationNo',verifyToken,upload,async function(req,res){
 	console.log(req.params)
 	console.log(req.tokenData)
 	if (req.params.applicationNo != req.tokenData.appNo) {
@@ -859,7 +859,7 @@ router.patch('/nri/application-page3/:id',verifyToken,upload,async function(req,
 })
 
 
-router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,res){
+router.patch('/nri/application-page5/:applicationNo',verifyToken,upload,async function(req,res){
 	console.log(req.params)
 	console.log(req.tokenData)
 	if (req.params.applicationNo != req.tokenData.appNo) {
@@ -932,7 +932,7 @@ router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,
 	});
 })
 
-/*router.post("/send_pdf/:id", verifyToken,upload2.single("filePreview"), (req, res) => {
+/*router.post("/send_pdf/:applicationNo", verifyToken,upload2.single("filePreview"), (req, res) => {
    
     User.findOne({ applicationNo: req.params.id }, function (err, user) {
         if (!err) {
