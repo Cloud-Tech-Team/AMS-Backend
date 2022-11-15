@@ -313,11 +313,13 @@ const UserSchema = new Schema({
 
 UserSchema.methods.generateApplicationNo = function(number) {
 	// If quota is OTHERS (PIO/CWIG/OCI), we use SBT in application number
-	if (this.quota.toString().toUpperCase() === 'OTHERS')
-		quota = 'S'
+	// if (this.quota.toString().toUpperCase() === 'OCI/PIO/CIWG')
+	// 	quota = 'S'
 	// else, simply use the first letter (N for NRI, M for Mgmt, etc.)
-	else
+	// else
 		quota=this.quota.toString().toUpperCase()[0];
+    if(quota == 'O')
+      quota = 'S';
 	course=this.course.toString().toUpperCase().slice(0,2);
 	month=this.registrationTimeStamp.getMonth();
 	year = this.registrationTimeStamp.getFullYear().toString().slice(2,);
