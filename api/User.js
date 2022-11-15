@@ -22,7 +22,7 @@ const DatauriParser = require('datauri/parser');
 const parser = new DatauriParser();
 const multer = require('multer');
 const fs = require("fs");
-const upload2 = multer({ dest: "public/files" });
+const upload2 = multer({ dest: "./public/files" });
 const findRemoveSync = require('find-remove');
 
 express().use(express.static(__dirname + '/public'));
@@ -68,7 +68,8 @@ router.post('/login', upload, Auth.login);
 router.post('/recover', Password.recover);
 
 router.post('/register', upload, async function (req, res) {
-    let { quota, firstName, middleName, lastName, email,aadhaar, phone, dob, gender, password } = req.body;
+    let { quota, firstName, middleName, lastName, email, aadhaar,
+		phone, dob, gender, password, academicYear, course } = req.body;
 	console.log(req.body);
     // quota = quota.toString().trim();
     // firstName = firstName.toString().trim();
@@ -88,14 +89,14 @@ router.post('/register', upload, async function (req, res) {
         })
         console.log(req.body)
     } else {
-		var query = {email: email, quota: quota, course: req.body.course,academicYear:req.body.academicYear}
+		var query = {email: email, quota: quota, course: course, academicYear: academicYear}
 		const stu = await User.findOne(query)
 		if (stu) {
 			console.log(`error: student exists ${stu}`)
 			res.status(409)
 			return res.json({
 				status: 'FAILED',
-				message: `User has already registered for ${quota} ${academicYear}and ${req.body.course}`
+				message: `User has already registered for ${quota} ${academicYear}and ${course}`
 			})
 		}
 		console.log('student does not exist')
@@ -166,7 +167,7 @@ router.post('/register', upload, async function (req, res) {
 						to: user.email, // Change to your recipient
 						from: 'ams.mits23@gmail.com', // Change to your verified sender
 						subject: 'Registration Successful',
-						text: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} 20${user.academicYear} at Muthoot Institute of Technology and Science\nYour Registration Number: ${user.applicationNo}\nPassword: ${password}.\n\nPlease login and complete the application.\n\nTeam MITS
+						text: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} 20${user.academicYear} at Muthoot Institute of Technology and Science\nYour Registration Number: ${user.applicationNo}\nPassword: ${user.password}.\n\nPlease login and complete the application.\n\nTeam MITS
   \n`
 					}
 					sgMail.send(msg).then((response) => {
@@ -1020,12 +1021,15 @@ router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,
     });
 })
 
-router.post("/send_pdf/:id", verifyToken,upload2.single("filePreview"), (req, res) => {
+/*router.post("/send_pdf/:id", verifyToken,upload2.single("filePreview"), (req, res) => {
    
     User.findOne({ applicationNo: req.params.id }, function (err, user) {
         if (!err) {
+            console.log(`cwd = ${process.cwd()}, req.file.path = ${req.file.path}`)
             var pathToAttachment = path.join(process.cwd(), req.file.path);
+            //var pathToAttachment = 'https://drive.google.com/file/d/1ekHNlkBpfYTW9DgWVYVZI-FI4tNw7Yil/view?usp=share_link';
             console.log(pathToAttachment);
+            
             var attachment = fs.readFileSync(pathToAttachment).toString("base64");
             const msg = {
                 to: [
@@ -1075,6 +1079,7 @@ router.post("/send_pdf/:id", verifyToken,upload2.single("filePreview"), (req, re
         }
     });
   });
+  */
 /* Get applicationNo, branch, and quota from request.
  * Have the user occupy the branch's quota.
  * Return waiting list number (0 if not in waiting list)
