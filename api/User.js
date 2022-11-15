@@ -22,10 +22,10 @@ const DatauriParser = require('datauri/parser');
 const parser = new DatauriParser();
 const multer = require('multer');
 const fs = require("fs");
-const upload2 = multer({ dest: "./public/files" });
+//const upload2 = multer({ dest: "./public/files" });
 const findRemoveSync = require('find-remove');
 
-express().use(express.static(__dirname + '/public'));
+//express().use(express.static(__dirname + '/public'));
 
 const formatBufferTo64 = file =>
     parser.format(path.extname(file.originalname).toString(), file.buffer)
