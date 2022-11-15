@@ -1,4 +1,5 @@
 const express = require('express')
+
 const router = express.Router()
 
 
@@ -19,6 +20,12 @@ const moment = require('moment')
 //uploading files
 const DatauriParser = require('datauri/parser');
 const parser = new DatauriParser();
+const multer = require('multer');
+const fs = require("fs");
+const upload2 = multer({ dest: "public/files" });
+const findRemoveSync = require('find-remove');
+
+express().use(express.static(__dirname + '/public'));
 
 const formatBufferTo64 = file =>
     parser.format(path.extname(file.originalname).toString(), file.buffer)
@@ -61,7 +68,7 @@ router.post('/login', upload, Auth.login);
 router.post('/recover', Password.recover);
 
 router.post('/register', upload, async function (req, res) {
-    let { quota, firstName, middleName, lastName, email, age, aadhaar, phone, dob, gender, password } = req.body;
+    let { quota, firstName, middleName, lastName, email,aadhaar, phone, dob, gender, password } = req.body;
 	console.log(req.body);
     // quota = quota.toString().trim();
     // firstName = firstName.toString().trim();
@@ -81,14 +88,14 @@ router.post('/register', upload, async function (req, res) {
         })
         console.log(req.body)
     } else {
-		var query = {email: email, quota: quota, course: req.body.course}
+		var query = {email: email, quota: quota, course: req.body.course,academicYear:req.body.academicYear}
 		const stu = await User.findOne(query)
 		if (stu) {
 			console.log(`error: student exists ${stu}`)
 			res.status(409)
 			return res.json({
 				status: 'FAILED',
-				message: `User has already registered for ${quota} and ${req.body.course}`
+				message: `User has already registered for ${quota} ${academicYear}and ${req.body.course}`
 			})
 		}
 		console.log('student does not exist')
@@ -103,11 +110,11 @@ router.post('/register', upload, async function (req, res) {
 		const user = new User({
 			quota:req.body.quota,
 			course:req.body.course,
+            academicYear:req.body.academicYear,
 			firstName: req.body.firstName,
 			middleName: req.body.middleName,
 			lastName: req.body.lastName,
 			email: req.body.email,
-			age: req.body.age,
 			aadhaar: req.body.aadhaar,
 			phone: req.body.phone,
 			dob: req.body.dob,
@@ -1013,59 +1020,61 @@ router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,
     });
 })
 
-    router.patch('/nri/preview/:id',verifyToken,upload, async function(req,res){
-
-        if(req.files){
-            if (req.files.filePreview) {
-                const file64 = formatBufferTo64(req.files.filePreview[0]);
-                const uploadResult = await cloudinaryUpload(file64.content);
-                req.body.filePreview = uploadResult.secure_url;
-                if(req.body.filePreview!=null)
-                    console.log('Application preview received\n');
-            }
-        }
-         User.findOne({ applicationNo: req.params.id }, function (err, user) {
-            if (!err) {
-    
-                    a = req.body
-                    if (!(a.filePreview)) {
-                        res.json({
-                            status: "FAILED",
-                            message: "Uploads are Missing"
-                        });
+router.post("/send_pdf/:id", verifyToken,upload2.single("filePreview"), (req, res) => {
+   
+    User.findOne({ applicationNo: req.params.id }, function (err, user) {
+        if (!err) {
+            var pathToAttachment = path.join(process.cwd(), req.file.path);
+            console.log(pathToAttachment);
+            var attachment = fs.readFileSync(pathToAttachment).toString("base64");
+            const msg = {
+                to: [
+                    {
+                        "email": "19cs022@mgits.ac.in"
+                    },
+                    {
+                        "email":"19cs208@mgits.ac.in",
                     }
-                    else{
-                        
-                        
-                    const update = {
-                        
-                        filePreview:a.filePreview || user.filePreview || user.a
-                        
-                     }
-                      User.updateOne(
-                        { applicationNo: req.params.id },
-                        { $set: update }, { runValidators: true },
-                        function (err) {
-                            if (err) {
-                                res.json({ error_message: err.message, status: "FAILED" });
-                            } else {
-                                    res.json({
-                                    status: "SUCCESS ",
-                                });
-                            }
-                    })
-                }
-            } else {
+                    ], // Change to your recipient
+                from: 'ams.mits23@gmail.com', 
+                subject: 'Application Received',
+                text: `Hi ${user.firstName},\nWe have received your application of admission for ${user.course} ${user.quota} ${user.academicYear} batch at Muthoot Institute of Technology and Science\nYour application number: ${user.applicationNo}\nPlease find attached, the application form you submitted.\n\nTeam MITS`,
+                attachments: [
+                {
+                    content: attachment,
+                    filename: "application_form.pdf",
+                    type: "application/pdf",
+                    disposition: "attachment"
+                }]
+            };
+            sgMail.send(msg).then((response) => {
+                console.log(response[0].statusCode)
+                console.log(response[0].headers)
+                
+                    //findRemoveSync(`${__dirname.slice(0,-4)}\public\\files`, {age: {seconds: 3600}});
+                     fs.unlinkSync(`${__dirname.slice(0,-4)}\\`+req.file.path);
+                     console.log('files removed');
+                  
                 res.json({
-                    status: 'FAILED',
-                    message: 'Not registered'
-                })
-            }
-      
-    
-        });
-    })
-    
+                    status: "SUCCESS ",
+                    message:"Mail has been sent to admissions team and the student"
+                });
+            }) .catch((error) => {
+                console.error(error)
+                res.json({
+                    status: "FAILED",
+                    message:"Mail could not be sent"
+                });
+            })
+                
+        } else {
+            res.json({
+                status: 'FAILED',
+                message: 'Pdf not mailed'
+            })
+        }
+    });
+  });
 /* Get applicationNo, branch, and quota from request.
  * Have the user occupy the branch's quota.
  * Return waiting list number (0 if not in waiting list)
