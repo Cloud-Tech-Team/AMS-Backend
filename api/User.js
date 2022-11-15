@@ -684,7 +684,7 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
 
     User.findOne({ applicationNo: req.params.applicationNo },async function (err, users) {
         if(users!=null){
-            if(users.quota=='NRI'){
+           
                 if(req.files){
                     if (req.files.fileKeam) {
                         const file64 = formatBufferTo64(req.files.fileKeam[0]);
@@ -780,7 +780,7 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
     
     
     
-            }
+           
         }
         
         else{
@@ -900,8 +900,8 @@ router.patch('/nri/application-page5/:applicationNo',verifyToken,upload,async fu
 				const update = {
 
 					transactionID:a.transactionID ||users.transactionID ||users.a,
-					fileTransactionID:a.fileTransactionID || users.fileTransactionID || users.a
-
+					fileTransactionID:a.fileTransactionID || users.fileTransactionID || users.a,
+                    applicationCompleted:true
 
 				}
 				User.updateOne(
