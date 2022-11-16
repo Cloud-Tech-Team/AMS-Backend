@@ -183,8 +183,8 @@ router.post('/register', upload, async function (req, res) {
 });
 
 
-router.get('/application/:id', verifyToken, upload, function (req, res) {
-	if (req.params.id != req.tokenData.appNo) {
+router.get('/application/:applicationNo', verifyToken, upload, function (req, res) {
+	if (req.params.applicationNo != req.tokenData.appNo) {
 		console.log('application number in token and parameter does not match')
 		res.status(403)
 		return res.json({
@@ -195,7 +195,7 @@ router.get('/application/:id', verifyToken, upload, function (req, res) {
 	console.log('valid token')
 
     if (req.body.button == "", req.body.button == "save")
-        User.findOne({ applicationNo: req.params.id }, function (err, user) {
+        User.findOne({ applicationNo: req.params.applicationNo }, function (err, user) {
             if (!err) {
 				res.status(200);
                 res.send(user);
@@ -205,7 +205,7 @@ router.get('/application/:id', verifyToken, upload, function (req, res) {
 
         });
     else if (req.body.button == "submit") {
-        User.findOne({ applicationNo: req.params.id }, function (err, users) {
+        User.findOne({ applicationNo: req.params.applicationNo }, function (err, users) {
             if (!err) {
                 {
                     let {
@@ -340,8 +340,8 @@ router.patch('/quota_edit/', verifyToken, upload, async function (req, res) {
 	)
 })
 
-router.patch('/application/:id', verifyToken, upload, async function (req, res) {
-	if (req.params.id != req.tokenData.appNo) {
+router.patch('/application/:applicationNo', verifyToken, upload, async function (req, res) {
+	if (req.params.applicationNo != req.tokenData.appNo) {
 		console.log('application number in token and parameter does not match')
 		res.status(403)
 		return res.json({
@@ -379,7 +379,7 @@ router.patch('/application/:id', verifyToken, upload, async function (req, res) 
     //adding url of photograph to body
     
     // console.log(req.files)
-    User.findOne({ applicationNo: req.params.id }, function (err, users) {
+    User.findOne({ applicationNo: req.params.applicationNo }, function (err, users) {
         if (!err) {
 
             if (req.body.c_p) {
@@ -457,7 +457,7 @@ router.patch('/application/:id', verifyToken, upload, async function (req, res) 
                     fileTransactionID:a.fileTransactionID || users.fileTransactionID || users.a
                 }
                 User.updateOne(
-                    { applicationNo: req.params.id },
+                    { applicationNo: req.params.applicationNo },
                     { $set: update }, { runValidators: true },
                     function (err) {
                         if (err) {
@@ -801,7 +801,7 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
     })
 });
 
-router.patch('/nri/application-page3/:id',verifyToken,upload,async function(req,res){
+router.patch('/nri/application-page3/:applicationNo',verifyToken,upload,async function(req,res){
 	console.log(req.params)
 	console.log(req.tokenData)
 	if (req.params.applicationNo != req.tokenData.appNo) {
@@ -825,7 +825,7 @@ router.patch('/nri/application-page3/:id',verifyToken,upload,async function(req,
 				console.log('Signature uploaded\n');
 		}
 	}
-	User.findOne({ applicationNo: req.params.id }, function (err, users) {
+	User.findOne({ applicationNo: req.params.applicationNo }, function (err, users) {
 		if (!err) {
             if(!users.applicationCompleted) {
                 a = req.body
@@ -841,7 +841,7 @@ router.patch('/nri/application-page3/:id',verifyToken,upload,async function(req,
     
                 }
                 User.updateOne(
-                    { applicationNo: req.params.id },
+                    { applicationNo: req.params.applicationNo },
                     { $set: update }, { runValidators: true },
                     function (err) {
                         if (err) {
@@ -872,7 +872,7 @@ router.patch('/nri/application-page3/:id',verifyToken,upload,async function(req,
 })
 
 
-router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,res){
+router.patch('/nri/application-page5/:applicationNo',verifyToken,upload,async function(req,res){
 	console.log(req.params)
 	console.log(req.tokenData)
 	if (req.params.applicationNo != req.tokenData.appNo) {
@@ -895,7 +895,7 @@ router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,
 				console.log('Transaction proof uploaded\n');
 		}
 	}
-	User.findOne({ applicationNo: req.params.id }, function (err, user) {
+	User.findOne({ applicationNo: req.params.applicationNo }, function (err, user) {
 		if (!err) {
             if(!user.applicationCompleted) {
                 a = req.body
@@ -918,7 +918,7 @@ router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,
     
                     }
                     User.updateOne(
-                        { applicationNo: req.params.id },
+                        { applicationNo: req.params.applicationNo },
                         { $set: update }, { runValidators: true },
                         async function (err) {
                             if (err) {
@@ -951,9 +951,9 @@ router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,
 	});
 })
 
-/*router.post("/send_pdf/:id", verifyToken,upload2.single("filePreview"), (req, res) => {
+/*router.post("/send_pdf/:applicationNo", verifyToken,upload2.single("filePreview"), (req, res) => {
    
-    User.findOne({ applicationNo: req.params.id }, function (err, user) {
+    User.findOne({ applicationNo: req.params.applicationNo }, function (err, user) {
         if (!err) {
             console.log(`cwd = ${process.cwd()}, req.file.path = ${req.file.path}`)
             var pathToAttachment = path.join(process.cwd(), req.file.path);
