@@ -183,8 +183,8 @@ router.post('/register', upload, async function (req, res) {
 });
 
 
-router.get('/application/:id', verifyToken, upload, function (req, res) {
-	if (req.params.id != req.tokenData.appNo) {
+router.get('/application/:applicationNo', verifyToken, upload, function (req, res) {
+	if (req.params.applicationNo != req.tokenData.appNo) {
 		console.log('application number in token and parameter does not match')
 		res.status(403)
 		return res.json({
@@ -195,7 +195,7 @@ router.get('/application/:id', verifyToken, upload, function (req, res) {
 	console.log('valid token')
 
     if (req.body.button == "", req.body.button == "save")
-        User.findOne({ applicationNo: req.params.id }, function (err, user) {
+        User.findOne({ applicationNo: req.params.applicationNo }, function (err, user) {
             if (!err) {
 				res.status(200);
                 res.send(user);
@@ -205,7 +205,7 @@ router.get('/application/:id', verifyToken, upload, function (req, res) {
 
         });
     else if (req.body.button == "submit") {
-        User.findOne({ applicationNo: req.params.id }, function (err, users) {
+        User.findOne({ applicationNo: req.params.applicationNo }, function (err, users) {
             if (!err) {
                 {
                     let {
@@ -340,8 +340,8 @@ router.patch('/quota_edit/', verifyToken, upload, async function (req, res) {
 	)
 })
 
-router.patch('/application/:id', verifyToken, upload, async function (req, res) {
-	if (req.params.id != req.tokenData.appNo) {
+router.patch('/application/:applicationNo', verifyToken, upload, async function (req, res) {
+	if (req.params.applicationNo != req.tokenData.appNo) {
 		console.log('application number in token and parameter does not match')
 		res.status(403)
 		return res.json({
@@ -379,7 +379,7 @@ router.patch('/application/:id', verifyToken, upload, async function (req, res) 
     //adding url of photograph to body
     
     // console.log(req.files)
-    User.findOne({ applicationNo: req.params.id }, function (err, users) {
+    User.findOne({ applicationNo: req.params.applicationNo }, function (err, users) {
         if (!err) {
 
             if (req.body.c_p) {
@@ -457,7 +457,7 @@ router.patch('/application/:id', verifyToken, upload, async function (req, res) 
                     fileTransactionID:a.fileTransactionID || users.fileTransactionID || users.a
                 }
                 User.updateOne(
-                    { applicationNo: req.params.id },
+                    { applicationNo: req.params.applicationNo },
                     { $set: update }, { runValidators: true },
                     function (err) {
                         if (err) {
@@ -569,6 +569,7 @@ router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, funct
     User.findOne({ applicationNo: req.params.applicationNo },async function (err, users) {
 		console.log(users)
         if(users!=null){
+            if(users.applicationCompleted) {
                 if(req.files){
                     if (req.files.filePhotograph) {
                         const file64 = formatBufferTo64(req.files.filePhotograph[0]);
@@ -649,10 +650,15 @@ router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, funct
                                 message:'Details edited successfully'
                             });
                         }
-                    });
-           
-			console.log('users.quota != NRI')
+                });
+            }else{
+                            res.json({
+                                status: "FAILED",
+                                message:'Submitted application cannot be edited'
+                            });
+            }		
         }
+
         else{
             console.log('could not find user ' + req.params.applicationNo)
 			res.status(500);
@@ -684,7 +690,7 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
 
     User.findOne({ applicationNo: req.params.applicationNo },async function (err, users) {
         if(users!=null){
-           
+            if(!users.applicationCompleted) {
                 if(req.files){
                     if (req.files.fileKeam) {
                         const file64 = formatBufferTo64(req.files.fileKeam[0]);
@@ -777,12 +783,13 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
                             });
                         }
                     });
-    
-    
-    
-           
+            }else{
+                res.json({
+                    status: "FAILED",
+                    message:'Submitted application cannot be edited'
+                });
+            }            
         }
-        
         else{
             console.log('could not find user ' + req.params.applicationNo)
 			res.status(500);
@@ -791,11 +798,10 @@ router.patch('/nri/application-page2/:applicationNo', verifyToken, upload, funct
                 message: "An error occured while checking for existance of user"
             })
         }
-        
     })
 });
 
-router.patch('/nri/application-page3/:id',verifyToken,upload,async function(req,res){
+router.patch('/nri/application-page3/:applicationNo',verifyToken,upload,async function(req,res){
 	console.log(req.params)
 	console.log(req.tokenData)
 	if (req.params.applicationNo != req.tokenData.appNo) {
@@ -819,33 +825,40 @@ router.patch('/nri/application-page3/:id',verifyToken,upload,async function(req,
 				console.log('Signature uploaded\n');
 		}
 	}
-	User.findOne({ applicationNo: req.params.id }, function (err, users) {
+	User.findOne({ applicationNo: req.params.applicationNo }, function (err, users) {
 		if (!err) {
-
-			a = req.body
-			const update = {
-
-
-				bp1: a.bp1 || users.bp1 || users.a,
-				// bp2: a.bp2 || users.bp2 || users.a,
-				// bp3: a.bp3 || users.bp3 || users.a,
-				// bp4: a.bp4 || users.bp4 || users.a,
-				// bp5: a.bp5 || users.bp5 || users.a,
-				imgSign: a.imgSign || users.imgSign || users.a,
-
-			}
-			User.updateOne(
-				{ applicationNo: req.params.id },
-				{ $set: update }, { runValidators: true },
-				function (err) {
-					if (err) {
-						res.json({ error_message: err.message, status: "FAILED" });
-					} else {
-						res.json({
-							status: "SUCCESS ",
-						});
-					}
-				});
+            if(!users.applicationCompleted) {
+                a = req.body
+                const update = {
+    
+    
+                    bp1: a.bp1 || users.bp1 || users.a,
+                    // bp2: a.bp2 || users.bp2 || users.a,
+                    // bp3: a.bp3 || users.bp3 || users.a,
+                    // bp4: a.bp4 || users.bp4 || users.a,
+                    // bp5: a.bp5 || users.bp5 || users.a,
+                    imgSign: a.imgSign || users.imgSign || users.a,
+    
+                }
+                User.updateOne(
+                    { applicationNo: req.params.applicationNo },
+                    { $set: update }, { runValidators: true },
+                    function (err) {
+                        if (err) {
+                            res.json({ error_message: err.message, status: "FAILED" });
+                        } else {
+                            res.json({
+                                status: "SUCCESS ",
+                            });
+                        }
+                    });
+            }else{
+                res.json({
+                    status: "FAILED",
+                    message:"Submitted application cannot be edited"
+                });
+            }
+			
 		}else {
 			res.json({
 				status: 'FAILED',
@@ -859,7 +872,7 @@ router.patch('/nri/application-page3/:id',verifyToken,upload,async function(req,
 })
 
 
-router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,res){
+router.patch('/nri/application-page5/:applicationNo',verifyToken,upload,async function(req,res){
 	console.log(req.params)
 	console.log(req.tokenData)
 	if (req.params.applicationNo != req.tokenData.appNo) {
@@ -882,45 +895,51 @@ router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,
 				console.log('Transaction proof uploaded\n');
 		}
 	}
-	User.findOne({ applicationNo: req.params.id }, function (err, user) {
+	User.findOne({ applicationNo: req.params.applicationNo }, function (err, user) {
 		if (!err) {
-
-			a = req.body
-			if (!(a.fileTransactionID)) {
-				res.json({
-					status: "FAILED",
-					message: "Uploads are Missing"
-
-
-				});
-			}
-			else{
-
-
-				const update = {
-
-					transactionID:a.transactionID ||users.transactionID ||users.a,
-					fileTransactionID:a.fileTransactionID || users.fileTransactionID || users.a,
-                    applicationCompleted:true
-
-				}
-				User.updateOne(
-					{ applicationNo: req.params.id },
-					{ $set: update }, { runValidators: true },
-					async function (err) {
-						if (err) {
-							res.json({ error_message: err.message, status: "FAILED" });
-						} else {
-							console.log('calling user.assignCoadmin()')
-							await user.assignCoadmin()	// check for error and make this atomic
-							console.log(`user after assigning ${user}`)
-							res.json({
-								status: "SUCCESS ",
-							});
-						}
-					});
-
-			}
+            if(!user.applicationCompleted) {
+                a = req.body
+                if (!(a.fileTransactionID)) {
+                    res.json({
+                        status: "FAILED",
+                        message: "Uploads are Missing"
+    
+    
+                    });
+                }
+                else{
+    
+    
+                    const update = {
+    
+                        transactionID:a.transactionID ||users.transactionID ||users.a,
+                        fileTransactionID:a.fileTransactionID || users.fileTransactionID || users.a,
+                        applicationCompleted:true
+    
+                    }
+                    User.updateOne(
+                        { applicationNo: req.params.applicationNo },
+                        { $set: update }, { runValidators: true },
+                        async function (err) {
+                            if (err) {
+                                res.json({ error_message: err.message, status: "FAILED" });
+                            } else {
+                                console.log('calling user.assignCoadmin()')
+                                await user.assignCoadmin()	// check for error and make this atomic
+                                console.log(`user after assigning ${user}`)
+                                res.json({
+                                    status: "SUCCESS ",
+                                });
+                            }
+                        });
+                }
+			
+			}else{
+                res.json({
+                    status: "FAILED",
+                    message:"Submitted applcation cannot be edited"
+                });
+            }
 		} else {
 			res.json({
 				status: 'FAILED',
@@ -932,9 +951,9 @@ router.patch('/nri/application-page5/:id',verifyToken,upload,async function(req,
 	});
 })
 
-/*router.post("/send_pdf/:id", verifyToken,upload2.single("filePreview"), (req, res) => {
+/*router.post("/send_pdf/:applicationNo", verifyToken,upload2.single("filePreview"), (req, res) => {
    
-    User.findOne({ applicationNo: req.params.id }, function (err, user) {
+    User.findOne({ applicationNo: req.params.applicationNo }, function (err, user) {
         if (!err) {
             console.log(`cwd = ${process.cwd()}, req.file.path = ${req.file.path}`)
             var pathToAttachment = path.join(process.cwd(), req.file.path);
