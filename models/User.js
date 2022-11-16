@@ -96,7 +96,7 @@ const UserSchema = new Schema({
       },
       aPhone:
       {
-        type:Number,
+        type:String,
        
       },
       dob: Date,
