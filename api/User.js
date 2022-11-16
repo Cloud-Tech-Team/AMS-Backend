@@ -165,16 +165,17 @@ router.post('/register', upload, async function (req, res) {
 				if (user.email) {
 					const msg = {
 						to: user.email, // Change to your recipient
-						from: 'ams.mits23@gmail.com', // Change to your verified sender
+						from: process.env.FROM_EMAIL, // Change to your verified sender
 						subject: 'Registration Successful',
-						text: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} 20${user.academicYear} at Muthoot Institute of Technology and Science\nYour Registration Number: ${user.applicationNo}\nPassword: ${user.password}.\n\nPlease login and complete the application.\n\nTeam MITS
+						text: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} ${user.academicYear} at Muthoot Institute of Technology and Science\nYour Registration Number: ${user.applicationNo}\nPassword: ${user.password}.\n\nPlease login and complete the application.\n\nTeam MITS
   \n`
 					}
 					sgMail.send(msg).then((response) => {
 						console.log(response[0].statusCode)
 						console.log(response[0].headers)
+                        console.log("mail sent");
 					}) .catch((error) => {
-						console.error(error)
+						console.error(error +" mail not sent")
 					})
 				}
 			}
@@ -964,7 +965,7 @@ router.patch('/nri/application-page5/:applicationNo',verifyToken,upload,async fu
                         "email":"19cs208@mgits.ac.in",
                     }
                     ], // Change to your recipient
-                from: 'ams.mits23@gmail.com', 
+                from: 'process.env.FROM_EMAIL', 
                 subject: 'Application Received',
                 text: `Hi ${user.firstName},\nWe have received your application of admission for ${user.course} ${user.quota} ${user.academicYear} batch at Muthoot Institute of Technology and Science\nYour application number: ${user.applicationNo}\nPlease find attached, the application form you submitted.\n\nTeam MITS`,
                 attachments: [
