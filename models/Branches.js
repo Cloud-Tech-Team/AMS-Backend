@@ -16,6 +16,7 @@ const BranchSchema=new Schema({
 	/* maybe make this all configurable as an array  of objects */
     NRISeats:Number,
     MgmtSeats:Number,
+	SuperSeats: Number, // supernumerary - PIO/CIWG
 	/* total occupied seats - incremented when any seat is occupied */
     occupiedSeats:{
         type:Number,
@@ -27,6 +28,10 @@ const BranchSchema=new Schema({
         default:0
     },
 	occupiedSeatsMgmt: {
+		type: Number,
+		default: 0
+	},
+	occupiedSeatsSuper: {
 		type: Number,
 		default: 0
 	},
@@ -68,6 +73,20 @@ BranchSchema.methods.occupySeatNRI = async function(user) {
 		return 0
 	} else {
 		console.log('NRI filled')
+		return -1;
+	}
+};
+
+BranchSchema.methods.occupySeatSuper = async function(user) {
+	console.log(`occupySeatNRI: ${user.applicationNo}`)
+	if (!this.isSuperFilled()) {
+		console.log('not filled')
+		this.occupiedSeatsSuper++;
+		this.occupiedSeats++;
+		this.save()
+		return 0
+	} else {
+		console.log('Super filled')
 		return -1;
 	}
 };
@@ -135,6 +154,16 @@ BranchSchema.methods.freeSeatNRI = function(user) {
 	console.log(`occupiedSeats: ${this.occupiedSeats}`)
 }
 
+BranchSchema.methods.freeSeatSuper = function(user) {
+	console.log('freeSeatSuper')
+	if (this.occupiedSeatsSuper > 0) {
+		this.occupiedSeatsSuper--;
+		this.occupiedSeats--;
+	}
+	console.log(`occupiedSeatsSuper: ${this.occupiedSeatsSuper}`)
+	console.log(`occupiedSeats: ${this.occupiedSeats}`)
+}
+
 /*
  * Seat becomes free when user is removed - update waiting list accordingly.
  * NOTE: This does not remove user from UserDB.
@@ -166,6 +195,10 @@ BranchSchema.methods.freeSeatMgmt = function(user) {
 /* Check if quota is filled */
 BranchSchema.methods.isNRIFilled = function() {
     return this.occupiedSeatsNRI == this.NRISeats
+}
+
+BranchSchema.methods.isSuperFilled = function() {
+    return this.occupiedSeatsSuper == this.SuperSeats
 }
 
 BranchSchema.methods.isMgmtFilled = function() {
