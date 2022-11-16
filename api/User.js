@@ -915,7 +915,8 @@ router.patch('/nri/application-page5/:applicationNo',verifyToken,upload,async fu
 
 					transactionID:a.transactionID ||users.transactionID ||users.a,
 					fileTransactionID:a.fileTransactionID || users.fileTransactionID || users.a,
-                    applicationCompleted:true
+                    applicationCompleted:true,
+                    completeTimeStamp:Date.now()
 
 				}
 				User.updateOne(
