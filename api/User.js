@@ -569,7 +569,7 @@ router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, funct
     User.findOne({ applicationNo: req.params.applicationNo },async function (err, users) {
 		console.log(users)
         if(users!=null){
-            if(users.applicationCompleted) {
+            if(!users.applicationCompleted) {
                 if(req.files){
                     if (req.files.filePhotograph) {
                         const file64 = formatBufferTo64(req.files.filePhotograph[0]);
@@ -815,7 +815,7 @@ router.patch('/nri/application-page3/:applicationNo',verifyToken,upload,async fu
 	}
 	console.log('token verified')
 
-
+    
 	if(req.files){
 		if (req.files.imgSign) {
 			const file64 = formatBufferTo64(req.files.imgSign[0]);
@@ -841,7 +841,7 @@ router.patch('/nri/application-page3/:applicationNo',verifyToken,upload,async fu
     
                 }
                 User.updateOne(
-                    { applicationNo: req.params.applicationNo },
+                    { applicationNo: req.params.id },
                     { $set: update }, { runValidators: true },
                     function (err) {
                         if (err) {
@@ -851,7 +851,7 @@ router.patch('/nri/application-page3/:applicationNo',verifyToken,upload,async fu
                                 status: "SUCCESS ",
                             });
                         }
-                    });
+                    });    
             }else{
                 res.json({
                     status: "FAILED",
@@ -897,49 +897,43 @@ router.patch('/nri/application-page5/:applicationNo',verifyToken,upload,async fu
 	}
 	User.findOne({ applicationNo: req.params.applicationNo }, function (err, user) {
 		if (!err) {
-            if(!user.applicationCompleted) {
-                a = req.body
-                if (!(a.fileTransactionID)) {
-                    res.json({
-                        status: "FAILED",
-                        message: "Uploads are Missing"
-    
-    
-                    });
-                }
-                else{
-    
-    
-                    const update = {
-    
-                        transactionID:a.transactionID ||users.transactionID ||users.a,
-                        fileTransactionID:a.fileTransactionID || users.fileTransactionID || users.a,
-                        applicationCompleted:true
-    
-                    }
-                    User.updateOne(
-                        { applicationNo: req.params.applicationNo },
-                        { $set: update }, { runValidators: true },
-                        async function (err) {
-                            if (err) {
-                                res.json({ error_message: err.message, status: "FAILED" });
-                            } else {
-                                console.log('calling user.assignCoadmin()')
-                                await user.assignCoadmin()	// check for error and make this atomic
-                                console.log(`user after assigning ${user}`)
-                                res.json({
-                                    status: "SUCCESS ",
-                                });
-                            }
-                        });
-                }
-			
-			}else{
-                res.json({
-                    status: "FAILED",
-                    message:"Submitted applcation cannot be edited"
-                });
-            }
+
+			a = req.body
+			if (!(a.fileTransactionID)) {
+				res.json({
+					status: "FAILED",
+					message: "Uploads are Missing"
+
+
+				});
+			}
+			else{
+
+
+				const update = {
+
+					transactionID:a.transactionID ||users.transactionID ||users.a,
+					fileTransactionID:a.fileTransactionID || users.fileTransactionID || users.a,
+                    applicationCompleted:true
+
+				}
+				User.updateOne(
+					{ applicationNo: req.params.id },
+					{ $set: update }, { runValidators: true },
+					async function (err) {
+						if (err) {
+							res.json({ error_message: err.message, status: "FAILED" });
+						} else {
+							console.log('calling user.assignCoadmin()')
+							await user.assignCoadmin()	// check for error and make this atomic
+							console.log(`user after assigning ${user}`)
+							res.json({
+								status: "SUCCESS ",
+							});
+						}
+					});
+
+			}
 		} else {
 			res.json({
 				status: 'FAILED',
