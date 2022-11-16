@@ -9,7 +9,6 @@ const Branch = require('../models/Branches')
 const Constants= require('./../constants/constant')
 
 router.post('/add',upload,function(req,res){
-    
     if(req.headers.authorization){ 
         const token = req.headers.authorization.split(" ")[1];
 		var decoded;
@@ -54,10 +53,12 @@ router.post('/add',upload,function(req,res){
 					var total = req.body.totalSeats
 					var nri = req.body.NRISeats
 					var mgmt = req.body.MgmtSeats
+					var nsuper = req.body.SuperSeats
 					nri = nri ? nri : 0
 					mgmt = mgmt ? mgmt : 0
-					if ((nri + mgmt) != total) {
-						console.log(`${nri} + ${mgmt} != ${total}`)
+					nsuper = nsuper ? nsuper : 0
+					if ((nri + mgmt + nsuper) != total) {
+						console.log(`${nri} + ${mgmt} + ${nsuper} != ${total}`)
 						res.status(400)
 						return res.json({
 							status: "FAILED",
@@ -70,6 +71,7 @@ router.post('/add',upload,function(req,res){
                         totalSeats:req.body.totalSeats,
                         NRISeats:req.body.NRISeats,
                         MgmtSeats:req.body.MgmtSeats,
+						SuperSeats: req.body.SuperSeats,
 						WLNRILimit: req.body.WLNRILimit,
 						WLMgmtLimit: req.body.WLMgmtLimit
                     })
@@ -207,8 +209,10 @@ router.get('/get', upload, function (req, res) {
 				totalSeats: o.totalSeats,
 				NRISeats: o.NRISeats,
 				MgmtSeats: o.MgmtSeats,
+				SuperSeats: o.SuperSeats,
 				NRIOccupied: o.occupiedSeatsNRI,
 				MgmtOccupied: o.occupiedSeatsMgmt,
+				SuperOccupied: o.occupiedSeatsSuper,
 				MgmtWL: o.waitingListMgmt.length
 				// TODO: Add waiting limit field
 			}))
