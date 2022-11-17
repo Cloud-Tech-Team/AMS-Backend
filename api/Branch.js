@@ -82,7 +82,7 @@ router.post('/add', verifyToken, upload,function(req,res){
  * /branch/getall - list all fields of current branches
  * Only admin
  */
-router.post('/getall', upload, function (req, res) {
+router.post('/getall', verifyToken, upload, function (req, res) {
 	const decoded = req.tokenData
 	console.log(`role = ${decoded.role}`)
 	if (decoded.role != 'admin') {
