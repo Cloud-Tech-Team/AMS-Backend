@@ -8,104 +8,74 @@ const Branch = require('../models/Branches')
  
 const Constants= require('./../constants/constant')
 
-router.post('/add',upload,function(req,res){
-    if(req.headers.authorization){ 
-        const token = req.headers.authorization.split(" ")[1];
-		var decoded;
-		try {
-			console.log(`token = ${token}`)
-			decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
-		} catch (ex) {
-			console.log(ex.message)
-			res.status(400)
-			res.json({
-				status: 'FAILED',
-				message: 'Invalid token'
-			})
-			return
-		}
-		console.log("role:"+decoded.role);
-		if(decoded.role=='admin'){
-            console.log(req.body);
-            const branch = req.body.branch;
-			const year = req.body.year;
-			/* check if branch exists */
-			Branch.find({branch: branch, year: year},function(err,result){
-                if(err){
-                    console.log("Error in finding branch")
-                    res.status(500)
-                    res.json({
-                        status: "FAILED",
-                        message: "Insernal server error"
-                    })
-                }
-                if(result.length>=1)
-                {
-                    console.log("Already existing")
-                    res.json({
-                        message:"Already Existing Branch",
-                        status:"FAILED"
-                    });
-                }
-                else{
-					/* what to do when we add more quotas? */
-					var nriSeats = req.body.NRISeats
-					var mgmtSeats = req.body.MgmtSeats
-					var superSeats = req.body.SuperSeats
-					nriSeats = nriSeats ? nriSeats : 0
-					mgmtSeats = mgmtSeats ? mgmtSeats : 0
-					superSeats = superSeats ? superSeats : 0
-					var totalSeats = nriSeats + mgmtSeats + superSeats
+router.post('/add', verifyToken, upload,function(req,res){
+	const decoded = req.tokenData
+	if(decoded.role=='admin'){
+		console.log(req.body);
+		const branch = req.body.branch;
+		const year = req.body.year;
+		/* check if branch exists */
+		Branch.find({branch: branch, year: year},function(err,result){
+			if(err){
+				console.log("Error in finding branch")
+				res.status(500)
+				res.json({
+					status: "FAILED",
+					message: "Insernal server error"
+				})
+			}
+			if(result.length>=1)
+			{
+				console.log("Already existing")
+				res.json({
+					message:"Already Existing Branch",
+					status:"FAILED"
+				});
+			}
+			else{
+				/* what to do when we add more quotas? */
+				var nriSeats = req.body.NRISeats
+				var mgmtSeats = req.body.MgmtSeats
+				var superSeats = req.body.SuperSeats
+				nriSeats = nriSeats ? nriSeats : 0
+				mgmtSeats = mgmtSeats ? mgmtSeats : 0
+				superSeats = superSeats ? superSeats : 0
+				var totalSeats = nriSeats + mgmtSeats + superSeats
 
-                    const new_branch = new Branch({
-                        branch:branch,
-						year: year,
-                        totalSeats: totalSeats,
-                        NRISeats: nriSeats,
-                        MgmtSeats: mgmtSeats,
-						SuperSeats: superSeats,
-						WLNRILimit: req.body.WLNRILimit,
-						WLMgmtLimit: req.body.WLMgmtLimit,
-						WLSuperLimit: req.body.WLSuperLimit
-                    })
-					console.log('new branch')
-					console.log(new_branch)
-                    new_branch.save(function(err){
-                        if(err){
-                            console.log("Error in saving branch")
-                            res.status(500)
-                            res.json({
-                                status: "FAILED",
-                                message: err.message
-                            })
+				const new_branch = new Branch({
+					branch:branch,
+					year: year,
+					totalSeats: totalSeats,
+					NRISeats: nriSeats,
+					MgmtSeats: mgmtSeats,
+					SuperSeats: superSeats,
+					WLNRILimit: req.body.WLNRILimit,
+					WLMgmtLimit: req.body.WLMgmtLimit,
+					WLSuperLimit: req.body.WLSuperLimit
+				})
+				console.log('new branch')
+				console.log(new_branch)
+				new_branch.save(function(err){
+					if(err){
+						console.log("Error in saving branch")
+						res.status(500)
+						res.json({
+							status: "FAILED",
+							message: err.message
+						})
 
-                        }
-                        else{
-                            res.status(200)
-                            res.json({
-                                message:"Branch added successfully",
-                                status:"SUCCESS"
-                            })
-                        }
-                    })
-                }
-            })
-        }
-        else{
-            res.status(403);
-			res.json({
-				status:"FAILED",
-				message:'Access denied'
-			})
-        }
-    }
-    else{
-		res.json({
-			status:"FAILED",
-			message:'Access token error'
+					}
+					else{
+						res.status(200)
+						res.json({
+							message:"Branch added successfully",
+							status:"SUCCESS"
+						})
+					}
+				})
+			}
 		})
 	}
-
 });
 
 /*
