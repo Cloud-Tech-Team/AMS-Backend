@@ -196,7 +196,7 @@ router.post('/search', upload, function(req,res){
 				}
 				else{
 					console.log(`data.length = ${data.length}`)
-					if (offset >= data.length) {
+					if (data.length != 0 && offset >= data.length) {
 						res.status(400);
 						return res.json({
 							status: 'FAILURE',
