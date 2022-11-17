@@ -16,6 +16,7 @@ const BranchSchema=new Schema({
 	/* maybe make this all configurable as an array  of objects */
     NRISeats:Number,
     MgmtSeats:Number,
+	SuperSeats: Number, // supernumerary - PIO/CIWG
 	/* total occupied seats - incremented when any seat is occupied */
     occupiedSeats:{
         type:Number,
@@ -27,6 +28,10 @@ const BranchSchema=new Schema({
         default:0
     },
 	occupiedSeatsMgmt: {
+		type: Number,
+		default: 0
+	},
+	occupiedSeatsSuper: {
 		type: Number,
 		default: 0
 	},
@@ -54,9 +59,38 @@ BranchSchema.methods.isFilled = function() {
 	return this.occupiedSeats == this.totalSeats
 }
 
-/* occupySeatNRI
+/* occupySeat: generic occupySeat function.
+ * 	Returns the value returned by the occupySeatxxx functions
+ * 		-1 on error
+ * 		>= 0 on success, number indicates waitingList number
+ * 		Infinity - waiting list filled
+ */
+BranchSchema.methods.occupySeat = async function(user) {
+	console.log(`occupySeat(quota=${user.quota})`)
+	console.log(user.applicationNo)
+	var ret = -1
+	switch (user.quota) {
+		case 'NRI':
+			ret = await this.occupySeatNRI(user)
+			break
+		case 'Management':
+			ret = await this.occupySeatMgmt(user)
+			break
+		case 'ciwg':
+		case 'pio':
+			ret = await this.occupySeatSuper(user)
+			break
+		default:
+			console.log('invalid quota')
+			ret = -1
+	}
+	return ret
+}
+
+/* occupySeat for NRI and Super
  * 	No waiting list for NRI.
- *	Return 0 if success, -1 if filled.
+ *	Return 0 on success, Infinity if filled.
+ *	Right now, no waitingList for NRI and Super.
  */
 BranchSchema.methods.occupySeatNRI = async function(user) {
 	console.log(`occupySeatNRI: ${user.applicationNo}`)
@@ -68,7 +102,21 @@ BranchSchema.methods.occupySeatNRI = async function(user) {
 		return 0
 	} else {
 		console.log('NRI filled')
-		return -1;
+		return Infinity;
+	}
+};
+
+BranchSchema.methods.occupySeatSuper = async function(user) {
+	console.log(`occupySeatSuper: ${user.applicationNo}`)
+	if (!this.isSuperFilled()) {
+		console.log('not filled')
+		this.occupiedSeatsSuper++;
+		this.occupiedSeats++;
+		this.save()
+		return 0
+	} else {
+		console.log('Super filled')
+		return Infinity;
 	}
 };
 
@@ -79,6 +127,11 @@ BranchSchema.methods.occupySeatNRI = async function(user) {
  * To get a user's waiting list number, check their 'waiting' field.
  * If true, find their index in waitingListMgmt array using applicationNo.
  * Return Infinity if waiting list limit reached Hehe.
+ * Return:
+ * 	-1 on error
+ * 	>= 0 on success, where the number is the waiting list number
+ * 	Infinity when waitingList has been filled
+ *
  * NOTE: If user is already in waitingList, *PRETEND* to add and return index.
  * What if user who registered, but not in waiting list applies again?
  */
@@ -135,6 +188,16 @@ BranchSchema.methods.freeSeatNRI = function(user) {
 	console.log(`occupiedSeats: ${this.occupiedSeats}`)
 }
 
+BranchSchema.methods.freeSeatSuper = function(user) {
+	console.log('freeSeatSuper')
+	if (this.occupiedSeatsSuper > 0) {
+		this.occupiedSeatsSuper--;
+		this.occupiedSeats--;
+	}
+	console.log(`occupiedSeatsSuper: ${this.occupiedSeatsSuper}`)
+	console.log(`occupiedSeats: ${this.occupiedSeats}`)
+}
+
 /*
  * Seat becomes free when user is removed - update waiting list accordingly.
  * NOTE: This does not remove user from UserDB.
@@ -166,6 +229,10 @@ BranchSchema.methods.freeSeatMgmt = function(user) {
 /* Check if quota is filled */
 BranchSchema.methods.isNRIFilled = function() {
     return this.occupiedSeatsNRI == this.NRISeats
+}
+
+BranchSchema.methods.isSuperFilled = function() {
+    return this.occupiedSeatsSuper == this.SuperSeats
 }
 
 BranchSchema.methods.isMgmtFilled = function() {

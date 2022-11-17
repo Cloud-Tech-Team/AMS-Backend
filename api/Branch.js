@@ -9,7 +9,6 @@ const Branch = require('../models/Branches')
 const Constants= require('./../constants/constant')
 
 router.post('/add',upload,function(req,res){
-    
     if(req.headers.authorization){ 
         const token = req.headers.authorization.split(" ")[1];
 		var decoded;
@@ -52,18 +51,22 @@ router.post('/add',upload,function(req,res){
 					/* what to do when we add more quotas? */
 					var nriSeats = req.body.NRISeats
 					var mgmtSeats = req.body.MgmtSeats
+					var superSeats = req.body.SuperSeats
 					nriSeats = nriSeats ? nriSeats : 0
 					mgmtSeats = mgmtSeats ? mgmtSeats : 0
-					var totalSeats = nriSeats + mgmtSeats
+					superSeats = superSeats ? superSeats : 0
+					var totalSeats = nriSeats + mgmtSeats + superSeats
 
                     const new_branch = new Branch({
                         branch:branch,
 						year: year,
                         totalSeats: totalSeats,
-                        NRISeats:req.body.NRISeats,
-                        MgmtSeats:req.body.MgmtSeats,
+                        NRISeats: nriSeats,
+                        MgmtSeats: mgmtSeats,
+						SuperSeats: superSeats,
 						WLNRILimit: req.body.WLNRILimit,
-						WLMgmtLimit: req.body.WLMgmtLimit
+						WLMgmtLimit: req.body.WLMgmtLimit,
+						WLSuperLimit: req.body.WLSuperLimit
                     })
 					console.log('new branch')
 					console.log(new_branch)
@@ -201,8 +204,10 @@ router.get('/get', upload, function (req, res) {
 				totalSeats: o.totalSeats,
 				NRISeats: o.NRISeats,
 				MgmtSeats: o.MgmtSeats,
+				SuperSeats: o.SuperSeats,
 				NRIOccupied: o.occupiedSeatsNRI,
 				MgmtOccupied: o.occupiedSeatsMgmt,
+				SuperOccupied: o.occupiedSeatsSuper,
 				MgmtWL: o.waitingListMgmt.length
 				// TODO: Add waiting limit field
 			}))

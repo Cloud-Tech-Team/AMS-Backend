@@ -1011,82 +1011,84 @@ router.patch('/nri/application-page5/:applicationNo',verifyToken,upload,async fu
     });
   });
   */
+
 /* Get applicationNo, branch, and quota from request.
  * Have the user occupy the branch's quota.
+ * Branch and quota details are in user
  * Return waiting list number (0 if not in waiting list)
  */
 router.post('/test_waiting_list/', verifyToken, upload, async function (req, res) {
-	const branch_ = req.body.branch
-	const quota_  = req.body.quota
-	const appNo   = req.body.applicationNo
+	// TODO: check if user has already occupied a seat first! How??
+	console.log(req.body.tokenData)
+	const appNo   = req.tokenData.appNo
 
-	console.log(req.body)
-
-	console.log(`finding user ${appNo}`)
-	var user = null
-	var query = {applicationNo: appNo}
-	console.log(query)
-	await User.findOne({applicationNo: appNo}, (err, result) => {
-		if (err) {
-			console.log(`error finding user: ${err}`)
-			res.status(500)
-			return res.json({
-				status: 'FAILED',
-				message: `error finding user with applicationNo ${appNo}\n${err.message}`
-			})
-		}
-		user = result
-	})
-	console.log(user)
-	if (user == null) {
-		console.log(`invalid user: ${appNo}`)
-		res.status(400)
+	if (users.applicationCompleted) {
+		console.log('user has completed. cannot change now')
+		res.status(503)
 		return res.json({
 			status: 'FAILED',
-			message: 'invalid user'
+			message: 'user has clicked final submit - cannot change now'
 		})
 	}
 
-
-	console.log(`finding branch ${branch_}`)
-	await Branch.findOne({branch: branch_}, async (err, branch) => {
-		if (err) {
-			console.log(`error finding branch: ${err.message}`)
-			res.status(500)
+	console.log(`finding user ${appNo}`)
+	var user 
+	var query = {applicationNo: appNo}
+	console.log(query)
+	User.findOne(query).then(async (user) => {
+		if (!user) {
+			// can happen if user deleted after token was generated
+			console.log(`user doesn't exist`)
+			res.status(400)
 			return res.json({
 				status: 'FAILED',
-				message: err.message
+				message: `user (${appNo}) doesn't exist`
 			})
 		}
-		/* found branch; now occupy quota's seat */
-		var waitingNo = 0
-		switch (quota_) {
-			case 'NRI':
-				console.log('NRI')
-				console.log(user)
-				waitingNo = branch.occupySeatNRI(user)
-				break
-			case 'Management':
-				console.log('Management')
-				console.log(user)
-				waitingNo = branch.occupySeatMgmt(user)
-				break
-			default:
-				console.log('invalid quota')
-				waitingNo = -1
+		console.log(`after findOne: found user ${user.applicationNo}`)
+		console.log(`finding branch ${user.bp1}`)
+		var branch = null
+		await Branch.findOne({branch: user.bp1}, (err, branch_) => {
+			if (err) {
+				console.log(`error finding branch: ${err.message}`)
+				res.status(500)
+				return res.json({
+					status: 'FAILED',
+					message: err.message
+				})
+			}
+			branch = branch_
+		})
+		if (!branch) {
+			console.log(`branch ${user.bp1} doesn not exist`)
+			res.status(400)
+			return res.json({
+				status: 'FAILED',
+				message: `invalid branch ${user.bp1}`
+			})
 		}
+		/* found branch; now occupy quota's seat (quota is in user.quota) */
+		waitingNo = await branch.occupySeat(user)
 		if (waitingNo == -1) {
 			res.status(400)
 			return res.json({
 				status: 'FAILED',
 				message: 'Invalid quota'
 			})
+		} else if (waitingNo == Infinity) {	// quota filled
+			res.status(400)	// return OK or error?
+			return res.json({
+				status: 'FAILED',
+				message: `quota ${user.quota} filled`
+			})
 		}
+
 		/* set user's waiting status */
 		user.waiting = waitingNo > 0 ? true : false
 		try {
 			await user.save()
 		} catch (err) {
+			// branchDB has already been updated!! make it atomic
 			console.log(`error saving user: ${err.message}`)
 			res.status(500)
 			return res.json({
@@ -1097,9 +1099,16 @@ router.post('/test_waiting_list/', verifyToken, upload, async function (req, res
 		res.status(200)
 		return res.json({
 			status: 'SUCCESS',
-			message: `${appNo} occupied ${quota_}.\n`,
+			message: `${appNo} occupied ${user.quota}.\n`,
 			waitingListNo: waitingNo
 		})
+	}).catch(err => {
+			console.log(`error finding user: ${err}`)
+			res.status(500)
+			return res.json({
+				status: 'FAILED',
+				message: `error finding user with applicationNo ${appNo}\n${err.message}`
+			})
 	})
 })
 
