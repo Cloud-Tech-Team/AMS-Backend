@@ -181,9 +181,11 @@ router.post('/search', verifyToken, upload, function(req,res){
 			});
 		} else {
 			console.log(`data.length = ${data.length}`)
+			if (data.length != 0 && offset >= data.length) {
+				res.status(400);
 				return res.json({
 					status: 'FAILURE',
-					message: 'invalid offset: negative value'
+					message: `offset ${offset} is past end of result`
 				})
 			}
 			var result
