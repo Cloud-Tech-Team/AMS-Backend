@@ -156,7 +156,7 @@ router.post('/login', upload, function (req, res) {
  *	Return @count results starting from @offset of the data returned by the query.
  *	The filter for query is req.body minus @count and @offset parameters.
  */
-router.get('/search', upload, function(req,res){
+router.post('/search', upload, function(req,res){
 	if(typeof(req.headers.authorization) != 'undefined' && req.headers.authorization){
 		const token = req.headers.authorization.split(" ")[1];
 		const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
