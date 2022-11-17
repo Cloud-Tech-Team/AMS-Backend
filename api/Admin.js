@@ -48,7 +48,8 @@ router.get('/count', verifyToken, upload, async function (req, res) {
 	/* Perform query on db with the request body */
 	// queries = req.body.queries
 	var queries = [
-		{"quota":"Government"}, {"quota":"Management"}, {"quota":"NRI"}, {"verified":false}, {"verified":true}
+		{"quota":"Government"}, {"quota":"Management"}, {"quota":"NRI"}, {"quota": "CIWG"}, 
+		{"quota":"PIO"}, {"verified":false}, {"verified":true}
 	]
 	console.log(queries)
 	if (typeof(queries) == 'undefined' || typeof(queries.length) == 'undefined') {
