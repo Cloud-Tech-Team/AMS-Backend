@@ -1024,7 +1024,7 @@ router.post('/test_waiting_list/', verifyToken, upload, async function (req, res
 
 	if (users.applicationCompleted) {
 		console.log('user has completed. cannot change now')
-		res.status(503)
+		res.status(403)
 		return res.json({
 			status: 'FAILED',
 			message: 'user has clicked final submit - cannot change now'
