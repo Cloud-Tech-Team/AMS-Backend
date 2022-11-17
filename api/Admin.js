@@ -26,32 +26,13 @@ async function addcount(query, counts) {
 	})
 }
 
-router.get('/count', upload, async function (req, res) {
+router.get('/count', verifyToken, upload, async function (req, res) {
 	/* Verify token belongs to an admin */
 	console.log(req.headers)
 	console.log(req.body)
-	if ((typeof(req.headers.authorization) == 'undefined') || (req.headers.authorization == null)) {
-		console.log('req.headers.authorization undefined')
-		res.status(400);
-		return res.json({
-			status: 'FAILED',
-			message: 'Token not specified'
-		})
-	}
-	const token = req.headers.authorization.split(" ")[1];
-	var decoded
-	try {
-		console.log(`token = ${token}`)
-		decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
-	} catch (ex) {
-		console.log(ex.message)
-		res.status(400)
-		res.json({
-			status: 'FAILED',
-			message: 'Invalid token'
-		})
-		return
-	}
+	var decoded = req.tokenData
+	console.log(decoded)
+
 	if (decoded.role != 'admin' && decoded.role != 'co-admin') {
 		console.log('User is not admin!');
 		console.log('email: ' + decoded.email);
