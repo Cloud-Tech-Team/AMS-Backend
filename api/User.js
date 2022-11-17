@@ -859,6 +859,80 @@ router.patch('/nri/application-page3/:applicationNo',verifyToken,upload,async fu
     
 })
 
+/* Helper function to have a user occupy their branch seat in their quota (user.bp1).
+ * Increment the occupiedSeatxxx for quota (xxx) for the branch user.bp1, if not filled.
+ * NOTE: It does NOT do any other checks, that is the responsibility of the caller.
+ * 
+ * Saves user on success after setting user.waiting and user.applicationCompleted = true
+ * Returns json {status: HTTP Status Code, message: String}
+ */
+async function occupySeat(user) {
+	const appNo = user.applicationNo
+	console.log(`finding user ${appNo}`)
+	var query = {applicationNo: appNo}
+	console.log(query)
+	console.log(`after findOne: found user ${user.applicationNo}`)
+	console.log(`finding branch ${user.bp1}`)
+	var branch = null
+	await Branch.findOne({branch: user.bp1}).then((branch_) => {
+		branch = branch_
+	}).catch((err) => {
+		console.log(`error finding branch: ${err.message}`)
+		return {
+			code: 500,
+			status: 'FAILED',
+			message: 'Internal server error'
+		}
+	})
+	if (!branch) {
+		console.log(`branch ${user.bp1} doesn not exist`)
+		return {
+			code: 400,
+			status: 'FAILED',
+			message: `invalid branch ${user.bp1}`
+		}
+	}
+	/* found branch; now occupy quota's seat (quota is in user.quota) */
+	waitingNo = await branch.occupySeat(user)
+	if (waitingNo == -1) {
+		console.log(`${user.quota} invalid`)
+		return {
+			code: 400,
+			status: 'FAILED',
+			message: 'Invalid quota'
+		}
+	} else if (waitingNo == Infinity) {	// quota filled
+		console.log(`${user.quota} filled`)
+		return {
+			code: 400,
+			status: 'FAILED',
+			message: `quota ${user.quota} filled`
+		}
+	}
+	/* set user's waiting status */
+	user.waiting = waitingNo > 0 ? true : false
+	console.log(`user.waiting = ${user.waiting}`)
+	user.applicationCompleted = true
+	try {
+		await user.save()
+		console.log('user saved successfully')
+	} catch (err) {
+		// branchDB has already been updated!! make it atomic
+		console.log(`error saving user: ${err.message}`)
+		return {
+			code: 500,
+			status: 'FAILED',
+			message: `error saving user\n`
+		}
+	}
+	console.log('returning from occupySeat(user)')
+	return {
+		code: 200,
+		status: 'SUCCESS',
+		message: `${appNo} occupied ${user.quota}.\n`,
+		waitingListNo: waitingNo
+	}
+}
 
 router.patch('/nri/application-page5/:applicationNo',verifyToken,upload,async function(req,res){
 	console.log(req.params)
@@ -883,59 +957,75 @@ router.patch('/nri/application-page5/:applicationNo',verifyToken,upload,async fu
 				console.log('Transaction proof uploaded\n');
 		}
 	}
-	User.findOne({ applicationNo: req.params.applicationNo }, function (err, user) {
-		if (!err) {
-                if(!user.applicationCompleted) {
-                    a = req.body
-                    if (!(a.fileTransactionID)) {
-                        res.json({
-                            status: "FAILED",
-                            message: "Uploads are Missing"
-
-
-                        });
-                    }
-                    else{
-
-
-                        const update = {
-
-                            transactionID:a.transactionID ||users.transactionID ||users.a,
-                            fileTransactionID:a.fileTransactionID || users.fileTransactionID || users.a,
-                            applicationCompleted:true,
-                            completeTimeStamp:Date.now()
-
-                        }
-                        User.updateOne(
-                            { applicationNo: req.params.applicationNo },
-                            { $set: update }, { runValidators: true },
-                            async function (err) {
-                                if (err) {
-                                    res.json({ error_message: err.message, status: "FAILED" });
-                                } else {
-                                    console.log('calling user.assignCoadmin()')
-                                    await user.assignCoadmin()	// check for error and make this atomic
-                                    console.log(`user after assigning ${user}`)
-                                    res.json({
-                                        status: "SUCCESS ",
-                                    });
-                                }
-                        });
-                    }
-                }else{
-                    res.json({
-                        status: "FAILED",
-                        message:"Submitted application cannot be edited"
-                    });
-                }
-		} else {
-			res.json({
+	const query = { applicationNo: req.params.applicationNo } 
+	User.findOne(query, async function (err, user) {
+		if (err) {
+			console.log('internal error finding user')
+			console.log(err)
+			res.status(500)
+			return res.json({
 				status: 'FAILED',
-				message: 'Not registered'
+				message: 'Internal server error'
 			})
 		}
-
-
+		if (!user) {
+			console.log(query)
+			console.log(`user does not exist`)
+		}
+		if(!user.applicationCompleted) {
+			a = req.body
+			if (!(a.fileTransactionID)) {
+				console.log('fileTransactionID missing')
+				res.status(400)
+				return res.json({
+					status: "FAILED",
+					message: "Uploads are Missing"
+				});
+			}
+			if (!(a.transactionID)) {
+				console.log('transactionID missing in req.body')
+				res.status(400)
+				return res.json({
+					status: 'FAILED',
+					message: 'transactionID missing'
+				})
+			}
+			const update = {
+				// don't need ORs since [file]transactionID will be non-null if we reach here
+				transactionID:a.transactionID, //||users.transactionID ||users.a,
+				fileTransactionID:a.fileTransactionID, //|| users.fileTransactionID || users.a,
+				//  applicationCompleted:true,	//  set applicationCompleted by occupySeat helper
+				completeTimeStamp:Date.now()
+			}
+			console.log('updating user')
+			await User.updateOne(
+				{ applicationNo: req.params.applicationNo },
+				{ $set: update }, { runValidators: true },
+			).then(async function() {
+				console.log('calling user.assignCoadmin()')
+				await user.assignCoadmin()	// check for error and make this atomic
+				console.log(`user after assigning ${user}`)
+				console.log('occupying branch seat')
+				var result = await occupySeat(user)
+				console.log('returned from occupySeat(user)')
+				console.log(result)
+				res.status(result.code)
+				return res.json(result)
+			}).catch((err) => {
+				console.log('error updating user')
+				res.status(500)
+				return res.json({
+					status: 'FAILED',
+					message: 'Internal server error updating user transaction fields'
+				})
+			})
+		} else {
+			res.status(403)
+			return res.json({
+				status: "FAILED",
+				message:"Submitted application cannot be edited"
+			});
+		}
 	});
 })
 
