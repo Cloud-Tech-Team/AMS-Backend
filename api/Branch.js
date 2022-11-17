@@ -219,31 +219,9 @@ router.get('/get', upload, function (req, res) {
  * 	Branch to be deleted is given in request body which is passed directly to the
  * 	Branch.delete method
  */
-router.delete('/delete', upload, function (req, res) {
+router.delete('/delete', verifyToken, upload, function (req, res) {
 	console.log(`headers\n${req.headers}`)
-	if (typeof(req.headers.authorization) == 'undefined') {
-		console.log('no token received')
-		res.status(403)
-		return res.json({
-			status: 'FAILED',
-			message: 'Token not specified'
-		})
-	}
-
-	const token = req.headers.authorization.split(" ")[1];
-	try {
-		console.log(`token = ${token}`)
-		decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
-	} catch (ex) {
-		console.log(ex.message)
-		res.status(403)
-		return res.json({
-			status: 'FAILED',
-			message: 'Invalid token'
-		})
-	}
-	console.log("role:"+decoded.role);
-
+	const decoded = req.tokenData
 	if (decoded.role != 'admin') {
 		console.log('not admin')
 		res.status(403)
@@ -284,32 +262,18 @@ router.delete('/delete', upload, function (req, res) {
 /*
  * Edit branch db document given branch name and year
  */
-router.patch('/edit/:branch/:year',upload, async function(req,res){
-    if(req.headers.authorization){
-		const token = req.headers.authorization.split(" ")[1];
-		var decoded
-		try {
-			console.log(`token = ${token}`)
-			decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
-		} catch (ex) {
-			console.log(ex.message)
-			res.status(400)
-			res.json({
-				status: 'FAILED',
-				message: 'Invalid token'
-			})
-			return
-		}
-		console.log("role:"+decoded.role);
-		if(decoded.role=='admin'){
-			branch=req.params.branch;
-			year = req.params.year;
-			console.log(req.params)
-			////
-			console.log(`updating branch=${branch}, year=${year}`)
-			console.log(req.body)
-			await Branch.findOneAndUpdate({branch: branch, year: year}, { $set: req.body},
-												{ runValidators: true }, function(err, result) {
+router.patch('/edit/:branch/:year', verifyToken, upload, async function(req,res){
+	const decoded = req.tokenData
+	console.log("role:"+decoded.role);
+	if(decoded.role=='admin'){
+		branch=req.params.branch;
+		year = req.params.year;
+		console.log(req.params)
+		////
+		console.log(`updating branch=${branch}, year=${year}`)
+		console.log(req.body)
+		await Branch.findOneAndUpdate({branch: branch, year: year}, { $set: req.body},
+			{ runValidators: true }, function(err, result) {
 				if(err){
 					res.status(500);	// Internal server error
 					console.log('error message:\n' + err.message);
@@ -334,21 +298,6 @@ router.patch('/edit/:branch/:year',upload, async function(req,res){
 					}) 
 				}
 			})
-		} else {
-			res.status(403);
-			res.json({
-				status:"FAILED",
-				message:'Access denied'
-			})
-		}
-		console.log('hellooo')
-		
-	}
-	else{
-		res.json({
-			status:"FAILED",
-			message:'Access token error'
-		})
 	}
 })
 
