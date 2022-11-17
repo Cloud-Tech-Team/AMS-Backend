@@ -59,6 +59,25 @@ BranchSchema.methods.isFilled = function() {
 	return this.occupiedSeats == this.totalSeats
 }
 
+/* occupySeat: generic occupySeat function. */
+BranchSchema.methods.occupySeat = async function(user) {
+	console.log(`occupySeat(quota=${user.quota})`)
+	console.log(user.applicationNo)
+	switch (user.quota) {
+		case 'NRI':
+			await this.occupySeatNRI(user)
+			break
+		case 'Management':
+			await this.occupySeatMgmt(user)
+			break
+		case 'Super':
+			await this.occupySeatSuper(user)
+			break
+		default:
+			console.log('invalid quota')
+	}
+}
+
 /* occupySeatNRI
  * 	No waiting list for NRI.
  *	Return 0 if success, -1 if filled.
