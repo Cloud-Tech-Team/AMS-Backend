@@ -506,48 +506,30 @@ router.get('/application', verifyToken, upload, function (req, res){
                 })
             }
         })
-
-
-    }
-    
 })
 
 
 //nri get
-router.get('/nri/application', function (req, res){
-    if(req.headers.authorization){
-        // token=req.body.token;
-        const token = req.headers.authorization.split(" ")[1];
-        const decoded = jwt.verify(token,process.env.JWT_SECRET_KEY);
-        console.log(decoded.email);
-        id=decoded.id;
-        User.findOne({_id:id},function(err,user){
-            if(!err){
-                res.status(200);
-                res.json({
-                    status:"SUCCESS",
-                    message:"Application no is added",
-                    user:user
-                })
-            }
-            else{
-                res.status(500);
-                res.json({
-                    status:"FAILED",
-                    message:"An error occured while checking for existance of user"
-                })
-            }
-        })
-
-
-    }
-    else{
-        res.json({
-            status:"FAILED",
-            message:"Access token error"
-        })
-    }
-    
+router.get('/nri/application', verifyToken, function (req, res){
+	const decoded = req.tokenData
+	console.log(decoded.email);
+	id=decoded.id;
+	User.findOne({_id:id},function(err,user){
+		if(!err) {
+			res.status(200);
+			res.json({
+				status:"SUCCESS",
+				message:"Application no is added",
+				user:user
+			})
+		} else{
+			res.status(500);
+			res.json({
+				status:"FAILED",
+				message:"An error occured while checking for existance of user"
+			})
+		}
+	})
 });
 
 router.patch('/nri/application-page1/:applicationNo', verifyToken, upload, function (req, res) {
