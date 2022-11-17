@@ -823,7 +823,14 @@ router.patch('/nri/application-page3/:applicationNo',verifyToken,upload,async fu
 			const uploadResult = await cloudinaryUpload(file64.content);
 			req.body.imgSign = uploadResult.secure_url;
 			if(req.body.imgSign!=null)
-				console.log('Signature uploaded\n');
+				console.log('Student Signature uploaded\n');
+		}
+        if (req.files.parentSign) {
+			const file64 = formatBufferTo64(req.files.parentSign[0]);
+			const uploadResult = await cloudinaryUpload(file64.content);
+			req.body.parentSign = uploadResult.secure_url;
+			if(req.body.parentSign!=null)
+				console.log(' Parent Signature uploaded\n');
 		}
 	}
 	User.findOne({ applicationNo: req.params.applicationNo }, function (err, users) {
@@ -839,8 +846,9 @@ router.patch('/nri/application-page3/:applicationNo',verifyToken,upload,async fu
                     // bp4: a.bp4 || users.bp4 || users.a,
                     // bp5: a.bp5 || users.bp5 || users.a,
                     imgSign: a.imgSign || users.imgSign || users.a,
-    
+                    parentSign: a.parentSign || users.parentSign || users.a,
                 }
+                
                 User.updateOne(
                     { applicationNo: req.params.applicationNo},
                     { $set: update }, { runValidators: true },

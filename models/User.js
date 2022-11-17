@@ -289,6 +289,9 @@ const UserSchema = new Schema({
       imgSign:{
         type:String
       },
+      parentSign:{
+        type:String
+      },
       fileTransactionID:{
         type:String
       },
