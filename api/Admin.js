@@ -138,84 +138,69 @@ router.post('/login', upload, function (req, res) {
  *	Return @count results starting from @offset of the data returned by the query.
  *	The filter for query is req.body minus @count and @offset parameters.
  */
-router.post('/search', upload, function(req,res){
-	if(typeof(req.headers.authorization) != 'undefined' && req.headers.authorization){
-		const token = req.headers.authorization.split(" ")[1];
-		const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-		console.log("role:"+decoded.role);
-		console.log(req.body)
-		if(decoded.role=='admin'){
-			const count = req.body.count 		// no: of results to return
-			const offset = req.body.offset || 0	// offset from which to return count results
-			console.log(`count = ${count}\toffset = ${offset}`)
-			if (typeof(count) != 'undefined' && count <= 0) {
-				res.status(400)
-				return res.json({
-					status: 'FAILURE',
-					message: 'invalid count: negative value'
-				})
-			}
-			if (offset < 0) {
-				res.status(400)
+router.post('/search', verifyToken, upload, function(req,res){
+	const decoded = req.tokenData
+	console.log(decoded)
+	if(decoded.role != 'admin') {
+		console.log('not admin')
+		res.status(403);
+		return res.json({
+			status:"FAILED",
+			message:'Access denied'
+		})
+	}
+	const count = req.body.count 		// no: of results to return
+	const offset = req.body.offset || 0	// offset from which to return count results
+	console.log(`count = ${count}\toffset = ${offset}`)
+	if (typeof(count) != 'undefined' && count <= 0) {
+		res.status(400)
+		return res.json({
+			status: 'FAILURE',
+			message: 'invalid count: negative value'
+		})
+	}
+	if (offset < 0) {
+		res.status(400)
+		return res.json({
+			status: 'FAILURE',
+			message: 'invalid offset: negative value'
+		})
+	}
+
+	// create filter by removing count and offset fields from req.body
+	var filter = req.body
+	delete filter.count
+	delete filter.offset
+	User.find(filter, function(err, data) {
+		if(err) {
+			res.status(500);	// Internal server error
+			console.log('error message:\n' + err.message);
+			return res.json({
+				status: "FAILED",
+				message: "Internal server error"
+			});
+		} else {
+			console.log(`data.length = ${data.length}`)
 				return res.json({
 					status: 'FAILURE',
 					message: 'invalid offset: negative value'
 				})
 			}
-
-			// create filter by removing count and offset fields from req.body
-			var filter = req.body
-			delete filter.count
-			delete filter.offset
-			User.find(filter, function(err, data){
-				if(err){
-					res.status(500);	// Internal server error
-					console.log('error message:\n' + err.message);
-					return res.json({
-						status: "FAILED",
-						message: "Internal server error"
-					});
-				}
-				else{
-					console.log(`data.length = ${data.length}`)
-					if (data.length != 0 && offset >= data.length) {
-						res.status(400);
-						return res.json({
-							status: 'FAILURE',
-							message: `offset ${offset} is past end of result`
-						})
-					}
-					var result
-					if (typeof(count) != 'undefined')
-						result = data.slice(offset, offset+count)
-					else
-						result = data.slice(offset)
-					res.status(200);
-					res.json({
-					status:"SUCCESS",
-					message: 'Result retrieved successfully',
-					count: result.length,
-					list: result
-					})
-				}
-			})
-		} else {
-			res.status(403);
-			return res.json({
-				status:"FAILED",
-				message:'Access denied'
+			var result
+			if (typeof(count) != 'undefined')
+				result = data.slice(offset, offset+count)
+			else
+				result = data.slice(offset)
+			res.status(200);
+			res.json({
+				status:"SUCCESS",
+				message: 'Result retrieved successfully',
+				count: result.length,
+				list: result
 			})
 		}
-		
-	}
-	else{
-		return res.json({
-			status:"FAILED",
-			message:'Access token error'
-		})
-	}
-	
-})	
+	})
+})
 
 /* create co-admins */
 router.post('/add_coadmin', upload, function (req, res) {
