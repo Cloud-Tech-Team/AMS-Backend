@@ -307,7 +307,11 @@ const UserSchema = new Schema({
       },
       eligible:{
         
+      },
+      completeTimeStamp : {
+        type:Date
       }
+
 
 });
 

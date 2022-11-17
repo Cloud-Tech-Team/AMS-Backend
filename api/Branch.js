@@ -49,32 +49,27 @@ router.post('/add',upload,function(req,res){
                 }
                 else{
 					/* what to do when we add more quotas? */
-					/* verify totalSeats = sum of seats for quotas */
-					var total = req.body.totalSeats
-					var nri = req.body.NRISeats
-					var mgmt = req.body.MgmtSeats
-					var nsuper = req.body.SuperSeats
-					nri = nri ? nri : 0
-					mgmt = mgmt ? mgmt : 0
-					nsuper = nsuper ? nsuper : 0
-					if ((nri + mgmt + nsuper) != total) {
-						console.log(`${nri} + ${mgmt} + ${nsuper} != ${total}`)
-						res.status(400)
-						return res.json({
-							status: "FAILED",
-							message: "nri + mgmt != total"
-						})
-					}
-                    const new_branch= new Branch({
+					var nriSeats = req.body.NRISeats
+					var mgmtSeats = req.body.MgmtSeats
+					var superSeats = req.body.SuperSeats
+					nriSeats = nriSeats ? nriSeats : 0
+					mgmtSeats = mgmtSeats ? mgmtSeats : 0
+					superSeats = superSeats ? superSeats : 0
+					var totalSeats = nriSeats + mgmtSeats + superSeats
+
+                    const new_branch = new Branch({
                         branch:branch,
 						year: year,
-                        totalSeats:req.body.totalSeats,
-                        NRISeats:req.body.NRISeats,
-                        MgmtSeats:req.body.MgmtSeats,
-						SuperSeats: req.body.SuperSeats,
+                        totalSeats: totalSeats,
+                        NRISeats: nriSeats,
+                        MgmtSeats: mgmtSeats
+						SuperSeats: superSeats,
 						WLNRILimit: req.body.WLNRILimit,
-						WLMgmtLimit: req.body.WLMgmtLimit
+						WLMgmtLimit: req.body.WLMgmtLimit,
+						WLSuperLimit: req.body.WLSuperLimit
                     })
+					console.log('new branch')
+					console.log(new_branch)
                     new_branch.save(function(err){
                         if(err){
                             console.log("Error in saving branch")
