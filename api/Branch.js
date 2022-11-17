@@ -113,29 +113,8 @@ router.post('/getall', upload, function (req, res) {
 /*
  * /branch/get - list all fields of current branches
  */
-	console.log(req.headers)
-	if (typeof(req.headers.authorization) == 'undefined') {
-		console.log('no token received')
-		res.status(403)
-		return res.json({
-			status: 'FAILED',
-			message: 'Token not specified'
-		})
-	}
-	const token = req.headers.authorization.split(" ")[1];
-	try {
-		console.log(`token = ${token}`)
-		decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
-	} catch (ex) {
-		console.log(ex.message)
-		res.status(403)
-		return res.json({
-			status: 'FAILED',
-			message: 'Invalid token'
-		})
-	}
-
-router.post('/get', upload, function (req, res) {
+router.post('/get', verifyToken, upload, function (req, res) {
+	const decoded = req.tokenData
 	Branch.find(req.body, (err, result) => {
 		if (err) {
 			console.log(`error: ${err.message}`)
