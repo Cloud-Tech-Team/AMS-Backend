@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const upload = require('./../handler/multer')//form data
 const jwt = require('jsonwebtoken')
+const verifyToken = require('../middleware/verifyToken');
 
 
 const Branch = require('../models/Branches')
