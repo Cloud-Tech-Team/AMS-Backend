@@ -82,28 +82,8 @@ router.post('/add', verifyToken, upload,function(req,res){
  * /branch/getall - list all fields of current branches
  * Only admin
  */
-	console.log(req.headers)
-	if (typeof(req.headers.authorization) == 'undefined') {
-		console.log('no token received')
-		res.status(403)
-		return res.json({
-			status: 'FAILED',
-			message: 'Token not specified'
-		})
-	}
-	const token = req.headers.authorization.split(" ")[1];
-	try {
-		console.log(`token = ${token}`)
-		decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
-	} catch (ex) {
-		console.log(ex.message)
-		res.status(403)
-		return res.json({
-			status: 'FAILED',
-			message: 'Invalid token'
-		})
-	}
 router.post('/getall', upload, function (req, res) {
+	const decoded = req.tokenData
 	console.log(`role = ${decoded.role}`)
 	if (decoded.role != 'admin') {
 		console.log('not admin')
