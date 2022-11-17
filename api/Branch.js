@@ -113,7 +113,6 @@ router.post('/getall', upload, function (req, res) {
 /*
  * /branch/get - list all fields of current branches
  */
-router.get('/get', upload, function (req, res) {
 	console.log(req.headers)
 	if (typeof(req.headers.authorization) == 'undefined') {
 		console.log('no token received')
@@ -136,6 +135,7 @@ router.get('/get', upload, function (req, res) {
 		})
 	}
 
+router.post('/get', upload, function (req, res) {
 	Branch.find(req.body, (err, result) => {
 		if (err) {
 			console.log(`error: ${err.message}`)
