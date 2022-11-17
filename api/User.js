@@ -842,7 +842,7 @@ router.patch('/nri/application-page3/:applicationNo',verifyToken,upload,async fu
     
                 }
                 User.updateOne(
-                    { applicationNo: req.params.id },
+                    { applicationNo: req.params.applicationNo},
                     { $set: update }, { runValidators: true },
                     function (err) {
                         if (err) {
