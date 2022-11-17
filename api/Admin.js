@@ -49,7 +49,7 @@ router.get('/count', verifyToken, upload, async function (req, res) {
 	// queries = req.body.queries
 	var queries = [
 		{"quota":"Government"}, {"quota":"Management"}, {"quota":"NRI"}, {"quota": "CIWG"}, 
-		{"quota":"PIO"}, {"verified":false}, {"verified":true}
+		{"quota":"PIO"}, {"quota": "OCI"}, {"verified":false}, {"verified":true}
 	]
 	console.log(queries)
 	if (typeof(queries) == 'undefined' || typeof(queries.length) == 'undefined') {
