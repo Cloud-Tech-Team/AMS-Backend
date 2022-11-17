@@ -483,14 +483,12 @@ router.patch('/application/:applicationNo', verifyToken, upload, async function 
 
 })
 
-router.get('/application', upload, function (req, res){
-    if(req.body.token){
-        token=req.body.token;
-        const decoded = jwt.verify(token,process.env.JWT_SECRET_KEY);
+router.get('/application', verifyToken, upload, function (req, res){
+        const decoded = req.tokenData
         console.log(decoded.email);
         id=decoded.id;
-        User.findOne({_id:id},function(err,user){
-            if(!err){
+        User.findOne({_id:id},function(err,user) {
+            if(!err) {
                 res.status(200);
                 res.json({
                     status:"SUCESS",
@@ -500,8 +498,7 @@ router.get('/application', upload, function (req, res){
                     firstName:user.firstName,
                     phone:user.phone,
                 })
-            }
-            else{
+            } else {
                 res.status(400);
                 res.json({
                     status:"FAILED",
