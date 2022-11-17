@@ -62,7 +62,7 @@ router.post('/add',upload,function(req,res){
 						year: year,
                         totalSeats: totalSeats,
                         NRISeats: nriSeats,
-                        MgmtSeats: mgmtSeats
+                        MgmtSeats: mgmtSeats,
 						SuperSeats: superSeats,
 						WLNRILimit: req.body.WLNRILimit,
 						WLMgmtLimit: req.body.WLMgmtLimit,
