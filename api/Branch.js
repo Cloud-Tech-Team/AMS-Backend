@@ -82,7 +82,6 @@ router.post('/add', verifyToken, upload,function(req,res){
  * /branch/getall - list all fields of current branches
  * Only admin
  */
-router.get('/getall', upload, function (req, res) {
 	console.log(req.headers)
 	if (typeof(req.headers.authorization) == 'undefined') {
 		console.log('no token received')
@@ -104,6 +103,7 @@ router.get('/getall', upload, function (req, res) {
 			message: 'Invalid token'
 		})
 	}
+router.post('/getall', upload, function (req, res) {
 	console.log(`role = ${decoded.role}`)
 	if (decoded.role != 'admin') {
 		console.log('not admin')
