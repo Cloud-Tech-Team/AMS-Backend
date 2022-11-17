@@ -59,28 +59,38 @@ BranchSchema.methods.isFilled = function() {
 	return this.occupiedSeats == this.totalSeats
 }
 
-/* occupySeat: generic occupySeat function. */
+/* occupySeat: generic occupySeat function.
+ * 	Returns the value returned by the occupySeatxxx functions
+ * 		-1 on error
+ * 		>= 0 on success, number indicates waitingList number
+ * 		Infinity - waiting list filled
+ */
 BranchSchema.methods.occupySeat = async function(user) {
 	console.log(`occupySeat(quota=${user.quota})`)
 	console.log(user.applicationNo)
+	var ret = -1
 	switch (user.quota) {
 		case 'NRI':
-			await this.occupySeatNRI(user)
+			ret = await this.occupySeatNRI(user)
 			break
 		case 'Management':
-			await this.occupySeatMgmt(user)
+			ret = await this.occupySeatMgmt(user)
 			break
-		case 'Super':
-			await this.occupySeatSuper(user)
+		case 'ciwg':
+		case 'pio':
+			ret = await this.occupySeatSuper(user)
 			break
 		default:
 			console.log('invalid quota')
+			ret = -1
 	}
+	return ret
 }
 
-/* occupySeatNRI
+/* occupySeat for NRI and Super
  * 	No waiting list for NRI.
- *	Return 0 if success, -1 if filled.
+ *	Return 0 on success, Infinity if filled.
+ *	Right now, no waitingList for NRI and Super.
  */
 BranchSchema.methods.occupySeatNRI = async function(user) {
 	console.log(`occupySeatNRI: ${user.applicationNo}`)
@@ -92,12 +102,12 @@ BranchSchema.methods.occupySeatNRI = async function(user) {
 		return 0
 	} else {
 		console.log('NRI filled')
-		return -1;
+		return Infinity;
 	}
 };
 
 BranchSchema.methods.occupySeatSuper = async function(user) {
-	console.log(`occupySeatNRI: ${user.applicationNo}`)
+	console.log(`occupySeatSuper: ${user.applicationNo}`)
 	if (!this.isSuperFilled()) {
 		console.log('not filled')
 		this.occupiedSeatsSuper++;
@@ -106,7 +116,7 @@ BranchSchema.methods.occupySeatSuper = async function(user) {
 		return 0
 	} else {
 		console.log('Super filled')
-		return -1;
+		return Infinity;
 	}
 };
 
@@ -117,6 +127,11 @@ BranchSchema.methods.occupySeatSuper = async function(user) {
  * To get a user's waiting list number, check their 'waiting' field.
  * If true, find their index in waitingListMgmt array using applicationNo.
  * Return Infinity if waiting list limit reached Hehe.
+ * Return:
+ * 	-1 on error
+ * 	>= 0 on success, where the number is the waiting list number
+ * 	Infinity when waitingList has been filled
+ *
  * NOTE: If user is already in waitingList, *PRETEND* to add and return index.
  * What if user who registered, but not in waiting list applies again?
  */
