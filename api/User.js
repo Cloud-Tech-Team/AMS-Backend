@@ -1059,22 +1059,7 @@ router.post('/test_waiting_list/', verifyToken, upload, async function (req, res
 			})
 		}
 		/* found branch; now occupy quota's seat */
-		var waitingNo = 0
-		switch (quota_) {
-			case 'NRI':
-				console.log('NRI')
-				console.log(user)
-				waitingNo = branch.occupySeatNRI(user)
-				break
-			case 'Management':
-				console.log('Management')
-				console.log(user)
-				waitingNo = branch.occupySeatMgmt(user)
-				break
-			default:
-				console.log('invalid quota')
-				waitingNo = -1
-		}
+		waitingNo = await branch.occupySeat(user)
 		if (waitingNo == -1) {
 			res.status(400)
 			return res.json({
@@ -1087,6 +1072,7 @@ router.post('/test_waiting_list/', verifyToken, upload, async function (req, res
 		try {
 			await user.save()
 		} catch (err) {
+			// branchDB has already been updated!! make it atomic
 			console.log(`error saving user: ${err.message}`)
 			res.status(500)
 			return res.json({
