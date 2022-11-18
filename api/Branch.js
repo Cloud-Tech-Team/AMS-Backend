@@ -202,7 +202,39 @@ router.patch('/edit/:branch/:year', verifyToken, upload, async function(req,res)
 		////
 		console.log(`updating branch=${branch}, year=${year}`)
 		console.log(req.body)
-		await Branch.findOneAndUpdate({branch: branch, year: year}, { $set: req.body},
+		var result = null
+		await Branch.findOne({branch: branch, year: year}).then( (b) => {
+			result = b
+			if (b == null) {
+				console.log(`branch ${branch} doesn't exist`)
+				return
+			}
+			console.log(`found branch = ${branch}`)
+			nriSeats = req.body.NRISeats
+			mgmtSeats = req.body.MgmtSeats
+			superSeats = req.body.SuperSeats
+			if (typeof(nriSeats) == 'undefined')
+				nriSeats = b.NRISeats
+			if (typeof(superSeats) == 'undefined')
+				superSeats = b.superSeats
+			if (typeof(mgmtSeats) == 'undefined')
+				mgmtSeats = b.mgmtSeats
+			console.log(`nri=${nriSeats}, super=${superSeats}, mgmt=${mgmtSeats}`)
+			req.body.totalSeats = nriSeats + mgmtSeats + superSeats
+			console.log(`totalSeats = ${req.body.totalSeats}`)
+		})
+
+		if (!result) {
+			res.status(400)
+			return res.json({
+				status: 'FAILED',
+				message: "Branch doesn't exist"
+			})
+		}
+
+		console.log('totalSeats')
+		console.log(req.body.totalSeats)
+		await Branch.updateOne({branch: branch, year: year}, { $set: req.body},
 			{ runValidators: true }, function(err, result) {
 				if(err){
 					res.status(500);	// Internal server error
@@ -213,7 +245,7 @@ router.patch('/edit/:branch/:year', verifyToken, upload, async function(req,res)
 					});
 				}
 				console.log(result)
-				if (result ==null) {
+				if (result == null) {
 					console.log('modified 0')
 					res.status(400)
 					return res.json({
