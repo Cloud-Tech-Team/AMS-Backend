@@ -16,7 +16,7 @@ const BranchSchema=new Schema({
 	/* maybe make this all configurable as an array  of objects */
     NRISeats:Number,
     MgmtSeats:Number,
-	SuperSeats: Number, // supernumerary - PIO/CIWG
+	SuperSeats: Number, // supernumerary - PIO/CIWG/OCI
 	/* total occupied seats - incremented when any seat is occupied */
     occupiedSeats:{
         type:Number,
@@ -78,6 +78,7 @@ BranchSchema.methods.occupySeat = async function(user) {
 			break
 		case 'ciwg':
 		case 'pio':
+		case 'oci':	
 			ret = await this.occupySeatSuper(user)
 			break
 		default:
