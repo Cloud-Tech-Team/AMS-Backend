@@ -198,13 +198,13 @@ router.patch('/edit/:branch/:year', verifyToken, upload, async function(req,res)
 	const decoded = req.tokenData
 	console.log("role:"+decoded.role);
 	if(decoded.role=='admin'){
-		branch=req.params.branch;
-		year = req.params.year;
+		let branch=req.params.branch;
+		let year = req.params.year;
 		console.log(req.params)
 		////
 		console.log(`updating branch=${branch}, year=${year}`)
 		console.log(req.body)
-		var result = null
+		let result = null
 		await Branch.findOne({branch: branch, year: year}).then( (b) => {
 			result = b
 			if (b == null) {
