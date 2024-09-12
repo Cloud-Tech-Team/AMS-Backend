@@ -94,6 +94,7 @@ router.post('/getall', verifyToken, upload, function (req, res) {
 			message: 'Access denied'
 		})
 	}
+	console.log(req.body)
 	Branch.find(req.body, (err, result) => {
 		if (err) {
 			console.log(`error: ${err.message}`)
@@ -115,6 +116,7 @@ router.post('/getall', verifyToken, upload, function (req, res) {
  * /branch/get - list all fields of current branches
  */
 router.post('/get', verifyToken, upload, function (req, res) {
+	console.log("request body",req.body)
 	const decoded = req.tokenData
 	Branch.find(req.body, (err, result) => {
 		if (err) {
