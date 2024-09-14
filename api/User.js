@@ -1,10 +1,14 @@
 const express = require('express')
 
 const router = express.Router()
+const cors = require('cors')
 
 
-
-
+router.use(cors({
+	origin: '*', // Allow all origins. You can specify specific origins here.
+	methods: ['GET', 'POST', 'PATCH', 'DELETE'], // Specify allowed methods
+	allowedHeaders: ['Content-Type', 'Authorization'] // Specify allowed headers
+  }))
 //for uploading to cloudinary
 const cloudinary = require('cloudinary')
 
@@ -874,7 +878,7 @@ async function occupySeat(user) {
 	console.log(`after findOne: found user ${user.applicationNo}`)
 	console.log(`finding branch ${user.bp1}`)
 	var branch = null
-	await Branch.findOne({branch: user.bp1}).then((branch_) => {
+	await Branch.findOne({branch: user.bp1, year: user.academicYear}).then((branch_) => {
 		branch = branch_
 	}).catch((err) => {
 		console.log(`error finding branch: ${err.message}`)

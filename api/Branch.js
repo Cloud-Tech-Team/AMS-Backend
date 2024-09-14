@@ -1,9 +1,18 @@
 const express = require('express')
+const cors = require('cors')
 const router = express.Router()
 const upload = require('./../handler/multer')//form data
 const jwt = require('jsonwebtoken')
 const verifyToken = require('../middleware/verifyToken');
 
+
+router.use(cors({
+	origin: '*', // Allow all origins
+	methods: ['GET', 'POST', 'PATCH', 'DELETE'], // Allowed methods
+	allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+	credentials: true // If credentials like cookies, authorization headers are required
+  }));
+  
 
 const Branch = require('../models/Branches')
  
