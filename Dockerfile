@@ -8,4 +8,6 @@ RUN npm clean-install
 
 RUN ls -la
 
+EXPOSE 3001
+
 CMD ["node", "server.js"]
