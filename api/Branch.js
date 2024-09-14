@@ -1,9 +1,18 @@
 const express = require('express')
+const cors = require('cors')
 const router = express.Router()
 const upload = require('./../handler/multer')//form data
 const jwt = require('jsonwebtoken')
 const verifyToken = require('../middleware/verifyToken');
 
+
+router.use(cors({
+	origin: '*', // Allow all origins
+	methods: ['GET', 'POST', 'PATCH', 'DELETE'], // Allowed methods
+	allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+	credentials: true // If credentials like cookies, authorization headers are required
+  }));
+  
 
 const Branch = require('../models/Branches')
  
@@ -94,6 +103,7 @@ router.post('/getall', verifyToken, upload, function (req, res) {
 			message: 'Access denied'
 		})
 	}
+	console.log(req.body)
 	Branch.find(req.body, (err, result) => {
 		if (err) {
 			console.log(`error: ${err.message}`)
@@ -115,6 +125,7 @@ router.post('/getall', verifyToken, upload, function (req, res) {
  * /branch/get - list all fields of current branches
  */
 router.post('/get', verifyToken, upload, function (req, res) {
+	console.log("request body",req.body)
 	const decoded = req.tokenData
 	Branch.find(req.body, (err, result) => {
 		if (err) {
@@ -196,13 +207,13 @@ router.patch('/edit/:branch/:year', verifyToken, upload, async function(req,res)
 	const decoded = req.tokenData
 	console.log("role:"+decoded.role);
 	if(decoded.role=='admin'){
-		branch=req.params.branch;
-		year = req.params.year;
+		let branch=req.params.branch;
+		let year = req.params.year;
 		console.log(req.params)
 		////
 		console.log(`updating branch=${branch}, year=${year}`)
 		console.log(req.body)
-		var result = null
+		let result = null
 		await Branch.findOne({branch: branch, year: year}).then( (b) => {
 			result = b
 			if (b == null) {
