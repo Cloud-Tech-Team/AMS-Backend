@@ -43,9 +43,18 @@ var client = require('twilio')(
   );
 
 //Email
-const sgMail = require('@sendgrid/mail')
-require('dotenv').config();
-sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com", // Replace with your SMTP server
+  port: 465, // Replace with your SMTP port
+  secure: true, // true for 465, false for other ports
+  auth: {
+    user: process.env.SMTP_USER, // Replace with your SMTP user
+    pass: process.env.SMTP_PASS, // Replace with your SMTP password
+  },
+});
 
 
 require('./../config/cloudinary')
@@ -167,20 +176,22 @@ router.post('/register', upload, async function (req, res) {
 					});
 				}
 				if (user.email) {
-					const msg = {
-						to: user.email, // Change to your recipient
-						from: process.env.FROM_EMAIL, // Change to your verified sender
-						subject: 'Registration Successful',
-						text: `Hi ${user.firstName},\nYou have registered for ${user.course} ${user.quota} ${user.academicYear} at Muthoot Institute of Technology and Science\nYour Registration Number: ${user.applicationNo}\nPassword: ${user.password}.\n\nPlease login and complete the application.\n\nTeam MITS
-  \n`
-					}
-					sgMail.send(msg).then((response) => {
-						console.log(response[0].statusCode)
-						console.log(response[0].headers)
-                        console.log("mail sent");
-					}) .catch((error) => {
-						console.error(error +" mail not sent")
-					})
+					const mailOptions = {
+                        from: process.env.FROM_EMAIL, // Replace with your verified sender
+                        to: user.email, // Replace with your recipient
+                        subject: 'Registration Successful',
+                        text: `Hi ${user.name},\n\nYou have been registered as co-user of the Admission Management at Muthoot Institute of Technology and Science.
+                      Registered Email: ${user.email}\nPassword: ${user.password}\nYou can now login to the portal to check for your pending assignments.\nTeam MITS\n`,
+                      };
+                      
+                      // Step 5: Send the email using the transporter
+                      transporter.sendMail(mailOptions, (error, info) => {
+                        if (error) {
+                          return console.error(error);
+                        }
+                        console.log("Message sent: %s", info.messageId);
+                        console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+                      });
 				}
 			}
 		});
@@ -1006,8 +1017,8 @@ router.patch('/nri/application-page5/:applicationNo',verifyToken,upload,async fu
 				{ applicationNo: req.params.applicationNo },
 				{ $set: update }, { runValidators: true },
 			).then(async function() {
-				console.log('calling user.assignCoadmin()')
-				await user.assignCoadmin()	// check for error and make this atomic
+				console.log('calling user.assignCouser()')
+				await user.assignCouser()	// check for error and make this atomic
 				console.log(`user after assigning ${user}`)
 				console.log('occupying branch seat')
 				var result = await occupySeat(user)
