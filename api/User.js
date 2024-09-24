@@ -176,12 +176,12 @@ router.post('/register', upload, async function (req, res) {
 					});
 				}
 				if (user.email) {
+                    // console.log('sending email',user)
 					const mailOptions = {
                         from: process.env.FROM_EMAIL, // Replace with your verified sender
                         to: user.email, // Replace with your recipient
                         subject: 'Registration Successful',
-                        text: `Hi ${user.name},\n\nYou have been registered as co-user of the Admission Management at Muthoot Institute of Technology and Science.
-                      Registered Email: ${user.email}\nPassword: ${user.password}\nYou can now login to the portal to check for your pending assignments.\nTeam MITS\n`,
+                        text: `Hi ${user.firstName},\n\nYou have been registered as co-user of the Admission Management at Muthoot Institute of Technology and Science.\nRegistration No: ${user.applicationNo}\nPassword: ${user.password}\nYou can now login to the portal to check for your pending assignments.\nTeam MITS\n`,
                       };
                       
                       // Step 5: Send the email using the transporter
