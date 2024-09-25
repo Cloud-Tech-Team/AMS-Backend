@@ -181,7 +181,7 @@ router.post('/register', upload, async function (req, res) {
                         from: process.env.FROM_EMAIL, // Replace with your verified sender
                         to: user.email, // Replace with your recipient
                         subject: 'Registration Successful',
-                        text: `Hi ${user.firstName},\n\nYou have been registered as co-user of the Admission Management at Muthoot Institute of Technology and Science.\nRegistration No: ${user.applicationNo}\nPassword: ${user.password}\nYou can now login to the portal to check for your pending assignments.\nTeam MITS\n`,
+                        text: `Hi ${user.firstName},\n\nYou have been registered as applicant for admission at Muthoot Institute of Technology and Science.\nRegistration No: ${user.applicationNo}\nPassword: ${user.password}\nYou can now login to the portal to check for your pending assignments.\nTeam MITS\n`,
                       };
                       
                       // Step 5: Send the email using the transporter
