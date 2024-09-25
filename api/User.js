@@ -1017,8 +1017,9 @@ router.patch('/nri/application-page5/:applicationNo',verifyToken,upload,async fu
 				{ applicationNo: req.params.applicationNo },
 				{ $set: update }, { runValidators: true },
 			).then(async function() {
-				console.log('calling user.assignCouser()')
-				await user.assignCouser()	// check for error and make this atomic
+                // console.log('current user',user)
+                console.log('calling user.assignCoadmin()')
+				await user.assignCoadmin()	// check for error and make this atomic
 				console.log(`user after assigning ${user}`)
 				console.log('occupying branch seat')
 				var result = await occupySeat(user)
