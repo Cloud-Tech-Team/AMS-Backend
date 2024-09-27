@@ -324,18 +324,20 @@ UserSchema.methods.generateApplicationNo = function(number) {
 	// 	quota = 'S'
 	// else, simply use the first letter (N for NRI, M for Mgmt, etc.)
 	// else
-		quota=this.quota.toString().toUpperCase()[0];
-    if(quota == 'O')
-      quota = 'S';
-	course=this.course.toString().toUpperCase().slice(0,2);
-	month=this.registrationTimeStamp.getMonth();
-	year = this.registrationTimeStamp.getFullYear().toString().slice(2,);
-	if(month > 9)
-		year++;
-	//this.academicYear=year;
-	applicationNo=(this.academicYear.slice(2,)*10000)+Number(number);
-  console.log(applicationNo);
-	this.applicationNo=quota+course+applicationNo;
+  let quota = this.quota.toString().toUpperCase()[0];
+  if (quota === 'O') quota = 'S';
+  
+  let course = this.course.toString().toUpperCase().slice(0, 2);
+  let month = this.registrationTimeStamp.getMonth();
+  let year = this.registrationTimeStamp.getFullYear().toString().slice(2);
+  
+  if (month > 9) year = (parseInt(year) + 1).toString();
+  
+  let applicationNo = parseInt(this.academicYear.slice(2)) * 10000 + Number(number);
+  console.log(applicationNo); // Consider removing this in production
+  
+  this.applicationNo = quota + course + applicationNo;
+
 
 }
 
